@@ -1,0 +1,29 @@
+{
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "extends": [
+    "./node_modules/ts-standard/eslintrc.json"
+  ],
+  "rules": {
+    "comma-spacing": "error",
+    "eqeqeq": ["error", "always"],
+    "no-trailing-spaces": ["error", { "skipBlankLines": true }],
+    "no-multiple-empty-lines": "off",
+    "prefer-const": "warn",
+    "@typescript-eslint/indent": ["error",3],
+    "@typescript-eslint/semi": ["error","always"],
+    "@typescript-eslint/quotes": ["error", "single"],
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-empty-function": "error",
+    "@typescript-eslint/no-misused-promises": ["warn", { "checksVoidReturn": false }],
+    "@typescript-eslint/no-floating-promises": ["off", { "ignoreVoid": true }],
+    "@typescript-eslint/no-extraneous-class": ["warn", { "allowEmpty": true }],
+    "@typescript-eslint/promise-function-async": ["error", { "checkArrowFunctions": false}],
+    "@typescript-eslint/prefer-readonly": "off",
+    "@typescript-eslint/strict-boolean-expressions": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/return-await": "off",
+    "@typescript-eslint/member-delimiter-style": "off"
+  }
+}
