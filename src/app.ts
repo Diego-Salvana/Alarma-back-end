@@ -1,9 +1,6 @@
-import express from 'express';
+import { MongoDB } from './database/mongo-db';
+import { App } from './server/server';
 
-const app = express();
+MongoDB.connect();
 
-const PORT = 5000;
-
-app.listen(5000, () => {
-   console.log(`Server is running on port ${PORT} 🚀`);
-});
+App.create();
