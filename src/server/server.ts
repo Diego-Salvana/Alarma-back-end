@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { createHousesRouter, createUsersRouter } from '../routes';
+import { createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 
 export class App {
@@ -15,6 +15,7 @@ export class App {
       app.use('/api/users', createUsersRouter());
       app.use('/api/houses', createHousesRouter());
       app.use('/api/sensors', createSensorsRouter());
+      app.use('/api/central', createCentralRouter());
 
       app.use((req, res) => {
          res.status(404).send({ ok: false, message: 'Ninguna ruta conicide con la solicitud.' });

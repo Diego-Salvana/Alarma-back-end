@@ -1,42 +1,50 @@
-import { Casa, JwtPayloadExt, LoginResponse } from '../interfaces';
-import { HouseDataAccess, SensorDataAccess } from '../schemas';
+import { Dispositivo, JwtPayloadExt, SensorInfoDTO, SensorNameDTO } from '../interfaces';
+import { SensorDataAccess } from '../schemas';
 import { NotFound } from '../utils';
-import { UserDTO } from './user-dto';
 
 export class SensorService {
-   private userDTO = new UserDTO();
-
    constructor (private sensorDataAccess: SensorDataAccess) {}
 
-   // async create (body: any, userPayload: JwtPayloadExt): Promise<LoginResponse> {
-   //    const userId = userPayload.sub as string;
-   //    const user = await this.houseDataAccess.create(userId, body);
+   async create (userPayload: JwtPayloadExt, houseId: string, sensor: Dispositivo): Promise<Dispositivo> {
+      const userId = userPayload.sub as string;
 
-   //    if (user === null) throw new NotFound('Usuario no encontrado');
+      const newSensor = await this.sensorDataAccess.create(userId, houseId, sensor);
 
-   //    return this.userDTO.loginResponse(user);
-   // }
+      if (newSensor === null) throw new NotFound('Usuario o casa encontrado');
 
-   // async getOne (houseId: string, userPayload: JwtPayloadExt): Promise<Casa> {
-   //    const userId = userPayload.sub as string;
-   //    const house = await this.houseDataAccess.getOne(houseId, userId);
+      return newSensor;
+   }
 
-   //    if (house === null) throw new NotFound('Casa no encontrada');
+   async getOne (userPayload: JwtPayloadExt, houseId: string, sensorNumber: number): Promise<Dispositivo> {
+      const userId = userPayload.sub as string;
 
-   //    return house;
-   // }
+      const sensor = await this.sensorDataAccess.getOne(userId, houseId, sensorNumber);
 
-   // async update (houseId: string, userPayload: JwtPayloadExt, body: Casa): Promise<Casa> {
-   //    const userId = userPayload.sub as string;
+      if (sensor === null) throw new NotFound('Sensor no encontrado');
 
-   //    const updatedHouse = await this.houseDataAccess.update(houseId, userId, body);
+      return sensor;
+   }
 
-   //    return updatedHouse;
-   // }
+   async updateName (userPayload: JwtPayloadExt, houseId: string, nameBody: SensorNameDTO): Promise<Dispositivo> {
+      const userId = userPayload.sub as string;
+      const { numeroSensor, nombre } = nameBody;
 
-   // async delete (houseId: string, userPayload: JwtPayloadExt): Promise<void> {
-   //    const userId = userPayload.sub as string;
-      
-   //    await this.houseDataAccess.delete(houseId, userId);
-   // }
+      const updatedSensor = await this.sensorDataAccess.updateName(userId, houseId, numeroSensor, nombre);
+
+      return updatedSensor;
+   }
+
+   async updateInfo (userPayload: JwtPayloadExt, houseId: string, sensorNumber: number, infoBody: SensorInfoDTO): Promise<Dispositivo> {
+      const userId = userPayload.sub as string;
+
+      const updatedSensor = await this.sensorDataAccess.updateInfo(userId, houseId, sensorNumber, infoBody);
+
+      return updatedSensor;
+   }
+
+   async delete (userPayload: JwtPayloadExt, houseId: string, sensorNumber: number): Promise<void> {
+      const userId = userPayload.sub as string;
+
+      await this.sensorDataAccess.delete(userId, houseId, sensorNumber);
+   }
 }

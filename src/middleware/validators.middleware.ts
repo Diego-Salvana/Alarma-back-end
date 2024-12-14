@@ -22,6 +22,26 @@ export function updateHouseValidator (req: Request, res: Response, next: NextFun
    validateRequest(req, res, next, ZodValidators.validateUpdateHouseBody.bind(ZodValidators));
 }
 
+export function createSensorValidator (req: Request, res: Response, next: NextFunction) {
+   validateRequest(req, res, next, ZodValidators.validateCreateSensorBody.bind(ZodValidators));
+}
+
+export function updateNameSensorValidator (req: Request, res: Response, next: NextFunction) {
+   validateRequest(req, res, next, ZodValidators.validateNameSensorBody.bind(ZodValidators));
+}
+
+export function updateInfoSensorValidator (req: Request, res: Response, next: NextFunction) {
+   validateRequest(req, res, next, ZodValidators.validateInfoSensorBody.bind(ZodValidators));
+}
+
+export function updateCentralCodeValidator (req: Request, res: Response, next: NextFunction) {
+   validateRequest(req, res, next, ZodValidators.validateCentralCodeBody.bind(ZodValidators));
+}
+
+export function updateCentralInfoValidator (req: Request, res: Response, next: NextFunction) {
+   validateRequest(req, res, next, ZodValidators.validateCentralInfoBody.bind(ZodValidators));
+}
+
 // Función general
 type KeyString = Record<string, string>;
 

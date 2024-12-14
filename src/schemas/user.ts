@@ -39,7 +39,7 @@ const DispositivoSchema = new Schema(
       numeroSensor: { type: Number, required: true },
       nombre: { type: String, required: true },
       tipo: { type: String, required: true }, // Usar enum si los tipos son fijos
-      estado: { type: String, enum: ['Activado', 'Desactivado'], required: true },
+      estado: { type: String, enum: ['Activo', 'Inactivo'], required: true },
       historial: [HistorialSchema]
    },
    { _id: false }

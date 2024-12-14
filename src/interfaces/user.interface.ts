@@ -1,8 +1,8 @@
 import { Document, ObjectId } from 'mongoose';
 
 export enum Estado {
-   ACTIVADO = 'Activado',
-   DESACTIVADO = 'Desactivado'
+   ACTIVO = 'Activo',
+   INACTIVO = 'Inactivo'
 }
 
 // Historial Interface

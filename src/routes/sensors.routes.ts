@@ -1,17 +1,30 @@
 import { Router } from 'express';
 import { SensorDataAccess } from '../schemas';
 import { SensorController } from '../controllers';
-import { checkJWT } from '../middleware';
+import { checkJWT, createSensorValidator, updateInfoSensorValidator, updateNameSensorValidator } from '../middleware';
 
 export const createSensorsRouter = () => {
    const sensorsRouter = Router();
    const sensorsModel = new SensorDataAccess();
    const sensorController = new SensorController(sensorsModel);
 
-   // sensorsRouter.post('/', checkJWT, sensorController.create.bind(sensorController));
-   // sensorsRouter.get('/:id', checkJWT, sensorController.getHouse.bind(sensorController));
-   // sensorsRouter.patch('/:id', updateHouseValidator, checkJWT, sensorController.update.bind(sensorController));
-   // sensorsRouter.delete('/:id', checkJWT, sensorController.delete.bind(sensorController));
+   sensorsRouter.post(
+      '/:houseId', createSensorValidator, checkJWT, sensorController.create.bind(sensorController)
+   );
+   sensorsRouter.get('/:houseId/:sensorNumber', checkJWT, sensorController.getOne.bind(sensorController));
+   sensorsRouter.patch(
+      '/:houseId/sensor-name',
+      updateNameSensorValidator,
+      checkJWT,
+      sensorController.updateName.bind(sensorController)
+   );
+   sensorsRouter.patch(
+      '/:houseId/:sensorNumber/info',
+      updateInfoSensorValidator,
+      checkJWT,
+      sensorController.updateInfo.bind(sensorController)
+   );
+   sensorsRouter.delete('/:houseId/:sensorNumber', checkJWT, sensorController.delete.bind(sensorController));
 
    return sensorsRouter;
 };

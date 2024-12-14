@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { SensorDataAccess } from '../schemas';
 import { SensorService } from '../services';
 import { RequestExt } from '../interfaces';
-import { checkPayload, ErrorHandler } from '../utils';
+import { BadRequest, checkPayload, ErrorHandler } from '../utils';
 
 export class SensorController {
    private sensorService: SensorService;
@@ -11,50 +11,72 @@ export class SensorController {
       this.sensorService = new SensorService(sensorDataAccess);
    }
 
-   // async create ({ body, userPayload }: RequestExt, res: Response) {
-   //    try {
-   //       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+   async create ({ userPayload, params, body }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+         const houseId = params.houseId;
 
-   //       const responseHouse = await this.houseService.create(body, payload);
-   //       res.status(201).json({ message: 'Created successfully', data: responseHouse });
-   //    } catch (err: any) {
-   //       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
-   //    }
-   // }
+         const responseSensor = await this.sensorService.create(payload, houseId, body);
+         res.status(201).json({ message: 'Created successfully', data: responseSensor });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear el sensor');
+      }
+   }
 
-   // async getHouse ({ params, userPayload }: RequestExt, res: Response) {
-   //    try {
-   //       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-   //       const houseId = params.id;
+   async getOne ({ userPayload, params }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+         const houseId = params.houseId;
+         const sensorNumber = Number(params.sensorNumber);
 
-   //       const responseHouse = await this.houseService.getOne(houseId, payload);
-   //       res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
-   //    } catch (err: any) {
-   //       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
-   //    }
-   // }
+         if (isNaN(sensorNumber)) throw new BadRequest('Número de sensor no valido');
 
-   // async update ({ params, body, userPayload }: RequestExt, res: Response) {
-   //    try {
-   //       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-   //       const houseId = params.id;
+         const responseSensor = await this.sensorService.getOne(payload, houseId, sensorNumber);
+         res.status(200).json({ message: 'Satisfactory request', data: responseSensor });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
+      }
+   }
 
-   //       const responseHouse = await this.houseService.update(houseId, payload, body);
-   //       res.status(200).json({ message: 'Updated successfully', data: responseHouse });
-   //    } catch (err: any) {
-   //       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
-   //    }
-   // }
+   async updateName ({ userPayload, params, body }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+         const houseId = params.houseId;
 
-   // async delete ({ params, userPayload }: RequestExt, res: Response) {
-   //    try {
-   //       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-   //       const houseId = params.id;
+         const responseSensor = await this.sensorService.updateName(payload, houseId, body);
+         res.status(200).json({ message: 'Updated successfully', data: responseSensor });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
+      }
+   }
 
-   //       await this.houseService.delete(houseId, payload);
-   //       res.status(200).json({ message: 'Deleted successfully' });
-   //    } catch (err: any) {
-   //       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
-   //    }
-   // }
+   async updateInfo ({ userPayload, params, body }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+         const houseId = params.houseId;
+         const sensorNumber = Number(params.sensorNumber);
+
+         if (isNaN(sensorNumber)) throw new BadRequest('Número de sensor no valido');
+
+         const responseSensor = await this.sensorService.updateInfo(payload, houseId, sensorNumber, body);
+         res.status(200).json({ message: 'Updated successfully', data: responseSensor });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
+      }
+   }
+
+   async delete ({ userPayload, params }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+         const houseId = params.houseId;
+         const sensorNumber = Number(params.sensorNumber);
+
+         if (isNaN(sensorNumber)) throw new BadRequest('Número de sensor no valido');
+
+         await this.sensorService.delete(payload, houseId, sensorNumber);
+         res.status(200).json({ message: 'Deleted successfully' });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
+      }
+   }
 }

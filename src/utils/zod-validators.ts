@@ -1,5 +1,6 @@
-import { Casa, Login, Register } from '../interfaces';
-import { CasaSchema, UserSchema } from './user-zod-schemas';
+import { Casa, Dispositivo, Login, Register } from '../interfaces';
+import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
+import { CasaSchema, CentralSchema, DispositivoSchema, UserSchema } from './user-zod-schemas';
 
 export class ZodValidators {
    private static loginSchema = UserSchema.pick({ email: true, contrasena: true });
@@ -14,6 +15,14 @@ export class ZodValidators {
    private static updateUserSchema = this.registerSchema.partial({ contrasena: true });
    private static createHouseSchema = CasaSchema.partial({ sensores: true, camaras: true });
    private static updateHouseSchema = CasaSchema.pick({ nombre: true, direccion: true }).deepPartial().strict();
+   private static nameSensorSchema = DispositivoSchema.pick({ nombre: true, numeroSensor: true });
+   private static infoSensorSchema = DispositivoSchema
+      .pick({ dispositivoId: true, numeroSensor: true, tipo: true })
+      .partial()
+      .strict();
+
+   private static centralCodeSchema = CentralSchema.pick({ codigo: true });
+   private static centralInfoSchema = CentralSchema.pick({ centralId: true, nombre: true });
 
    static validateRegisterBody (body: Register) {
       return this.registerSchema.safeParse(body);
@@ -33,5 +42,25 @@ export class ZodValidators {
 
    static validateUpdateHouseBody (body: Casa) {
       return this.updateHouseSchema.safeParse(body);
+   }
+
+   static validateCreateSensorBody (body: Dispositivo) {
+      return DispositivoSchema.safeParse(body);
+   }
+
+   static validateNameSensorBody (body: Dispositivo) {
+      return this.nameSensorSchema.safeParse(body);
+   }
+
+   static validateInfoSensorBody (body: Dispositivo) {
+      return this.infoSensorSchema.safeParse(body);
+   }
+   
+   static validateCentralCodeBody (body: CentralCodeDTO) {
+      return this.centralCodeSchema.safeParse(body);
+   }
+
+   static validateCentralInfoBody (body: CentralInfoDTO) {
+      return this.centralInfoSchema.safeParse(body);
    }
 }

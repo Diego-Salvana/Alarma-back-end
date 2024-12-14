@@ -1,68 +1,95 @@
-import { merge } from 'lodash';
-import { Casa, User } from '../interfaces';
+import { Dispositivo, SensorInfoDTO, User } from '../interfaces';
 import { AlreadyExists, NotFound } from '../utils';
 import { UserModel } from './user';
 
 export class SensorDataAccess {
    private userModel = UserModel;
+   private noSensorsHistory = '-casas.sensores.historial -casas.camaras.historial';
+   private noCentralHistory = '-casas.central.historial';
 
-   // async create (userId: string, house: Casa): Promise<User | null> {
-   //    const user = await this.userModel.findOne({ _id: userId, 'casas.nombreCasa': house.nombreCasa });
+   async create (userId: string, houseId: string, sensor: Dispositivo): Promise<Dispositivo | null> {
+      const user = await this.userModel.findOne(
+         { _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensor.numeroSensor }
+      );
 
-   //    if (user !== null) throw new AlreadyExists(`Ya existe una casa con el nombre ${house.nombreCasa}`);
+      if (user !== null) throw new AlreadyExists(`Ya existe un sensor con el número ${sensor.numeroSensor}`);
 
-   //    const userNewHouse: User | null = await this.userModel
-   //       .findByIdAndUpdate(
-   //          userId,
-   //          { $push: { casas: house } },
-   //          { new: true }
-   //       )
-   //       .select('-casas.sensores.historial -casas.camaras.historial')
-   //       .lean();
+      const userNewSensor: User | null = await this.userModel
+         .findOneAndUpdate(
+            { _id: userId, 'casas._id': houseId },
+            { $push: { 'casas.$.sensores': sensor } },
+            { new: true }
+         )
+         .select(`${this.noSensorsHistory} ${this.noCentralHistory}`)
+         .lean();
+
+      const house = userNewSensor?.casas.find(h => h._id.toString() === houseId);
+      const newSensor = house?.sensores.find(s => s.numeroSensor === sensor.numeroSensor);
+
+      return newSensor ?? null;
+   }
+
+   async getOne (userId: string, houseId: string, sensorNumber: number): Promise<Dispositivo | null> {
+      const user = await this.userModel
+         .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
+         .select(this.noCentralHistory)
+         .lean();
+
+      const house = user?.casas.find(h => h._id.toString() === houseId);
+      const sensor = house?.sensores.find(s => s.numeroSensor === sensorNumber);
+
+      return sensor ?? null;
+   }
+
+   async updateName (userId: string, houseId: string, sensorNumber: number, name: string): Promise<Dispositivo> {
+      const user = await this.userModel
+         .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
+         .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
+
+      if (user === null) throw new NotFound('Sensor no encontrado');
+
+      const house = user.casas.find(h => h._id.toString() === houseId);
+      if (house === undefined) throw new NotFound('Casa no encontrada');
+
+      const sensor = house.sensores.find(s => s.numeroSensor === sensorNumber);
+      if (sensor === undefined) throw new NotFound('Sensor no encontrado');
+
+      sensor.nombre = name;
+
+      await user.save();
+
+      return sensor;
+   }
+
+   async updateInfo (userId: string, houseId: string, sensorNumber: number, infoBody: SensorInfoDTO): Promise<Dispositivo> {
+      const user = await this.userModel
+         .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
+         .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
+
+      if (user === null) throw new NotFound('Sensor no encontrado');
       
-   //    return userNewHouse;
-   // }
+      const house = user.casas.find(h => h._id.toString() === houseId);
+      if (house === undefined) throw new NotFound('Casa no encontrada');
 
-   // async getOne (houseId: string, userId: string): Promise<Casa | null> {
-   //    const user = await this.userModel
-   //       .findOne({ _id: userId, 'casas._id': houseId })
-   //       .select('-casas.sensores.historial -casas.camaras.historial')
-   //       .lean();
+      const sensor = house.sensores.find(s => s.numeroSensor === sensorNumber);
+      if (sensor === undefined) throw new NotFound('Sensor no encontrado');
 
-   //    if (user === null) throw new NotFound('Casa no encontrada');
-      
-   //    const house = user.casas.find(house => house._id.toString() === houseId);
+      if (infoBody.dispositivoId !== undefined) sensor.dispositivoId = infoBody.dispositivoId;
+      if (infoBody.numeroSensor !== undefined) sensor.numeroSensor = infoBody.numeroSensor;
+      if (infoBody.tipo !== undefined) sensor.tipo = infoBody.tipo;
 
-   //    return house ?? null;
-   // }
+      await user.save();
 
-   // async update (houseId: string, userId: string, houseBody: Casa): Promise<Casa> {
-   //    const house = await this.getOne(houseId, userId);
+      return sensor;
+   }
 
-   //    if (house === null) throw new NotFound('Casa no encontrada');
-      
-   //    const updatedHouse = merge({}, house, houseBody);
+   async delete (userId: string, houseId: string, sensorNumber: number): Promise<void> {
+      const user = await this.userModel.findOneAndUpdate(
+         { _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber },
+         { $pull: { 'casas.$.sensores': { numeroSensor: sensorNumber } } },
+         { new: true }
+      );
 
-   //    const user = await this.userModel.findOneAndUpdate(
-   //       { _id: userId, 'casas._id': houseId },
-   //       { $set: { 'casas.$': updatedHouse } },
-   //       { new: true }
-   //    ).select('-casas.sensores.historial -casas.camaras.historial -casas.central.historial');
-
-   //    const responseHouse = user?.casas.find(house => house._id.toString() === houseId);
-
-   //    if (responseHouse === undefined) throw new NotFound('Casa no encontrada');
-
-   //    return responseHouse;
-   // }
-
-   // async delete (houseId: string, userId: string): Promise<void> {
-   //    const user = await this.userModel.findOneAndUpdate(
-   //       { _id: userId, 'casas._id': houseId },
-   //       { $pull: { casas: { _id: houseId } } },
-   //       { new: true }
-   //    );
-
-   //    if (user === null) throw new NotFound('Casa no encontrada');
-   // }
+      if (user === null) throw new NotFound('Sensor no encontrado');
+   }
 }
