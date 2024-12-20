@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
+import { connectMosquitto } from '../mqtt/mosquitto';
 
 export class App {
    static create () {
@@ -20,6 +21,8 @@ export class App {
       app.use((req, res) => {
          res.status(404).send({ ok: false, message: 'Ninguna ruta conicide con la solicitud.' });
       });
+
+      connectMosquitto();
 
       const PORT = process.env.PORT ?? 1234;
 

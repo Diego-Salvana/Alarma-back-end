@@ -10,7 +10,7 @@ export class UserService {
    async create (body: Register): Promise<LoginResponse> {
       const registerBody: Register = {
          ...body,
-         nombreUsuario: `user: ${body.email}`,
+         nombreUsuario: `user_${body.email}`,
          mosquittoPass: 'creandoMosquittoPass',
          habilitado: true,
          casas: []

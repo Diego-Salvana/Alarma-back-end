@@ -1,4 +1,4 @@
-import { Dispositivo, SensorInfoDTO, User } from '../interfaces';
+import { Dispositivo, Estado, Historial, SensorInfoDTO, User } from '../interfaces';
 import { AlreadyExists, NotFound } from '../utils';
 import { UserModel } from './user';
 
@@ -91,5 +91,44 @@ export class SensorDataAccess {
       );
 
       if (user === null) throw new NotFound('Sensor no encontrado');
+   }
+
+   async updateState (userName: string, houseName: string, sensorNumber: number, state: Estado): Promise<void> {
+      const user = await this.userModel
+         .findOne({ nombreUsuario: userName, 'casas.nombreCasa': houseName, 'casas.sensores.numeroSensor': sensorNumber })
+         .select(`${this.noCentralHistory}`);
+
+      if (user === null) throw new NotFound('Sensor no encontrado');
+
+      const house = user.casas.find(h => h.nombreCasa === houseName);
+      if (house === undefined) throw new NotFound('Casa no encontrada');
+
+      const sensor = house.sensores.find(s => s.numeroSensor === sensorNumber);
+      if (sensor === undefined) throw new NotFound('Sensor no encontrado');
+
+      sensor.estado = state;
+
+      await user.save();
+   }
+
+   async addActivationDate (userName: string, houseName: string, sensorNumber: number, date: Date): Promise<void> {
+      const utcDate = new Date(date.toISOString());
+      const activationDate: Historial = { fechaHora: utcDate };
+            
+      const user = await this.userModel
+         .findOne({ nombreUsuario: userName, 'casas.nombreCasa': houseName, 'casas.sensores.numeroSensor': sensorNumber })
+         .select(`${this.noCentralHistory}`);
+
+      if (user === null) throw new NotFound('Sensor no encontrado');
+
+      const house = user.casas.find(h => h.nombreCasa === houseName);
+      if (house === undefined) throw new NotFound('Casa no encontrada');
+
+      const sensor = house.sensores.find(s => s.numeroSensor === sensorNumber);
+      if (sensor === undefined) throw new NotFound('Sensor no encontrado');
+
+      sensor.historial.unshift(activationDate);
+
+      await user.save();
    }
 }
