@@ -1,5 +1,6 @@
-import { Central, Historial } from '../interfaces';
+import { Central, Estado, Historial } from '../interfaces';
 import { CentralInfoDTO } from '../interfaces/central.interface';
+import { NotFound } from '../utils';
 import { UserModel } from './user';
 
 export class CentralDataAccess {
@@ -51,30 +52,33 @@ export class CentralDataAccess {
       return house?.central ?? null;
    }
 
-   async updateState (userName: string, houseName: string, state: boolean): Promise<boolean | null> {
+   async updateState (userName: string, houseName: string, state: Estado): Promise<void> {
       const user = await this.userModel
          .findOneAndUpdate(
             { nombreUsuario: userName, 'casas.nombreCasa': houseName },
-            { $set: { 'casas.$.central.alarmaEncendida': state } },
+            { $set: { 'casas.$.central.alarmaEncendida': state, 'casas.$.central.activada': 'false' } },
             { new: true }
          )
          .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
-
-      return user === null ? null : state;
+      
+      if (user === null) throw new NotFound('Usuario o casa no encontrados');
    }
 
-   async addActivationDate (userName: string, houseName: string, date: Date): Promise<Date | null> {
+   async setActivation (userName: string, houseName: string, date: Date): Promise<void> {
       const utcDate = new Date(date.toISOString());
       const activationDate: Historial = { fechaHora: utcDate };
 
       const user = await this.userModel
          .findOneAndUpdate(
             { nombreUsuario: userName, 'casas.nombreCasa': houseName },
-            { $push: { 'casas.$.central.historial': { $each: [activationDate], $position: 0 } } },
+            {
+               $set: { 'casas.$.central.activada': 'true' },
+               $push: { 'casas.$.central.historial': { $each: [activationDate], $position: 0 } }
+            },
             { new: true }
          )
          .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
 
-      return user === null ? null : date;
+      if (user === null) throw new NotFound('Usuario o casa no encontrados');
    }
 }

@@ -7,7 +7,7 @@ import { checkPayload, ErrorHandler } from '../utils';
 export class CentralController {
    private centralService: CentralService;
 
-   constructor (private centralDataAccess: CentralDataAccess) {
+   constructor (centralDataAccess: CentralDataAccess) {
       this.centralService = new CentralService(centralDataAccess);
    }
 

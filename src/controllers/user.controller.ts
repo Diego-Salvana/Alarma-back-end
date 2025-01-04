@@ -6,7 +6,7 @@ import { ErrorHandler } from '../utils';
 export class UserController {
    private userService: UserService;
 
-   constructor (private userDataAccess: IUserDataAccess) {
+   constructor (userDataAccess: IUserDataAccess) {
       this.userService = new UserService(userDataAccess);
    }
 

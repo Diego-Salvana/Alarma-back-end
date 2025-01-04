@@ -1,8 +1,8 @@
 import { Document, ObjectId } from 'mongoose';
 
 export enum Estado {
-   ACTIVO = 'Activo',
-   INACTIVO = 'Inactivo'
+   ENCENDIDO = 'On',
+   APAGADO = 'Off'
 }
 
 // Historial Interface
@@ -22,7 +22,8 @@ export interface Central {
    centralId: string;
    nombre: string;
    codigo: number;
-   alarmaEncendida: boolean;
+   alarmaEncendida: Estado;
+   activada: boolean;
    historial: Historial[];
 }
 

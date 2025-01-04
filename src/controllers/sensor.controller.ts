@@ -7,7 +7,7 @@ import { BadRequest, checkPayload, ErrorHandler } from '../utils';
 export class SensorController {
    private sensorService: SensorService;
 
-   constructor (private sensorDataAccess: SensorDataAccess) {
+   constructor (sensorDataAccess: SensorDataAccess) {
       this.sensorService = new SensorService(sensorDataAccess);
    }
 

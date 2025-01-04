@@ -7,7 +7,7 @@ import { checkPayload, ErrorHandler } from '../utils';
 export class HouseController {
    private houseService: HouseService;
 
-   constructor (private houseDataAccess: HouseDataAccess) {
+   constructor (houseDataAccess: HouseDataAccess) {
       this.houseService = new HouseService(houseDataAccess);
    }
 

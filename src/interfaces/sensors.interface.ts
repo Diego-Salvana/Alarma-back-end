@@ -8,3 +8,5 @@ export interface SensorInfoDTO {
    numeroSensor: number;
    tipo: string;
 }
+
+export type SensorProperty = 'estado' | 'activado';

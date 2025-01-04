@@ -26,7 +26,8 @@ const CentralSchema = new Schema(
       centralId: { type: String, required: true },
       nombre: { type: String, required: true },
       codigo: { type: Number, required: true },
-      alarmaEncendida: { type: Boolean, required: true, default: false },
+      alarmaEncendida: { type: String, enum: ['On', 'Off'], required: true },
+      activada: { type: Boolean, required: true, default: false },
       historial: [HistorialSchema]
    },
    { _id: false }
@@ -39,7 +40,7 @@ const DispositivoSchema = new Schema(
       numeroSensor: { type: Number, required: true },
       nombre: { type: String, required: true },
       tipo: { type: String, required: true }, // Usar enum si los tipos son fijos
-      estado: { type: String, enum: ['Activo', 'Inactivo'], required: true },
+      estado: { type: String, enum: ['On', 'Off'], required: true },
       historial: [HistorialSchema]
    },
    { _id: false }

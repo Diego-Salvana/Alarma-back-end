@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
-import { connectMosquitto } from '../mqtt/mosquitto';
+import { connectMosquitto } from '../mqtt/mosquitto.controller';
 
 export class App {
    static create () {
