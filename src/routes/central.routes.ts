@@ -3,9 +3,8 @@ import { CentralDataAccess } from '../schemas';
 import { CentralController } from '../controllers';
 import { checkJWT, updateCentralCodeValidator, updateCentralInfoValidator } from '../middleware';
 
-export const createCentralRouter = () => {
+export const createCentralRouter = (centralModel: CentralDataAccess) => {
    const centralRouter = Router();
-   const centralModel = new CentralDataAccess();
    const centralController = new CentralController(centralModel);
 
    centralRouter.get('/:houseId', checkJWT, centralController.getOne.bind(centralController));

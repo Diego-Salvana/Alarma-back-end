@@ -4,9 +4,8 @@ import { UserController } from '../controllers';
 import { loginValidator, registerValidator, updateUserValidator } from '../middleware';
 import { checkJWT } from '../middleware/jwt-check';
 
-export const createUsersRouter = () => {
+export const createUsersRouter = (userModel: UserDataAccess) => {
    const usersRouter = Router();
-   const userModel = new UserDataAccess();
    const userController = new UserController(userModel);
 
    usersRouter.post('/register', registerValidator, userController.create.bind(userController));

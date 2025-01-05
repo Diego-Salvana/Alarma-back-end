@@ -3,10 +3,9 @@ import { SensorDataAccess } from '../schemas';
 import { SensorController } from '../controllers';
 import { checkJWT, createSensorValidator, updateInfoSensorValidator, updateNameSensorValidator } from '../middleware';
 
-export const createSensorsRouter = () => {
+export const createSensorsRouter = (sensorModel: SensorDataAccess) => {
    const sensorsRouter = Router();
-   const sensorsModel = new SensorDataAccess();
-   const sensorController = new SensorController(sensorsModel);
+   const sensorController = new SensorController(sensorModel);
 
    sensorsRouter.post(
       '/:houseId', createSensorValidator, checkJWT, sensorController.create.bind(sensorController)

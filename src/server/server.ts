@@ -4,8 +4,14 @@ import cors from 'cors';
 import { createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { connectMosquitto } from '../mqtt/mosquitto.controller';
+import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../schemas';
 
 export class App {
+   static centralDataAccess = new CentralDataAccess();
+   static userDataAccess = new UserDataAccess();
+   static houseDataAccess = new HouseDataAccess();
+   static sensorDataAccess = new SensorDataAccess();
+
    static create () {
       const app = express();
 
@@ -13,16 +19,16 @@ export class App {
       app.disable('x-powered-by');
       app.use(cors());
 
-      app.use('/api/users', createUsersRouter());
-      app.use('/api/houses', createHousesRouter());
-      app.use('/api/sensors', createSensorsRouter());
-      app.use('/api/central', createCentralRouter());
+      app.use('/api/users', createUsersRouter(this.userDataAccess));
+      app.use('/api/houses', createHousesRouter(this.houseDataAccess));
+      app.use('/api/sensors', createSensorsRouter(this.sensorDataAccess));
+      app.use('/api/central', createCentralRouter(this.centralDataAccess));
 
       app.use((req, res) => {
-         res.status(404).send({ ok: false, message: 'Ninguna ruta conicide con la solicitud.' });
+         res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });
       });
 
-      connectMosquitto();
+      connectMosquitto(this.centralDataAccess, this.sensorDataAccess);
 
       const PORT = process.env.PORT ?? 1234;
 

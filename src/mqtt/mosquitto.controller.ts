@@ -1,9 +1,12 @@
 import mqtt from 'mqtt';
-import { updateCentralState, setCentralActivation } from './mosquitto-central';
-import { updateSensorHistory } from './mosquitto-sensor';
+import { MosquittoCentralService } from './mosquitto-central';
+import { CentralDataAccess, SensorDataAccess } from '../schemas';
 import { CentralProperty, SensorProperty } from '../interfaces';
+import { MosquittoSensorService } from './mosquitto-sensor';
 
-export function connectMosquitto () {
+export function connectMosquitto (centralModel: CentralDataAccess, sensorModel: SensorDataAccess) {
+   const serviceOfCentral = new MosquittoCentralService(centralModel);
+   const serviceOfSensor = new MosquittoSensorService(sensorModel);
    const mqttUrl = process.env.MQTT_URL ?? '';
    const topicBase = process.env.TOPIC_BASE ?? '';
 
@@ -36,7 +39,7 @@ export function connectMosquitto () {
 
          switch (centralProp as CentralProperty) {
             case 'alarmaEncendida':
-               updateCentralState(userName, houseName, messageText);
+               serviceOfCentral.updateState(userName, houseName, messageText);
                break;
             default:
                break;
@@ -51,8 +54,8 @@ export function connectMosquitto () {
                // updateSensorState(userName, houseName, sensorNumber, messageText);
                break;
             case 'activado':
-               setCentralActivation(userName, houseName);
-               updateSensorHistory(userName, houseName, messageText);
+               serviceOfCentral.setActivation(userName, houseName);
+               serviceOfSensor.updateHistory(userName, houseName, messageText);
                break;
             default:
                break;
