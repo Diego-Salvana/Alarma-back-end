@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose';
 import { Casa } from './user.interface';
 
 export interface Login {
@@ -17,18 +16,14 @@ export interface Register extends Login {
 }
 
 export interface BodyPayload {
-   id: string;
-   nombreUsuario: string;
-   mosquittoPass: string;
+   userId: string;
+   houseId?: string;
 }
 
 export interface LoginResponse {
-   id: ObjectId;
    nombre: string;
    apellido: string;
    email: string;
-   nombreUsuario: string; // Debe ir en JWT
-   mosquittoPass: string; // Debe ir en JWT
    habilitado: boolean;
    token: string;
    casas: Casa[];

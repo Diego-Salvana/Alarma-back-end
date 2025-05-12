@@ -12,7 +12,7 @@ export class UserService {
          ...body,
          nombreUsuario: `user_${body.email}`,
          mosquittoPass: 'creandoMosquittoPass',
-         habilitado: true,
+         habilitado: false,
          casas: []
       };
 

@@ -6,9 +6,8 @@ export class JWTHandler {
 
    static generateToken (userBody: BodyPayload): string {
       const payload: JwtPayloadExt = {
-         sub: userBody.id,
-         name: userBody.nombreUsuario,
-         mosPass: userBody.mosquittoPass
+         sub: userBody.userId,
+         hid: userBody.houseId
       };
 
       return sign(payload, this.JWT_SECRET, { expiresIn: '90 days' });
