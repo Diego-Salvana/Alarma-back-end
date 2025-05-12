@@ -1,4 +1,4 @@
-import { IUserDataAccess, Login, LoginResponse, Register } from '../interfaces';
+import { IUserDataAccess, Login, LoginResponse, Register, RegisterDB } from '../interfaces';
 import { NotFound } from '../utils';
 import { UserDTO } from './user-dto';
 
@@ -8,7 +8,7 @@ export class UserService {
    constructor (private userDataAccess: IUserDataAccess) {}
 
    async create (body: Register): Promise<LoginResponse> {
-      const registerBody: Register = {
+      const registerBody: RegisterDB = {
          ...body,
          nombreUsuario: `user_${body.email}`,
          mosquittoPass: 'creandoMosquittoPass',

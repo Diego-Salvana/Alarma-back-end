@@ -1,4 +1,4 @@
-import { IUserDocument, LoginResponse, User } from '../interfaces';
+import { HouseResponse, IUserDocument, LoginResponse, User } from '../interfaces';
 import { JWTHandler } from '../utils';
 
 export class UserDTO {
@@ -8,13 +8,18 @@ export class UserDTO {
          houseId: user.casas[0] ? user.casas[0]._id : undefined
       });
 
+      const casasResponse: HouseResponse[] = user.casas.map(casa => ({
+         _id: casa._id.toString(),
+         nombre: casa.nombre,
+         direccion: casa.direccion,
+         alarmaEncendida: casa.central.alarmaEncendida
+      }));
+
       const responseUser: LoginResponse = {
          nombre: user.nombre,
-         apellido: user.apellido,
-         email: user.email,
          habilitado: user.habilitado,
          token,
-         casas: user.casas
+         casas: casasResponse
       };
 
       return responseUser;

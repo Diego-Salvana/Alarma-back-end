@@ -12,7 +12,7 @@ export class ZodValidators {
       telefono: true
    });
 
-   private static updateUserSchema = this.registerSchema.partial({ contrasena: true });
+   private static updateUserSchema = this.registerSchema.partial();
    private static createHouseSchema = CasaSchema.partial({ sensores: true, camaras: true });
    private static updateHouseSchema = CasaSchema.pick({ nombre: true, direccion: true }).deepPartial().strict();
    private static nameSensorSchema = DispositivoSchema.pick({ nombre: true, numeroSensor: true });
