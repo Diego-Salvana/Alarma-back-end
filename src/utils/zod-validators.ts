@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { Casa, Dispositivo, Login, Register } from '../interfaces';
 import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
 import { CasaSchema, CentralSchema, DispositivoSchema, UserSchema } from './user-zod-schemas';
@@ -13,7 +14,11 @@ export class ZodValidators {
    }).strict();
 
    private static updateUserSchema = this.registerSchema
-      .pick({ nombre: true, apellido: true, telefono: true, contrasena: true })
+      .pick({ nombre: true, apellido: true, telefono: true })
+      .extend({
+         contrasenaActual: z.string().trim().min(6, { message: 'La contraseña debe tener al menos 6 caracteres.' }),
+         nuevaContrasena: z.string().trim().min(6, { message: 'La contraseña debe tener al menos 6 caracteres.' })
+      })
       .partial()
       .strict();
 

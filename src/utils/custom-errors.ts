@@ -25,3 +25,11 @@ export class BadRequest extends CustomError {
       this.statusCode = 400;
    }
 }
+
+export class Unauthorized extends CustomError {
+   constructor (message: string) {
+      super(message);
+      this.name = this.constructor.name;
+      this.statusCode = 401;
+   }
+}

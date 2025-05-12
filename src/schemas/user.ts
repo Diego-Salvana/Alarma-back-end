@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IUserDataAccess, IUserDocument, Login, Register, User } from '../interfaces';
+import { IUserDataAccess, IUserDocument, Register, User } from '../interfaces';
 import { AlreadyExists } from '../utils/custom-errors';
 
 // Historial Schema
@@ -98,9 +98,18 @@ export class UserDataAccess implements IUserDataAccess {
       return newUser;
    }
 
-   async getOne (loginBody: Login): Promise<User | null> {
+   async getOne (email: string): Promise<User | null> {
       const user: User | null = await this.userModel
-         .findOne({ email: loginBody.email })
+         .findOne({ email })
+         .select('-casas.sensores.historial -casas.camaras.historial -casas.central.historial')
+         .lean();
+
+      return user;
+   }
+
+   async getById (id: string): Promise<User | null> {
+      const user: User | null = await this.userModel
+         .findById(id)
          .select('-casas.sensores.historial -casas.camaras.historial -casas.central.historial')
          .lean();
 

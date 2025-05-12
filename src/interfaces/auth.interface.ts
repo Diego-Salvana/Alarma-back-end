@@ -18,6 +18,11 @@ export interface RegisterDB extends Register {
    casas: Casa[];
 }
 
+export interface UpdateUser extends Register {
+   contrasenaActual?: string;
+   nuevaContrasena?: string;
+}
+
 export interface BodyPayload {
    userId: string;
    houseId?: string;

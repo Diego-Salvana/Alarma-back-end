@@ -1,5 +1,5 @@
-import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Register, RegisterDB } from '../interfaces';
-import { NotFound } from '../utils';
+import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Register, RegisterDB, UpdateUser } from '../interfaces';
+import { encrypt, NotFound, Unauthorized, verify } from '../utils';
 import { UserDTO } from './user-dto';
 
 export class UserService {
@@ -8,8 +8,11 @@ export class UserService {
    constructor (private userDataAccess: IUserDataAccess) {}
 
    async create (body: Register): Promise<LoginResponse> {
+      const passwordHash = await encrypt(body.contrasena);
+      const userData = { ...body, contrasena: passwordHash };
+
       const registerBody: RegisterDB = {
-         ...body,
+         ...userData,
          nombreUsuario: `user_${body.email}`,
          mosquittoPass: 'creandoMosquittoPass',
          habilitado: false,
@@ -22,11 +25,18 @@ export class UserService {
       return responseUser;
    }
 
-   async login (body: Login): Promise<LoginResponse> {
-      const user = await this.userDataAccess.getOne(body);
+   async login ({ email, contrasena }: Login): Promise<LoginResponse> {
+      const user = await this.userDataAccess.getOne(email);
 
       if (user === null) {
          throw new NotFound('Usuario no encontrado');
+      }
+
+      const hashedPassword = user.contrasena;
+      const passwordIsCorrect = await verify(contrasena, hashedPassword);
+
+      if (!passwordIsCorrect) {
+         throw new Unauthorized('Usuario o contraseña no válidos');
       }
 
       const responseUser = this.userDTO.loginResponse(user);
@@ -34,14 +44,31 @@ export class UserService {
       return responseUser;
    }
 
-   async update (id: string, body: Register): Promise<ProfileResponse> {
-      const user = await this.userDataAccess.update(id, body);
+   async update (id: string, body: UpdateUser): Promise<ProfileResponse> {
+      const user = await this.userDataAccess.getById(id);
 
       if (user === null) {
          throw new NotFound('Usuario no encontrado');
       }
 
-      const responseUser = this.userDTO.profileResponse(user);
+      if (body.contrasenaActual && body.nuevaContrasena) {
+         const hashedPassword = user.contrasena;
+         const passwordIsCorrect = await verify(body.contrasenaActual, hashedPassword);
+
+         if (!passwordIsCorrect) {
+            throw new Unauthorized('Contraseña actual incorrecta');
+         } else {
+            body = { ...body, contrasena: await encrypt(body.nuevaContrasena) };
+         }
+      }
+
+      const updatedUser = await this.userDataAccess.update(id, body);
+
+      if (updatedUser === null) {
+         throw new NotFound('Usuario para actualizar no encontrado');
+      }
+
+      const responseUser = this.userDTO.profileResponse(updatedUser);
 
       return responseUser;
    }

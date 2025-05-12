@@ -4,3 +4,4 @@ export * from './custom-errors';
 export * from './error-handler';
 export * from './jwt-handler';
 export * from './check-payload';
+export * from './pass-encrypt';
