@@ -3,26 +3,30 @@ import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface'
 import { CasaSchema, CentralSchema, DispositivoSchema, UserSchema } from './user-zod-schemas';
 
 export class ZodValidators {
-   private static loginSchema = UserSchema.pick({ email: true, contrasena: true });
+   private static loginSchema = UserSchema.pick({ email: true, contrasena: true }).strict();
    private static registerSchema = UserSchema.pick({
       nombre: true,
       apellido: true,
       email: true,
       contrasena: true,
       telefono: true
-   });
+   }).strict();
 
-   private static updateUserSchema = this.registerSchema.partial();
-   private static createHouseSchema = CasaSchema.partial({ sensores: true, camaras: true });
+   private static updateUserSchema = this.registerSchema
+      .pick({ nombre: true, apellido: true, telefono: true, contrasena: true })
+      .partial()
+      .strict();
+
+   private static createHouseSchema = CasaSchema.partial({ sensores: true, camaras: true }).strict();
    private static updateHouseSchema = CasaSchema.pick({ nombre: true, direccion: true }).deepPartial().strict();
-   private static nameSensorSchema = DispositivoSchema.pick({ nombre: true, numeroSensor: true });
+   private static nameSensorSchema = DispositivoSchema.pick({ nombre: true, numeroSensor: true }).strict();
    private static infoSensorSchema = DispositivoSchema
       .pick({ dispositivoId: true, numeroSensor: true, tipo: true })
       .partial()
       .strict();
 
-   private static centralCodeSchema = CentralSchema.pick({ codigo: true });
-   private static centralInfoSchema = CentralSchema.pick({ centralId: true, nombre: true });
+   private static centralCodeSchema = CentralSchema.pick({ codigo: true }).strict();
+   private static centralInfoSchema = CentralSchema.pick({ centralId: true, nombre: true }).strict();
 
    static validateRegisterBody (body: Register) {
       return this.registerSchema.safeParse(body);

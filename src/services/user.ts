@@ -1,4 +1,4 @@
-import { IUserDataAccess, Login, LoginResponse, Register, RegisterDB } from '../interfaces';
+import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Register, RegisterDB } from '../interfaces';
 import { NotFound } from '../utils';
 import { UserDTO } from './user-dto';
 
@@ -34,14 +34,14 @@ export class UserService {
       return responseUser;
    }
 
-   async update (id: string, body: Register): Promise<LoginResponse> {
+   async update (id: string, body: Register): Promise<ProfileResponse> {
       const user = await this.userDataAccess.update(id, body);
 
       if (user === null) {
          throw new NotFound('Usuario no encontrado');
       }
 
-      const responseUser = this.userDTO.loginResponse(user);
+      const responseUser = this.userDTO.profileResponse(user);
 
       return responseUser;
    }

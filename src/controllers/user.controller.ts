@@ -31,8 +31,6 @@ export class UserController {
    async update ({ body, userPayload }: RequestExt, res: Response) {
       const id = userPayload?.sub as string;
 
-      console.log('Payload: ', userPayload);
-
       try {
          const responseUser = await this.userService.update(id, body);
          res.status(200).json({ message: 'Updated successfully', data: responseUser });
@@ -48,7 +46,7 @@ export class UserController {
          await this.userService.delete(id);
          res.status(200).json({ message: 'Deleted successfully' });
       } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al borrar usuario');
       }
    }
 }

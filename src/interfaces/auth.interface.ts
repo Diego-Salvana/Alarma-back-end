@@ -36,3 +36,12 @@ export interface HouseResponse {
    direccion: Direccion;
    alarmaEncendida: Estado;
 }
+
+export interface ProfileResponse {
+   nombre: string;
+   apellido: string;
+   email: string;
+   telefono: string;
+   habilitado: boolean;
+   casas: HouseResponse[];
+}
