@@ -1,4 +1,4 @@
-import { Casa, Direccion, Estado } from './user.interface';
+import { Casa, Direccion, Dispositivo, Estado } from './user.interface';
 
 export interface Login {
    email: string;
@@ -40,6 +40,9 @@ export interface HouseResponse {
    nombre: string;
    direccion: Direccion;
    alarmaEncendida: Estado;
+   sonando?: boolean;
+   sensores?: Dispositivo[];
+   token?: string;
 }
 
 export interface ProfileResponse {

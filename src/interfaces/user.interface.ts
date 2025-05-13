@@ -23,7 +23,7 @@ export interface Central {
    nombre: string;
    codigo: number;
    alarmaEncendida: Estado;
-   activada: boolean;
+   sonando: boolean;
    historial: Historial[];
 }
 

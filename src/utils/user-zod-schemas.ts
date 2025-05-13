@@ -21,7 +21,7 @@ export const CentralSchema = z.object({
    centralId: z.string().trim().min(1),
    nombre: z.string().trim().min(1),
    codigo: z.number().int().positive().max(999999, { message: 'Máximo 6 dígitos' }),
-   alarmaEncendida: z.boolean({ message: 'El tipo debe ser boolean.' }).default(false)
+   alarmaEncendida: z.enum(['On', 'Off'], { message: 'El estado de la alarma debe ser "On" o "Off".' })
 });
 
 // Dispositivo Validation
@@ -30,7 +30,7 @@ export const DispositivoSchema = z.object({
    numeroSensor: z.number().int().positive({ message: 'El número de sensor debe ser positivo.' }),
    nombre: z.string().trim().min(1),
    tipo: z.string().trim().min(1),
-   estado: z.enum(['Activo', 'Inactivo'])
+   estado: z.enum(['On', 'Off'])
 });
 
 // Casa Validation

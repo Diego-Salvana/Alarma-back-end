@@ -40,7 +40,8 @@ export class UserDTO {
          _id: casa._id.toString(),
          nombre: casa.nombre,
          direccion: casa.direccion,
-         alarmaEncendida: casa.central.alarmaEncendida
+         alarmaEncendida: casa.central.alarmaEncendida,
+         sonando: casa.central.sonando
       }));
    }
 }
