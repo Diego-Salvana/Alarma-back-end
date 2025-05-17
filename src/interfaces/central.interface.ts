@@ -1,5 +1,7 @@
 export interface CentralCodeDTO {
-   codigo: number;
+   contrasena: string;
+   codigoActual: number;
+   nuevoCodigo: number;
 }
 
 export interface CentralInfoDTO {

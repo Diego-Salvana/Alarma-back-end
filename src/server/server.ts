@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
-import { connectMosquitto } from '../mqtt/mosquitto.controller';
+import { MosquittoAccess } from '../mqtt';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../schemas';
 
 export class App {
@@ -11,6 +11,7 @@ export class App {
    static userDataAccess = new UserDataAccess();
    static houseDataAccess = new HouseDataAccess();
    static sensorDataAccess = new SensorDataAccess();
+   static mosquittoAccess = new MosquittoAccess(this.centralDataAccess, this.sensorDataAccess);
 
    static create () {
       const app = express();
@@ -28,7 +29,7 @@ export class App {
          res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });
       });
 
-      connectMosquitto(this.centralDataAccess, this.sensorDataAccess);
+      this.mosquittoAccess.connect();
 
       const PORT = process.env.PORT ?? 1234;
 

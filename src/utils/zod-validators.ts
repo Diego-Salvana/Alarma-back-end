@@ -30,7 +30,14 @@ export class ZodValidators {
       .partial()
       .strict();
 
-   private static centralCodeSchema = CentralSchema.pick({ codigo: true }).strict();
+   private static centralCodeSchema = UserSchema
+      .pick({ contrasena: true })
+      .extend({
+         codigoActual: CentralSchema.shape.codigo.describe('Código actual de la central'),
+         nuevoCodigo: CentralSchema.shape.codigo.describe('Nuevo código para la central')
+      })
+      .strict();
+
    private static centralInfoSchema = CentralSchema.pick({ centralId: true, nombre: true }).strict();
 
    static validateRegisterBody (body: Register) {

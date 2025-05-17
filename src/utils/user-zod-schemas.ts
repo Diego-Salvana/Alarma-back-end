@@ -20,7 +20,7 @@ export const DireccionSchema = z.object({
 export const CentralSchema = z.object({
    centralId: z.string().trim().min(1),
    nombre: z.string().trim().min(1),
-   codigo: z.number().int().positive().max(999999, { message: 'Máximo 6 dígitos' }),
+   codigo: z.number().int().positive().min(100000, { message: 'Mínimo 6 dígitos' }).max(999999, { message: 'Máximo 6 dígitos' }),
    alarmaEncendida: z.enum(['On', 'Off'], { message: 'El estado de la alarma debe ser "On" o "Off".' })
 });
 

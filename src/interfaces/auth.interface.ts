@@ -25,7 +25,7 @@ export interface UpdateUser extends Register {
 
 export interface BodyPayload {
    userId: string;
-   houseId?: string;
+   houseId: string;
 }
 
 export interface LoginResponse {

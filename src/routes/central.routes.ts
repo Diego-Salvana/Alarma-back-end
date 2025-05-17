@@ -7,13 +7,11 @@ export const createCentralRouter = (centralModel: CentralDataAccess) => {
    const centralRouter = Router();
    const centralController = new CentralController(centralModel);
 
-   centralRouter.get('/:houseId', checkJWT, centralController.getOne.bind(centralController));
-   centralRouter.patch(
-      '/:houseId/code',
-      updateCentralCodeValidator,
-      checkJWT,
-      centralController.updateCode.bind(centralController)
-   );
+   // Usuario con token
+   centralRouter.get('/', checkJWT, centralController.getHistory.bind(centralController));
+   centralRouter.patch('/code', updateCentralCodeValidator, checkJWT, centralController.updateCode.bind(centralController));
+   
+   // Administrador (refactorizar)
    centralRouter.patch(
       '/:houseId/info',
       updateCentralInfoValidator,

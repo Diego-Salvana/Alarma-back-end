@@ -10,7 +10,7 @@ export class SensorDataAccess {
    async create (userId: string, houseId: string, sensor: Dispositivo): Promise<Dispositivo | null> {
       const user = await this.userModel.findOne(
          { _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensor.numeroSensor }
-      );
+      ).lean();
 
       if (user !== null) throw new AlreadyExists(`Ya existe un sensor con el número ${sensor.numeroSensor}`);
 
@@ -46,7 +46,7 @@ export class SensorDataAccess {
          .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
          .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
 
-      if (user === null) throw new NotFound('Sensor no encontrado');
+      if (user === null) throw new NotFound('Usuario o sensor no encontrados');
 
       const house = user.casas.find(h => h._id.toString() === houseId);
       if (house === undefined) throw new NotFound('Casa no encontrada');

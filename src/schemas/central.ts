@@ -1,6 +1,6 @@
 import { Central, Estado, Historial } from '../interfaces';
-import { CentralInfoDTO } from '../interfaces/central.interface';
-import { NotFound } from '../utils';
+import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
+import { NotFound, Unauthorized, verify } from '../utils';
 import { UserModel } from './user';
 
 export class CentralDataAccess {
@@ -14,23 +14,44 @@ export class CentralDataAccess {
          .select(this.noSensorsHistory)
          .lean();
 
-      const house = user?.casas.find(h => h._id.toString() === houseId);
+      if (user === null) throw new NotFound('Usuario o casa no encontrados');
+
+      const house = user.casas.find(h => h._id.toString() === houseId);
 
       return house?.central ?? null;
    }
 
-   async updateCode (userId: string, houseId: string, code: number): Promise<Central | null> {
+   async updateCode (userId: string, houseId: string, codeBody: CentralCodeDTO): Promise<Central | null> {
       const user = await this.userModel
          .findOneAndUpdate(
             { _id: userId, 'casas._id': houseId },
-            { $set: { 'casas.$.central.codigo': code } },
+            { $set: { 'casas.$.central.codigo': codeBody.nuevoCodigo } },
             { new: true }
          )
          .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
+
+      if (user === null) throw new NotFound('Usuario o casa no encontrados');
       
-      const house = user?.casas.find(h => h._id.toString() === houseId);
+      const house = user.casas.find(h => h._id.toString() === houseId);
    
       return house?.central ?? null;
+   }
+
+   async validatePasswordAndCode (userId: string, houseId: string, codeBody: CentralCodeDTO): Promise<void> {
+      const user = await this.userModel
+         .findOne({ _id: userId, 'casas._id': houseId })
+         .select('-casas.central.historial -casas.sensores')
+         .lean();
+
+      if (user === null) throw new NotFound('Usuario o casa no encontrados para validación.');
+
+      const passwordIsCorrect = await verify(codeBody.contrasena, user.contrasena ?? '');
+      if (!passwordIsCorrect) throw new Unauthorized('Contraseña de usuario incorrecta.');
+
+      const house = user.casas.find(h => h._id.toString() === houseId);
+      if (house?.central?.codigo === undefined) throw new NotFound('Central o código de alarma no encontrados para validación.');
+
+      if (house.central.codigo !== codeBody.codigoActual) throw new Unauthorized('Código de alarma actual incorrecto.');
    }
 
    async updateInfo (userId: string, houseId: string, infoBody: CentralInfoDTO): Promise<Central | null> {
@@ -56,10 +77,11 @@ export class CentralDataAccess {
       const user = await this.userModel
          .findOneAndUpdate(
             { nombreUsuario: userName, 'casas.nombreCasa': houseName },
-            { $set: { 'casas.$.central.alarmaEncendida': state, 'casas.$.central.activada': 'false' } },
+            { $set: { 'casas.$.central.alarmaEncendida': state, 'casas.$.central.sonando': 'false' } },
             { new: true }
          )
-         .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
+         .select(`${this.noSensorsHistory} ${this.noCentralHistory}`)
+         .lean();
       
       if (user === null) throw new NotFound('Usuario o casa no encontrados');
    }
@@ -72,7 +94,7 @@ export class CentralDataAccess {
          .findOneAndUpdate(
             { nombreUsuario: userName, 'casas.nombreCasa': houseName },
             {
-               $set: { 'casas.$.central.activada': 'true' },
+               $set: { 'casas.$.central.sonando': 'true' },
                $push: { 'casas.$.central.historial': { $each: [activationDate], $position: 0 } }
             },
             { new: true }

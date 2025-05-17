@@ -5,7 +5,7 @@ export class UserDTO {
    loginResponse (user: IUserDocument | User): LoginResponse {
       const token = JWTHandler.generateToken({
          userId: user._id as string,
-         houseId: user.casas[0] ? user.casas[0]._id : undefined
+         houseId: user.casas[0] ? user.casas[0]._id : ''
       });
 
       const casasResponse: HouseResponse[] = this.housesMap(user.casas);
