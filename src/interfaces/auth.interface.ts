@@ -30,6 +30,7 @@ export interface BodyPayload {
 
 export interface LoginResponse {
    nombre: string;
+   email: string;
    habilitado: boolean;
    token: string;
    casas: HouseResponse[];

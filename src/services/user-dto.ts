@@ -12,6 +12,7 @@ export class UserDTO {
 
       const responseUser: LoginResponse = {
          nombre: user.nombre,
+         email: user.email,
          habilitado: user.habilitado,
          token,
          casas: casasResponse
