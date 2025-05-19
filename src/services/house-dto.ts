@@ -1,4 +1,4 @@
-import { Casa, HouseResponse, IUserDocument, User } from '../interfaces';
+import { Casa, HouseResponse } from '../interfaces';
 import { JWTHandler } from '../utils';
 
 export class HouseDTO {
@@ -22,14 +22,12 @@ export class HouseDTO {
       return houseData;
    }
 
-   housesListResponse (user: IUserDocument | User): HouseResponse[] {
-      return user.casas.map(casa => ({
+   housesListResponse (casas: Array<Pick<Casa, '_id' | 'nombre' | 'direccion' | 'central'>>): HouseResponse[] {
+      return casas.map(casa => ({
          _id: casa._id.toString(),
          nombre: casa.nombre,
          direccion: casa.direccion,
-         alarmaEncendida: casa.central.alarmaEncendida,
-         sonando: casa.central.sonando,
-         sensores: casa.sensores
+         alarmaEncendida: casa.central.alarmaEncendida
       }));
    }
 }

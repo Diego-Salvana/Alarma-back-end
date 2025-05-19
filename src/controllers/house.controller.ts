@@ -15,10 +15,21 @@ export class HouseController {
       try {
          const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
 
-         const responseHouse = await this.houseService.create(body, payload);
-         res.status(201).json({ message: 'Created successfully', data: responseHouse });
+         await this.houseService.create(body, payload);
+         res.status(201).json({ message: 'Created successfully' });
       } catch (err: any) {
          ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
+      }
+   }
+
+   async getAll ({ userPayload }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+
+         const responseHouse = await this.houseService.getAll(payload);
+         res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
       }
    }
 

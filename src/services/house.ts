@@ -8,15 +8,22 @@ export class HouseService {
 
    constructor (private houseDataAccess: HouseDataAccess) {}
 
-   async create (body: Casa, userPayload: JwtPayloadExt): Promise<HouseResponse[]> {
+   async create (body: Casa, userPayload: JwtPayloadExt): Promise<void> {
       const userId = userPayload.sub;
       const houseData: Casa = { ...body, nombreCasa: body.nombre.toLowerCase().replace(/\s/g, '') };
 
       const user = await this.houseDataAccess.create(userId, houseData);
 
       if (user === null) throw new NotFound('Usuario no encontrado');
+   }
 
-      return this.houseDTO.housesListResponse(user);
+   async getAll (userPayload: JwtPayloadExt): Promise<HouseResponse[]> {
+      const userId = userPayload.sub;
+      const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
+
+      if (allUserHouses === null) throw new NotFound('Casas no encontradas');
+
+      return this.houseDTO.housesListResponse(allUserHouses); ;
    }
 
    async getOne (houseId: string, userPayload: JwtPayloadExt): Promise<HouseResponse> {

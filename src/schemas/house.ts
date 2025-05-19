@@ -23,6 +23,24 @@ export class HouseDataAccess {
       
       return userNewHouse;
    }
+   
+   async getAllByUserId (userId: string): Promise<Array<Pick<Casa, '_id' | 'nombre' | 'direccion' | 'central'>>> {
+      const user = await this.userModel
+         .findById(userId)
+         .select('casas._id casas.nombre casas.direccion casas.central.alarmaEncendida')
+         .lean();
+
+      if (user === null) throw new NotFound('Casas no encontradas');
+
+      const houses = user.casas.map(casa => ({
+         _id: casa._id.toString(),
+         nombre: casa.nombre,
+         direccion: casa.direccion,
+         central: casa.central
+      }));
+      
+      return houses;
+   }
 
    async getOne (houseId: string, userId: string): Promise<Casa | null> {
       const user = await this.userModel
@@ -35,23 +53,6 @@ export class HouseDataAccess {
       const house = user.casas.find(house => house._id.toString() === houseId);
       
       return house ?? null;
-   }
-
-   async getAllByUserId (userId: string): Promise<Array<Pick<Casa, '_id' | 'nombre' | 'direccion'>>> {
-      const user = await this.userModel
-         .findById(userId)
-         .select('casas._id casas.nombre casas.direccion')
-         .lean();
-
-      if (user === null) throw new NotFound('Casas no encontradas');
-
-      const houses = user.casas.map(casa => ({
-         _id: casa._id.toString(),
-         nombre: casa.nombre,
-         direccion: casa.direccion
-      }));
-      
-      return houses;
    }
 
    async update (houseId: string, userId: string, houseBody: Partial<Casa>): Promise<Casa> {

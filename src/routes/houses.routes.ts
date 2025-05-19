@@ -8,6 +8,7 @@ export const createHousesRouter = (houseModel: HouseDataAccess) => {
    const houseController = new HouseController(houseModel);
 
    housesRouter.post('/', createHouseValidator, checkJWT, houseController.create.bind(houseController));
+   housesRouter.get('/', checkJWT, houseController.getAll.bind(houseController));
    housesRouter.get('/:id', checkJWT, houseController.getHouse.bind(houseController));
    housesRouter.patch('/name-dir/:id', updateHouseValidator, checkJWT, houseController.update.bind(houseController));
    housesRouter.delete('/:id', checkJWT, houseController.delete.bind(houseController));
