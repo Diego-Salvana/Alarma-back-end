@@ -10,6 +10,7 @@ export const createUsersRouter = (userModel: UserDataAccess) => {
 
    usersRouter.post('/register', registerValidator, userController.create.bind(userController));
    usersRouter.post('/login', loginValidator, userController.login.bind(userController));
+   usersRouter.get('/', checkJWT, userController.getById.bind(userController));
    usersRouter.patch('/', updateUserValidator, checkJWT, userController.update.bind(userController));
    usersRouter.delete('/', checkJWT, userController.delete.bind(userController));
 

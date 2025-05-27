@@ -28,6 +28,17 @@ export class UserController {
       }
    }
 
+   async getById ({ userPayload }: RequestExt, res: Response) {
+      const id = userPayload?.sub as string;
+
+      try {
+         const responseUser = await this.userService.getById(id);
+         res.status(200).json({ message: 'Get by id successfully', data: responseUser });
+      } catch (e) {
+         ErrorHandler.generateResponse(res, e, 'Ocurrió un error al obtener usuario');
+      }
+   }
+
    async update ({ body, userPayload }: RequestExt, res: Response) {
       const id = userPayload?.sub as string;
 

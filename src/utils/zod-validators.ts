@@ -23,7 +23,9 @@ export class ZodValidators {
       .strict();
 
    private static createHouseSchema = CasaSchema.partial({ sensores: true, camaras: true }).strict();
-   private static updateHouseSchema = CasaSchema.pick({ nombre: true, direccion: true }).partial().strict();
+   private static updateHouseSchema = CasaSchema.pick({ nombre: true, direccion: true }).deepPartial().strict();
+
+   private static createSensorSchema = DispositivoSchema.partial().strict();
    private static nameSensorSchema = DispositivoSchema.pick({ nombre: true, numeroSensor: true }).strict();
    private static infoSensorSchema = DispositivoSchema
       .pick({ dispositivoId: true, numeroSensor: true, tipo: true })

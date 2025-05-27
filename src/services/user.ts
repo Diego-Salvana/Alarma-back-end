@@ -44,6 +44,18 @@ export class UserService {
       return responseUser;
    }
 
+   async getById (id: string): Promise<ProfileResponse> {
+      const user = await this.userDataAccess.getById(id);
+      
+      if (user === null) {
+         throw new NotFound('Usuario no encontrado');
+      }
+
+      const responseUser = this.userDTO.profileResponse(user);
+
+      return responseUser;
+   }
+
    async update (id: string, body: UpdateUser): Promise<ProfileResponse> {
       const user = await this.userDataAccess.getById(id);
 

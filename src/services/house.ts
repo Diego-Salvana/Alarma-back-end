@@ -1,3 +1,4 @@
+import { IncomingHttpHeaders } from 'http2';
 import { Casa, HouseResponse, JwtPayloadExt } from '../interfaces';
 import { HouseDataAccess } from '../schemas';
 import { AlreadyExists, NotFound } from '../utils';
@@ -26,13 +27,15 @@ export class HouseService {
       return this.houseDTO.housesListResponse(allUserHouses); ;
    }
 
-   async getOne (houseId: string, userPayload: JwtPayloadExt): Promise<HouseResponse> {
+   async getOne (houseId: string, userPayload: JwtPayloadExt, headers: IncomingHttpHeaders): Promise<HouseResponse> {
       const userId = userPayload.sub;
       const house = await this.houseDataAccess.getOne(houseId, userId);
 
       if (house === null) throw new NotFound('Casa no encontrada');
 
-      return this.houseDTO.houseResponse(house);
+      const newToken = headers['set-house'] === 'true';
+
+      return this.houseDTO.houseResponse(house, newToken ? userId : undefined, newToken);
    }
 
    async update (houseId: string, userPayload: JwtPayloadExt, body: Partial<Casa>): Promise<HouseResponse> {

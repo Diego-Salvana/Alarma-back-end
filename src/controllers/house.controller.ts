@@ -33,12 +33,12 @@ export class HouseController {
       }
    }
 
-   async getHouse ({ params, userPayload }: RequestExt, res: Response) {
+   async getHouse ({ params, userPayload, headers }: RequestExt, res: Response) {
       try {
          const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
          const houseId = params.id;
 
-         const responseHouse = await this.houseService.getOne(houseId, payload);
+         const responseHouse = await this.houseService.getOne(houseId, payload, headers);
          res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
       } catch (err: any) {
          ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
