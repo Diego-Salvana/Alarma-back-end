@@ -42,10 +42,10 @@ export class HouseDataAccess {
       return houses;
    }
 
-   async getOne (houseId: string, userId: string): Promise<Casa | null> {
+   async getOne (houseId: string, userId: string, withHistory = false): Promise<Casa | null> {
       const user = await this.userModel
          .findOne({ _id: userId, 'casas._id': houseId })
-         .select(this.withoutHistory)
+         .select(withHistory ? '' : this.withoutHistory)
          .lean();
 
       if (user === null) throw new NotFound('Casa no encontrada');
@@ -56,7 +56,7 @@ export class HouseDataAccess {
    }
 
    async update (houseId: string, userId: string, houseBody: Partial<Casa>): Promise<Casa> {
-      const house = await this.getOne(houseId, userId);
+      const house = await this.getOne(houseId, userId, true);
 
       if (house === null) throw new NotFound('Casa no encontrada');
       
@@ -66,7 +66,7 @@ export class HouseDataAccess {
          { _id: userId, 'casas._id': houseId },
          { $set: { 'casas.$': updatedHouseData } },
          { new: true }
-      ).select(this.withoutHistory).lean();
+      ).select(this.withoutHistory).lean(); // Revisar
 
       if (user === null) throw new NotFound('Usuario o casa no encontrados durante la actualización');
       const responseHouse = user.casas.find(house => house._id.toString() === houseId);

@@ -2,7 +2,13 @@ import { z } from 'zod';
 
 // Historial Validation
 export const HistorialSchema = z.object({
-   fechaHora: z.date().default(() => new Date())
+   fechaHora: z.date()
+});
+
+// Historial Central Validation
+export const HistorialCentralSchema = z.object({
+   fechaHora: z.date(),
+   numeroDispositivo: z.number().int().positive({ message: 'El número de dispositivo debe ser positivo.' })
 });
 
 // Dirección Validation

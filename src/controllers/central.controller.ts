@@ -15,8 +15,8 @@ export class CentralController {
       try {
          const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
 
-         const responseCentral = await this.centralService.getHistory(payload);
-         res.status(200).json({ message: 'Satisfactory request', data: responseCentral });
+         const responseHistory = await this.centralService.getHistory(payload);
+         res.status(200).json({ message: 'Satisfactory request', data: responseHistory });
       } catch (err: any) {
          ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
       }

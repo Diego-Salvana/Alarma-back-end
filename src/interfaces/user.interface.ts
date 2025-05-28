@@ -10,6 +10,18 @@ export interface Historial {
    fechaHora: Date;
 }
 
+// Historial Central Interface
+export interface HistorialCentral {
+   fechaHora: Date;
+   numeroDispositivo: number;
+}
+
+// Historial con Nombre
+export interface HistorialConNombre {
+   fechaHora: Date;
+   nombreDispositivo: string;
+}
+
 // Dirección Interface
 export interface Direccion {
    calle: string;
@@ -24,7 +36,7 @@ export interface Central {
    codigo: number;
    alarmaEncendida: Estado;
    sonando: boolean;
-   historial: Historial[];
+   historial: HistorialCentral[];
 }
 
 // Dispositivo Interface (Sensores y Cámaras)

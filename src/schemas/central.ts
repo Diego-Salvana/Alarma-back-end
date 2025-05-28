@@ -1,4 +1,4 @@
-import { Central, Estado, Historial } from '../interfaces';
+import { Casa, Central, Estado, HistorialCentral } from '../interfaces';
 import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
 import { NotFound, Unauthorized, verify } from '../utils';
 import { UserModel } from './user';
@@ -8,7 +8,7 @@ export class CentralDataAccess {
    private noSensorsHistory = '-casas.sensores.historial -casas.camaras.historial';
    private noCentralHistory = '-casas.central.historial';
 
-   async getOne (userId: string, houseId: string): Promise<Central | null> {
+   async getOne (userId: string, houseId: string): Promise<Casa | null> {
       const user = await this.userModel
          .findOne({ _id: userId, 'casas._id': houseId })
          .select(this.noSensorsHistory)
@@ -18,7 +18,7 @@ export class CentralDataAccess {
 
       const house = user.casas.find(h => h._id.toString() === houseId);
 
-      return house?.central ?? null;
+      return house ?? null;
    }
 
    async updateCode (userId: string, houseId: string, codeBody: CentralCodeDTO): Promise<Central | null> {
@@ -86,9 +86,9 @@ export class CentralDataAccess {
       if (user === null) throw new NotFound('Usuario o casa no encontrados');
    }
 
-   async setActivation (userName: string, houseName: string, date: Date): Promise<void> {
+   async setActivation (userName: string, houseName: string, sensorNumber: number, date: Date): Promise<void> {
       const utcDate = new Date(date.toISOString());
-      const activationDate: Historial = { fechaHora: utcDate };
+      const activationDate: HistorialCentral = { fechaHora: utcDate, numeroDispositivo: sensorNumber };
 
       const user = await this.userModel
          .findOneAndUpdate(

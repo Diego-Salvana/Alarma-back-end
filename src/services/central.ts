@@ -1,4 +1,4 @@
-import { Central, Historial, JwtPayloadExt } from '../interfaces';
+import { Central, HistorialConNombre, JwtPayloadExt } from '../interfaces';
 import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
 import { CentralDataAccess } from '../schemas';
 import { NotFound } from '../utils';
@@ -6,15 +6,21 @@ import { NotFound } from '../utils';
 export class CentralService {
    constructor (private centralDataAccess: CentralDataAccess) {}
 
-   async getHistory (userPayload: JwtPayloadExt): Promise<Historial[]> {
+   async getHistory (userPayload: JwtPayloadExt): Promise<HistorialConNombre[]> {
       const userId = userPayload.sub;
       const houseId = userPayload.hid;
 
-      const central = await this.centralDataAccess.getOne(userId, houseId);
+      const house = await this.centralDataAccess.getOne(userId, houseId);
 
-      if (central === null) throw new NotFound('Central no encontrada');
+      if (house === null) throw new NotFound('Central no encontrada');
 
-      return central.historial;
+      return house.central.historial.map(history => {
+         const sensorName = house.sensores.find(s => s.numeroSensor === history.numeroDispositivo)?.nombre ??
+            history.numeroDispositivo.toString();
+         
+         const historyWithName: HistorialConNombre = { fechaHora: history.fechaHora, nombreDispositivo: sensorName };
+         return historyWithName;
+      });
    }
 
    async updateCode (userPayload: JwtPayloadExt, codeBody: CentralCodeDTO): Promise<void> {

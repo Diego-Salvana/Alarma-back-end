@@ -44,7 +44,7 @@ export class SensorDataAccess {
    async updateName (userId: string, houseId: string, sensorNumber: number, name: string): Promise<Dispositivo> {
       const user = await this.userModel
          .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
-         .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
+         .select(`${this.noCentralHistory}`);
 
       if (user === null) throw new NotFound('Usuario o sensor no encontrados');
 

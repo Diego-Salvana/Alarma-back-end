@@ -1,5 +1,6 @@
 import { Estado } from '../interfaces';
 import { CentralDataAccess } from '../schemas';
+import { verifySensorNumber } from './utils';
 
 export class MosquittoCentralService {
    constructor (private centralDataAccess: CentralDataAccess) {}
@@ -19,11 +20,13 @@ export class MosquittoCentralService {
    }
    
    // Este es el método en el cual se colocaría alguna acción para avisar al usuario de la activación de la alarma.
-   async setActivation (userName: string, houseName: string) {
-      const activationDate = new Date(Date.now());
-   
+   async setActivation (userName: string, houseName: string, message: string) {
       try {
-         await this.centralDataAccess.setActivation(userName, houseName, activationDate);
+         const sensorNumber = verifySensorNumber(message);
+         
+         const activationDate = new Date(Date.now());
+   
+         await this.centralDataAccess.setActivation(userName, houseName, sensorNumber, activationDate);
       } catch (err: any) {
          console.log(`Error (method: "setCentralActivation"): ${err.message as string}`);
       }

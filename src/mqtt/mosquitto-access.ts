@@ -49,15 +49,17 @@ export class MosquittoAccess {
             }
 
             // Array de 5 partes implica apuntar a un sensor "alarmas/usuario_1/casa_1/sensores/(estado || activado)"
+            // estado --> mensaje: 1,"On" | "Off"
+            // activado --> mensaje: 1
          } else if (topicArray.length === 5) {
             const sensorProp = topicArray[4];
 
             switch (sensorProp as SensorProperty) {
                case 'estado':
-               // updateSensorState(userName, houseName, sensorNumber, messageText);
+                  // updateSensorState(userName, houseName, sensorNumber, messageText);
                   break;
                case 'activado':
-                  this.mqttCentralService.setActivation(userName, houseName);
+                  this.mqttCentralService.setActivation(userName, houseName, messageText);
                   this.mqttSensorService.updateHistory(userName, houseName, messageText);
                   break;
                default:

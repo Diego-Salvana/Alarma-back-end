@@ -2,10 +2,19 @@ import mongoose, { Schema } from 'mongoose';
 import { IUserDataAccess, IUserDocument, Register, User } from '../interfaces';
 import { AlreadyExists } from '../utils/custom-errors';
 
-// Historial Schema
+// Historial Dispositivo Schema
 const HistorialSchema = new Schema(
    {
       fechaHora: { type: Date, default: Date.now }
+   },
+   { _id: false }
+);
+
+// Historial Central Schema
+const HistorialCentralSchema = new Schema(
+   {
+      fechaHora: { type: Date, default: Date.now },
+      numeroDispositivo: { type: Number, required: true }
    },
    { _id: false }
 );
@@ -28,7 +37,7 @@ const CentralSchema = new Schema(
       codigo: { type: Number, required: true },
       alarmaEncendida: { type: String, enum: ['On', 'Off'], required: true },
       sonando: { type: Boolean, required: true, default: false },
-      historial: [HistorialSchema]
+      historial: [HistorialCentralSchema]
    },
    { _id: false }
 );
