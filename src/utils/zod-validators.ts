@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { Casa, Dispositivo, Login, Register } from '../interfaces';
+import { Casa, Dispositivo, ExcludeArrayDTO, Login, Register } from '../interfaces';
 import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
-import { CasaSchema, CentralSchema, DispositivoSchema, UserSchema } from './user-zod-schemas';
+import { CasaSchema, CentralSchema, DispositivoSchema, UserSchema, ExclusionSensorSchema } from './user-zod-schemas';
 
 export class ZodValidators {
    private static loginSchema = UserSchema.pick({ email: true, contrasena: true }).strict();
@@ -24,8 +24,6 @@ export class ZodValidators {
 
    private static createHouseSchema = CasaSchema.partial({ sensores: true, camaras: true }).strict();
    private static updateHouseSchema = CasaSchema.pick({ nombre: true, direccion: true }).deepPartial().strict();
-
-   private static createSensorSchema = DispositivoSchema.partial().strict();
    private static nameSensorSchema = DispositivoSchema.pick({ nombre: true, numeroSensor: true }).strict();
    private static infoSensorSchema = DispositivoSchema
       .pick({ dispositivoId: true, numeroSensor: true, tipo: true })
@@ -80,5 +78,9 @@ export class ZodValidators {
 
    static validateCentralInfoBody (body: CentralInfoDTO) {
       return this.centralInfoSchema.safeParse(body);
+   }
+
+   static validateExclusionArray (body: ExcludeArrayDTO) {
+      return ExclusionSensorSchema.safeParse(body);
    }
 }

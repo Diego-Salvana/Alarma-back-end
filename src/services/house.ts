@@ -69,4 +69,15 @@ export class HouseService {
       
       await this.houseDataAccess.delete(houseId, userId);
    }
+
+   async activeAlarm (userPayload: JwtPayloadExt, body: any): Promise<HouseResponse> {
+      const userId = userPayload.sub;
+      const houseId = userPayload.hid;
+
+      const house = await this.houseDataAccess.activeAlarm(houseId, userId, body.exclusionArray);
+
+      if (house === null) throw new NotFound('Casa no encontrada');
+
+      return this.houseDTO.houseResponse(house);
+   }
 }

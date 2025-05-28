@@ -11,6 +11,14 @@ export const HistorialCentralSchema = z.object({
    numeroDispositivo: z.number().int().positive({ message: 'El número de dispositivo debe ser positivo.' })
 });
 
+// Array de Exclusión
+export const ExclusionSensorSchema = z.object({
+   exclusionArray: z.object({
+      numeroSensor: z.string().trim().min(1, 'El número de sensor es requerido.'),
+      estado: z.enum(['On', 'Off'])
+   }).array()
+});
+
 // Dirección Validation
 export const DireccionSchema = z.object({
    calle: z.string({ invalid_type_error: 'La calle debe ser cadena de texto.' })

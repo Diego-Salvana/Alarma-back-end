@@ -68,4 +68,15 @@ export class HouseController {
          ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
       }
    }
+
+   async activeAlarm ({ body, userPayload }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+
+         const responseHouse = await this.houseService.activeAlarm(payload, body);
+         res.status(200).json({ message: 'Activated successfully', data: responseHouse });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al activar la alarma');
+      }
+   }
 }

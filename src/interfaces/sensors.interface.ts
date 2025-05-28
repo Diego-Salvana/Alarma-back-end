@@ -1,3 +1,5 @@
+import { Estado } from './user.interface';
+
 export interface SensorNameDTO {
    numeroSensor: number;
    nombre: string;
@@ -10,3 +12,12 @@ export interface SensorInfoDTO {
 }
 
 export type SensorProperty = 'estado' | 'activado';
+
+export interface ExclusionSensor {
+   numeroSensor: string;
+   estado: Estado | undefined;
+};
+
+export interface ExcludeArrayDTO {
+   exclusionArray: ExclusionSensor[];
+}

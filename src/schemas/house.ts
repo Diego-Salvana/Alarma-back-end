@@ -1,6 +1,6 @@
 import { merge } from 'lodash';
-import { Casa, User } from '../interfaces';
-import { AlreadyExists, NotFound } from '../utils';
+import { Casa, Estado, ExclusionSensor, User } from '../interfaces';
+import { AlreadyExists, BadRequest, NotFound } from '../utils';
 import { UserModel } from './user';
 
 export class HouseDataAccess {
@@ -84,5 +84,29 @@ export class HouseDataAccess {
       );
 
       if (user === null) throw new NotFound('Casa no encontrada');
+   }
+
+   async activeAlarm (houseId: string, userId: string, exclusionArray: ExclusionSensor[]): Promise<Casa | null> {
+      if (exclusionArray.length < 1) throw new BadRequest('Debe haber algún sensor activado');
+
+      const user = await this.userModel
+         .findOne({ _id: userId, 'casas._id': houseId })
+         .select(this.withoutHistory);
+
+      if (user === null) throw new NotFound('Usuario no encontrado');
+
+      const house = user.casas.find(h => h._id.toString() === houseId);
+      if (house === undefined) throw new NotFound('Casa no encontrada');
+
+      house.sensores.forEach(sensor => {
+         const state = exclusionArray.find(excObj => sensor.numeroSensor.toString() === excObj.numeroSensor)?.estado ?? Estado.APAGADO;
+         sensor.estado = state;
+      });
+
+      house.central.alarmaEncendida = Estado.ENCENDIDO;
+
+      await user.save();
+
+      return await this.getOne(houseId, userId);
    }
 }

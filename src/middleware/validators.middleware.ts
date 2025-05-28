@@ -42,6 +42,10 @@ export function updateCentralInfoValidator (req: Request, res: Response, next: N
    validateRequest(req, res, next, ZodValidators.validateCentralInfoBody.bind(ZodValidators));
 }
 
+export function exclusionArrayValidator (req: Request, res: Response, next: NextFunction) {
+   validateRequest(req, res, next, ZodValidators.validateExclusionArray.bind(ZodValidators));
+}
+
 // Función general
 type KeyString = Record<string, string>;
 
