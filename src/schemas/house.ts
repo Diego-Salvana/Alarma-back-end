@@ -109,4 +109,21 @@ export class HouseDataAccess {
 
       return await this.getOne(houseId, userId);
    }
+
+   async disarmAlarm (houseId: string, userId: string): Promise<Casa | null> {
+      const user = await this.userModel
+         .findOne({ _id: userId, 'casas._id': houseId })
+         .select(this.withoutHistory);
+
+      if (user === null) throw new NotFound('Usuario no encontrado');
+
+      const house = user.casas.find(h => h._id.toString() === houseId);
+      if (house === undefined) throw new NotFound('Casa no encontrada');
+
+      house.central.alarmaEncendida = Estado.APAGADO;
+
+      await user.save();
+
+      return await this.getOne(houseId, userId);
+   }
 }

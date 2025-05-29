@@ -1,7 +1,7 @@
 import { IncomingHttpHeaders } from 'http2';
-import { Casa, HouseResponse, JwtPayloadExt } from '../interfaces';
+import { Casa, Estado, ExcludeArrayDTO, HouseResponse, JwtPayloadExt } from '../interfaces';
 import { HouseDataAccess } from '../schemas';
-import { AlreadyExists, NotFound } from '../utils';
+import { AlreadyExists, BadRequest, NotFound } from '../utils';
 import { HouseDTO } from './house-dto';
 
 export class HouseService {
@@ -70,11 +70,26 @@ export class HouseService {
       await this.houseDataAccess.delete(houseId, userId);
    }
 
-   async activeAlarm (userPayload: JwtPayloadExt, body: any): Promise<HouseResponse> {
+   async activeAlarm (userPayload: JwtPayloadExt, body: ExcludeArrayDTO): Promise<HouseResponse> {
+      const userId = userPayload.sub;
+      const houseId = userPayload.hid;
+      const exclusionArray = body.exclusionArray;
+      const someActivated = exclusionArray.some(sensor => sensor.estado === Estado.ENCENDIDO);
+
+      if (!someActivated) throw new BadRequest('No hay sensores encendidos');
+
+      const house = await this.houseDataAccess.activeAlarm(houseId, userId, exclusionArray);
+
+      if (house === null) throw new NotFound('Casa no encontrada');
+
+      return this.houseDTO.houseResponse(house);
+   }
+
+   async disarmAlarm (userPayload: JwtPayloadExt): Promise<HouseResponse> {
       const userId = userPayload.sub;
       const houseId = userPayload.hid;
 
-      const house = await this.houseDataAccess.activeAlarm(houseId, userId, body.exclusionArray);
+      const house = await this.houseDataAccess.disarmAlarm(houseId, userId);
 
       if (house === null) throw new NotFound('Casa no encontrada');
 

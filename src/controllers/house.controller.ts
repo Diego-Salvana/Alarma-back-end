@@ -79,4 +79,15 @@ export class HouseController {
          ErrorHandler.generateResponse(res, err, 'Ocurrió un error al activar la alarma');
       }
    }
+
+   async disarmAlarm ({ userPayload }: RequestExt, res: Response) {
+      try {
+         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+
+         const responseHouse = await this.houseService.disarmAlarm(payload);
+         res.status(200).json({ message: 'Disarmed successfully', data: responseHouse });
+      } catch (err: any) {
+         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
+      }
+   }
 }

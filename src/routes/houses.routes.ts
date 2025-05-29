@@ -9,6 +9,7 @@ export const createHousesRouter = (houseModel: HouseDataAccess) => {
 
    housesRouter.post('/', createHouseValidator, checkJWT, houseController.create.bind(houseController));
    housesRouter.post('/active', exclusionArrayValidator, checkJWT, houseController.activeAlarm.bind(houseController));
+   housesRouter.get('/disarm', checkJWT, houseController.disarmAlarm.bind(houseController));
    housesRouter.get('/', checkJWT, houseController.getAll.bind(houseController));
    housesRouter.get('/:id', checkJWT, houseController.getHouse.bind(houseController));
    housesRouter.patch('/name-dir/:id', updateHouseValidator, checkJWT, houseController.update.bind(houseController));
