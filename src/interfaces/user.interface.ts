@@ -1,81 +1,81 @@
 import { Document, ObjectId } from 'mongoose';
 
 export enum Estado {
-   ENCENDIDO = 'On',
-   APAGADO = 'Off'
+	ENCENDIDO = 'On',
+	APAGADO = 'Off'
 }
 
 // Historial Interface
 export interface Historial {
-   fechaHora: Date;
+	fechaHora: Date;
 }
 
 // Historial Central Interface
 export interface HistorialCentral {
-   fechaHora: Date;
-   numeroDispositivo: number;
+	fechaHora: Date;
+	numeroDispositivo: number;
 }
 
 // Historial con Nombre
 export interface HistorialConNombre {
-   fechaHora: Date;
-   nombreDispositivo: string;
+	fechaHora: Date;
+	nombreDispositivo: string;
 }
 
 // Dirección Interface
 export interface Direccion {
-   calle: string;
-   numero: number;
-   ciudad: string;
+	calle: string;
+	numero: number;
+	ciudad: string;
 }
 
 // Central Interface
 export interface Central {
-   centralId: string;
-   nombre: string;
-   codigo: number;
-   alarmaEncendida: Estado;
-   sonando: boolean;
-   historial: HistorialCentral[];
+	centralId: string;
+	nombre: string;
+	codigo: number;
+	alarmaEncendida: Estado;
+	sonando: boolean;
+	historial: HistorialCentral[];
 }
 
 // Dispositivo Interface (Sensores y Cámaras)
 export interface Dispositivo {
-   dispositivoId: string;
-   numeroSensor: number;
-   nombre: string;
-   tipo: string; // Usar un tipo enum si los valores de tipo son limitados
-   estado: Estado;
-   historial: Historial[];
+	dispositivoId: string;
+	numeroSensor: number;
+	nombre: string;
+	tipo: string; // Usar un tipo enum si los valores de tipo son limitados
+	estado: Estado;
+	historial: Historial[];
 }
 
 // Casa Interface
 export interface Casa {
-   _id: string;
-   nombre: string;
-   nombreCasa: string;
-   direccion: Direccion;
-   central: Central;
-   sensores: Dispositivo[];
-   camaras: Dispositivo[];
+	_id: string;
+	nombre: string;
+	nombreCasa: string;
+	direccion: Direccion;
+	central: Central;
+	sensores: Dispositivo[];
+	camaras: Dispositivo[];
 }
 
 // Usuario Interface
 export interface User {
-   _id: ObjectId | unknown;
-   nombre: string;
-   apellido: string;
-   nombreUsuario: string;
-   email: string;
-   contrasena: string;
-   mosquittoPass: string;
-   telefono: string;
-   habilitado: boolean;
-   casas: Casa[];
+	_id: ObjectId | unknown;
+	nombre: string;
+	apellido: string;
+	nombreUsuario: string;
+	email: string;
+	contrasena: string;
+	mosquittoPass: string;
+	telefono: string;
+	habilitado: boolean;
+	casas: Casa[];
 }
 
 export interface IUserDocument extends User, Document {
-   createdAt: Date;
-   updatedAt: Date;
-   __v: number;
+	createdAt: Date;
+	updatedAt: Date;
+	__v: number;
 }

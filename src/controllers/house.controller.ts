@@ -1,93 +1,171 @@
 import { Response } from 'express';
-import { HouseDataAccess } from '../schemas';
+import { HouseDataAccess, UserDataAccess } from '../schemas';
 import { HouseService } from '../services';
-import { RequestExt } from '../interfaces';
-import { checkPayload, ErrorHandler } from '../utils';
+import { Estado, ExclusionSensor, RequestExt } from '../interfaces';
+import { BadRequest, checkPayload, ErrorHandler } from '../utils';
+import { MosquittoAccess } from '../mqtt';
 
 export class HouseController {
-   private houseService: HouseService;
+  private houseService: HouseService;
+	
+  constructor (
+    houseDataAccess: HouseDataAccess,
+    mosquittoAcces: MosquittoAccess,
+    userDataAccess: UserDataAccess
+  ) {
+    this.houseService = new HouseService(
+      houseDataAccess,
+      mosquittoAcces,
+      userDataAccess
+    );
+  }
 
-   constructor (houseDataAccess: HouseDataAccess) {
-      this.houseService = new HouseService(houseDataAccess);
-   }
+  async create ({ body, userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
 
-   async create ({ body, userPayload }: RequestExt, res: Response) {
-      try {
-         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      await this.houseService.create(body, payload);
+      res.status(201).json({ message: 'Created successfully' });
+    } catch (err: any) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
+    }
+  }
 
-         await this.houseService.create(body, payload);
-         res.status(201).json({ message: 'Created successfully' });
-      } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
-      }
-   }
+  async getAll ({ userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(
+        userPayload,
+        'Falta información para encontrar usuario'
+      );
 
-   async getAll ({ userPayload }: RequestExt, res: Response) {
-      try {
-         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const responseHouse = await this.houseService.getAll(payload);
+      res
+        .status(200)
+        .json({ message: 'Satisfactory request', data: responseHouse });
+    } catch (err: any) {
+      ErrorHandler.generateResponse(
+        res,
+        err,
+        'Ocurrió un error al obtener la casa'
+      );
+    }
+  }
 
-         const responseHouse = await this.houseService.getAll(payload);
-         res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
-      } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
-      }
-   }
+  async getHouse ({ params, userPayload, headers }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(
+        userPayload,
+        'Falta información para encontrar usuario'
+      );
+      const houseId = params.id;
 
-   async getHouse ({ params, userPayload, headers }: RequestExt, res: Response) {
-      try {
-         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-         const houseId = params.id;
+      const responseHouse = await this.houseService.getOne(
+        houseId,
+        payload,
+        headers
+      );
+      res
+        .status(200)
+        .json({ message: 'Satisfactory request', data: responseHouse });
+    } catch (err: any) {
+      ErrorHandler.generateResponse(
+        res,
+        err,
+        'Ocurrió un error al obtener la casa'
+      );
+    }
+  }
 
-         const responseHouse = await this.houseService.getOne(houseId, payload, headers);
-         res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
-      } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
-      }
-   }
+  async update ({ params, body, userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(
+        userPayload,
+        'Falta información para encontrar usuario'
+      );
+      const houseId = params.id;
 
-   async update ({ params, body, userPayload }: RequestExt, res: Response) {
-      try {
-         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-         const houseId = params.id;
+      const responseHouse = await this.houseService.update(
+        houseId,
+        payload,
+        body
+      );
+      res
+        .status(200)
+        .json({ message: 'Updated successfully', data: responseHouse });
+    } catch (err: any) {
+      ErrorHandler.generateResponse(
+        res,
+        err,
+        'Ocurrió un error al actualizar casa'
+      );
+    }
+  }
 
-         const responseHouse = await this.houseService.update(houseId, payload, body);
-         res.status(200).json({ message: 'Updated successfully', data: responseHouse });
-      } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
-      }
-   }
+  async delete ({ params, userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(
+        userPayload,
+        'Falta información para encontrar usuario'
+      );
+      const houseId = params.id;
 
-   async delete ({ params, userPayload }: RequestExt, res: Response) {
-      try {
-         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-         const houseId = params.id;
+      await this.houseService.delete(houseId, payload);
+      res.status(200).json({ message: 'Deleted successfully' });
+    } catch (err: any) {
+      ErrorHandler.generateResponse(
+        res,
+        err,
+        'Ocurrió un error al actualizar usuario'
+      );
+    }
+  }
 
-         await this.houseService.delete(houseId, payload);
-         res.status(200).json({ message: 'Deleted successfully' });
-      } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
-      }
-   }
+  async activeAlarm ({ body, userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(
+        userPayload,
+        'Falta información para encontrar usuario'
+      );
+      const someActivated = body.exclusionArray.some(
+        (sensor: ExclusionSensor) => sensor.estado === Estado.ENCENDIDO
+      );
 
-   async activeAlarm ({ body, userPayload }: RequestExt, res: Response) {
-      try {
-         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      if (!someActivated) throw new BadRequest('No hay sensores encendidos');
 
-         const responseHouse = await this.houseService.activeAlarm(payload, body);
-         res.status(200).json({ message: 'Activated successfully', data: responseHouse });
-      } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al activar la alarma');
-      }
-   }
+      // Responde inmediatamente que la solicitud fue aceptada para su procesamiento.
+      res
+        .status(202)
+        .json({ message: 'Activation in process', state: 'pending' });
 
-   async disarmAlarm ({ userPayload }: RequestExt, res: Response) {
-      try {
-         const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      // Inicia el proceso de activación de la alarma en segundo plano.
+      void this.houseService.setAlarmState(payload, Estado.ENCENDIDO, body);
+    } catch (err: any) {
+      ErrorHandler.generateResponse(
+        res,
+        err,
+        'Ocurrió un error al activar la alarma'
+      );
+    }
+  }
 
-         const responseHouse = await this.houseService.disarmAlarm(payload);
-         res.status(200).json({ message: 'Disarmed successfully', data: responseHouse });
-      } catch (err: any) {
-         ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
-      }
-   }
+  async disarmAlarm ({ userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(
+        userPayload,
+        'Falta información para encontrar usuario'
+      );
+
+      res
+        .status(202)
+        .json({ message: 'Activation in process', state: 'pending' });
+
+      void this.houseService.setAlarmState(payload, Estado.APAGADO);
+    } catch (err: any) {
+      ErrorHandler.generateResponse(
+        res,
+        err,
+        'Ocurrió un error al desactivar la alarma'
+      );
+    }
+  }
 }

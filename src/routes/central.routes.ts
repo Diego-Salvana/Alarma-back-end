@@ -4,20 +4,20 @@ import { CentralController } from '../controllers';
 import { checkJWT, updateCentralCodeValidator, updateCentralInfoValidator } from '../middleware';
 
 export const createCentralRouter = (centralModel: CentralDataAccess) => {
-   const centralRouter = Router();
-   const centralController = new CentralController(centralModel);
+  const centralRouter = Router();
+  const centralController = new CentralController(centralModel);
 
-   // Usuario con token
-   centralRouter.get('/', checkJWT, centralController.getHistory.bind(centralController));
-   centralRouter.patch('/code', updateCentralCodeValidator, checkJWT, centralController.updateCode.bind(centralController));
+  // Usuario con token
+  centralRouter.get('/', checkJWT, centralController.getHistory.bind(centralController));
+  centralRouter.patch('/code', updateCentralCodeValidator, checkJWT, centralController.updateCode.bind(centralController));
    
-   // Administrador (refactorizar)
-   centralRouter.patch(
-      '/:houseId/info',
-      updateCentralInfoValidator,
-      checkJWT,
-      centralController.updateInfo.bind(centralController)
-   );
+  // Administrador (refactorizar)
+  centralRouter.patch(
+    '/:houseId/info',
+    updateCentralInfoValidator,
+    checkJWT,
+    centralController.updateInfo.bind(centralController)
+  );
 
-   return centralRouter;
+  return centralRouter;
 };

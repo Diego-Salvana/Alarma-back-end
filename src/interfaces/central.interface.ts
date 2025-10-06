@@ -1,12 +1,12 @@
 export interface CentralCodeDTO {
-   contrasena: string;
-   codigoActual: number;
-   nuevoCodigo: number;
+	contrasena: string;
+	codigoActual: number;
+	nuevoCodigo: number;
 }
 
 export interface CentralInfoDTO {
-   centralId?: string;
-   nombre?: string;
+	centralId?: string;
+	nombre?: string;
 }
 
-export type CentralProperty = 'alarmaEncendida' | 'activada' | 'historial';
+export type CentralProperty = 'alarmaEncendida' | 'sonando' | 'historial';
