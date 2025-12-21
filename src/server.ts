@@ -8,9 +8,7 @@ MongoDB.connect();
 const serverApp = createServer(App.create());
 
 const io = new Server(serverApp, {
-  cors: {
-    origin: '*'
-  },
+  cors: { origin: '*' },
   path: '/api-alarma/socket'
 });
 
@@ -27,12 +25,13 @@ io.on('connection', (socket) => {
   });
 });
 
+/** Envía datos a través de ``websockets``. */
+export const emitDataSockets = (topic: string, data: any) => {
+  io.emit(topic, data);
+};
+
 const PORT = process.env.PORT ?? 1234;
 
 serverApp.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto: ${PORT} 🚀`);
 });
-
-export const emitDataSockets = (topic: string, data: any) => {
-  io.emit(topic, data);
-};

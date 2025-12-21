@@ -5,6 +5,7 @@ import { Estado, ExclusionSensor, RequestExt } from '../interfaces';
 import { BadRequest, checkPayload, ErrorHandler } from '../utils';
 import { MosquittoAccess } from '../mqtt';
 
+/** Gestiona peticiones y respuestas vinculadas a Casas. */
 export class HouseController {
   private houseService: HouseService;
 	
@@ -13,11 +14,7 @@ export class HouseController {
     mosquittoAcces: MosquittoAccess,
     userDataAccess: UserDataAccess
   ) {
-    this.houseService = new HouseService(
-      houseDataAccess,
-      mosquittoAcces,
-      userDataAccess
-    );
+    this.houseService = new HouseService(houseDataAccess, mosquittoAcces, userDataAccess);
   }
 
   async create ({ body, userPayload }: RequestExt, res: Response) {
@@ -33,139 +30,79 @@ export class HouseController {
 
   async getAll ({ userPayload }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(
-        userPayload,
-        'Falta información para encontrar usuario'
-      );
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
 
       const responseHouse = await this.houseService.getAll(payload);
-      res
-        .status(200)
-        .json({ message: 'Satisfactory request', data: responseHouse });
+      res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
     } catch (err: any) {
-      ErrorHandler.generateResponse(
-        res,
-        err,
-        'Ocurrió un error al obtener la casa'
-      );
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
     }
   }
 
-  async getHouse ({ params, userPayload, headers }: RequestExt, res: Response) {
+  async getOne ({ params, userPayload, headers }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(
-        userPayload,
-        'Falta información para encontrar usuario'
-      );
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
       const houseId = params.id;
 
-      const responseHouse = await this.houseService.getOne(
-        houseId,
-        payload,
-        headers
-      );
-      res
-        .status(200)
-        .json({ message: 'Satisfactory request', data: responseHouse });
+      const responseHouse = await this.houseService.getOne(houseId, payload, headers);
+      res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
     } catch (err: any) {
-      ErrorHandler.generateResponse(
-        res,
-        err,
-        'Ocurrió un error al obtener la casa'
-      );
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
     }
   }
 
   async update ({ params, body, userPayload }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(
-        userPayload,
-        'Falta información para encontrar usuario'
-      );
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
       const houseId = params.id;
 
-      const responseHouse = await this.houseService.update(
-        houseId,
-        payload,
-        body
-      );
-      res
-        .status(200)
-        .json({ message: 'Updated successfully', data: responseHouse });
+      const responseHouse = await this.houseService.update(houseId, payload, body);
+      res.status(200).json({ message: 'Updated successfully', data: responseHouse });
     } catch (err: any) {
-      ErrorHandler.generateResponse(
-        res,
-        err,
-        'Ocurrió un error al actualizar casa'
-      );
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
     }
   }
 
   async delete ({ params, userPayload }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(
-        userPayload,
-        'Falta información para encontrar usuario'
-      );
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
       const houseId = params.id;
 
       await this.houseService.delete(houseId, payload);
       res.status(200).json({ message: 'Deleted successfully' });
     } catch (err: any) {
-      ErrorHandler.generateResponse(
-        res,
-        err,
-        'Ocurrió un error al actualizar usuario'
-      );
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al borrar la casa');
     }
   }
 
-  async activeAlarm ({ body, userPayload }: RequestExt, res: Response) {
+  async armAlarm ({ body, userPayload }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(
-        userPayload,
-        'Falta información para encontrar usuario'
-      );
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
       const someActivated = body.exclusionArray.some(
         (sensor: ExclusionSensor) => sensor.estado === Estado.ENCENDIDO
       );
-
+      
       if (!someActivated) throw new BadRequest('No hay sensores encendidos');
-
+      
       // Responde inmediatamente que la solicitud fue aceptada para su procesamiento.
-      res
-        .status(202)
-        .json({ message: 'Activation in process', state: 'pending' });
-
+      res.status(202).json({ message: 'Activation in process', status: 'pending' });
+      
       // Inicia el proceso de activación de la alarma en segundo plano.
       void this.houseService.setAlarmState(payload, Estado.ENCENDIDO, body);
     } catch (err: any) {
-      ErrorHandler.generateResponse(
-        res,
-        err,
-        'Ocurrió un error al activar la alarma'
-      );
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al activar la alarma');
     }
   }
 
   async disarmAlarm ({ userPayload }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(
-        userPayload,
-        'Falta información para encontrar usuario'
-      );
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
 
-      res
-        .status(202)
-        .json({ message: 'Activation in process', state: 'pending' });
+      res.status(202).json({ message: 'Deactivation in process', status: 'pending' });
 
       void this.houseService.setAlarmState(payload, Estado.APAGADO);
     } catch (err: any) {
-      ErrorHandler.generateResponse(
-        res,
-        err,
-        'Ocurrió un error al desactivar la alarma'
-      );
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
     }
   }
 }

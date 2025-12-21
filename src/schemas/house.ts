@@ -1,12 +1,15 @@
 import { merge } from 'lodash';
-import { Casa, Estado, ExclusionSensor, User } from '../interfaces';
-import { AlreadyExists, BadRequest, NotFound } from '../utils';
-import { UserModel } from './user';
+import { Casa, Estado, User } from '../interfaces';
+import { AlreadyExists, NotFound } from '../utils';
+import { UserModel } from '.';
 
+/** Provee acceso a la base de datos para operaciones con Casas. */
 export class HouseDataAccess {
   private userModel = UserModel;
-  private withoutHistory = '-casas.central.historial -casas.sensores.historial -casas.camaras.historial';
+  private withoutHistory =
+    '-casas.central.historial -casas.sensores.historial -casas.camaras.historial';
 
+  /** Crea una nueva casa para un usuario, evitando nombres duplicados. */
   async create (userId: string, house: Casa): Promise<User | null> {
     const user = await this.userModel.findOne({ _id: userId, 'casas.nombre': house.nombre });
 
@@ -24,7 +27,10 @@ export class HouseDataAccess {
     return userNewHouse;
   }
    
-  async getAllByUserId (userId: string): Promise<Array<Pick<Casa, '_id' | 'nombre' | 'direccion' | 'central'>>> {
+  /** Obtiene todas las casas del usuario. */
+  async getAllByUserId (
+    userId: string
+  ): Promise<Array<Pick<Casa, '_id' | 'nombre' | 'nombreCasa' | 'direccion' | 'central'>>> {
     const user = await this.userModel
       .findById(userId)
       .select('casas._id casas.nombre casas.direccion casas.central.alarmaEncendida')
@@ -35,6 +41,7 @@ export class HouseDataAccess {
     const houses = user.casas.map(casa => ({
       _id: casa._id.toString(),
       nombre: casa.nombre,
+      nombreCasa: casa.nombreCasa,
       direccion: casa.direccion,
       central: casa.central
     }));
@@ -42,6 +49,7 @@ export class HouseDataAccess {
     return houses;
   }
 
+  /** Obtiene una casa específica del usuario. */
   async getOne (houseId: string, userId: string, withHistory = false): Promise<Casa | null> {
     const user = await this.userModel
       .findOne({ _id: userId, 'casas._id': houseId })
@@ -55,6 +63,7 @@ export class HouseDataAccess {
     return house ?? null;
   }
 
+  /** Actualiza una casa específica del usuario. */
   async update (houseId: string, userId: string, houseBody: Partial<Casa>): Promise<Casa> {
     const house = await this.getOne(houseId, userId, true);
 
@@ -66,16 +75,22 @@ export class HouseDataAccess {
       { _id: userId, 'casas._id': houseId },
       { $set: { 'casas.$': updatedHouseData } },
       { new: true }
-    ).select(this.withoutHistory).lean(); // Revisar
+    ).select(this.withoutHistory).lean();
 
-    if (user === null) throw new NotFound('Usuario o casa no encontrados durante la actualización');
+    if (user === null) {
+      throw new NotFound('Usuario o casa no encontrados durante la actualización');
+    }
+    
     const responseHouse = user.casas.find(house => house._id.toString() === houseId);
 
-    if (responseHouse === undefined) throw new NotFound('Casa no encontrada después de la actualización');
-
+    if (responseHouse === undefined) {
+      throw new NotFound('Casa no encontrada después de la actualización');
+    }
+    
     return responseHouse;
   }
 
+  /** Elimina una casa del usuario. */
   async delete (houseId: string, userId: string): Promise<void> {
     const user = await this.userModel.findOneAndUpdate(
       { _id: userId, 'casas._id': houseId },
@@ -86,7 +101,9 @@ export class HouseDataAccess {
     if (user === null) throw new NotFound('Casa no encontrada');
   }
 
-  async activeAlarm (userName: string, houseName: string, exclusionArray: string[]): Promise<void> {
+  /** Actualiza el ``estado`` de la Alarma y sus Sensores en una Casa en la BD. */
+  async updateAlarmState (userName: string, houseName: string, exclusionArray?: string[]):
+  Promise<void> {
     const user = await this.userModel
       .findOne({ nombreUsuario: userName, 'casas.nombreCasa': houseName })
       .select(this.withoutHistory);
@@ -96,28 +113,17 @@ export class HouseDataAccess {
     const house = user.casas.find(h => h.nombreCasa === houseName);
     if (house === undefined) throw new NotFound('Casa no encontrada');
 
-    house.sensores.forEach(sensor => {
-      sensor.estado = exclusionArray.includes(sensor.numeroSensor.toString())
-        ? Estado.APAGADO
-        : Estado.ENCENDIDO;
-    });
-
-    house.central.alarmaEncendida = Estado.ENCENDIDO;
-
-    await user.save();
-  }
-
-  async disarmAlarm (userName: string, houseName: string): Promise<void> {
-    const user = await this.userModel
-      .findOne({ nombreUsuario: userName, 'casas.nombreCasa': houseName })
-      .select(this.withoutHistory);
-
-    if (user === null) throw new NotFound('Usuario no encontrado');
-
-    const house = user.casas.find(h => h.nombreCasa === houseName);
-    if (house === undefined) throw new NotFound('Casa no encontrada');
-
-    house.central.alarmaEncendida = Estado.APAGADO;
+    if (exclusionArray) {
+      house.sensores.forEach(sensor => {
+        sensor.estado = exclusionArray.includes(sensor.numeroSensor.toString())
+          ? Estado.APAGADO
+          : Estado.ENCENDIDO;
+      });
+      
+      house.central.alarmaEncendida = Estado.ENCENDIDO;
+    } else {
+      house.central.alarmaEncendida = Estado.APAGADO;
+    }
 
     await user.save();
   }

@@ -6,6 +6,7 @@ import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess } from '../mqtt';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../schemas';
 
+/** Proporciona la configuración y arranque del servidor Express, con routers y conexión MQTT. */
 export class App {
   static centralDataAccess = new CentralDataAccess();
   static userDataAccess = new UserDataAccess();
