@@ -1,27 +1,17 @@
 import { Response } from 'express';
-import { HouseDataAccess, UserDataAccess } from '../schemas';
 import { HouseService } from '../services';
 import { Estado, ExclusionSensor, RequestExt } from '../interfaces';
 import { BadRequest, checkPayload, ErrorHandler } from '../utils';
-import { MosquittoAccess } from '../mqtt';
 
 /** Gestiona peticiones y respuestas vinculadas a Casas. */
 export class HouseController {
-  private houseService: HouseService;
-	
-  constructor (
-    houseDataAccess: HouseDataAccess,
-    mosquittoAcces: MosquittoAccess,
-    userDataAccess: UserDataAccess
-  ) {
-    this.houseService = new HouseService(houseDataAccess, mosquittoAcces, userDataAccess);
-  }
+  constructor (private houseService: HouseService) {}
 
   async create ({ body, userPayload }: RequestExt, res: Response) {
     try {
       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-
       await this.houseService.create(body, payload);
+
       res.status(201).json({ message: 'Created successfully' });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
@@ -31,8 +21,8 @@ export class HouseController {
   async getAll ({ userPayload }: RequestExt, res: Response) {
     try {
       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-
       const responseHouse = await this.houseService.getAll(payload);
+
       res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
@@ -43,8 +33,8 @@ export class HouseController {
     try {
       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
       const houseId = params.id;
-
       const responseHouse = await this.houseService.getOne(houseId, payload, headers);
+
       res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
@@ -55,8 +45,8 @@ export class HouseController {
     try {
       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
       const houseId = params.id;
-
       const responseHouse = await this.houseService.update(houseId, payload, body);
+
       res.status(200).json({ message: 'Updated successfully', data: responseHouse });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
@@ -67,8 +57,8 @@ export class HouseController {
     try {
       const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
       const houseId = params.id;
-
       await this.houseService.delete(houseId, payload);
+
       res.status(200).json({ message: 'Deleted successfully' });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al borrar la casa');
@@ -103,6 +93,30 @@ export class HouseController {
       void this.houseService.setAlarmState(payload, Estado.APAGADO);
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
+    }
+  }
+
+  async setLights ({ body, userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+
+      res.status(202).json({ message: 'Set lights state in process', status: 'pending' });
+
+      void this.houseService.setLightsState(payload, body);
+    } catch (err: any) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
+    }
+  }
+
+  async triggerAlarm ({ body, userPayload }: RequestExt, res: Response) {
+    try {
+      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+
+      res.status(202).json({ message: 'Trigger in process', status: 'pending' });
+
+      void this.houseService.setTriggeredState(payload, body.state);
+    } catch (err: any) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al disparar la alarma');
     }
   }
 }

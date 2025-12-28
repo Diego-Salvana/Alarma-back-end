@@ -1,16 +1,11 @@
 import { Response } from 'express';
-import { SensorDataAccess } from '../schemas';
 import { SensorService } from '../services';
 import { RequestExt } from '../interfaces';
 import { BadRequest, checkPayload, ErrorHandler } from '../utils';
 
 /** Gestiona peticiones y respuestas vinculadas a Sensores. */
 export class SensorController {
-  private sensorService: SensorService;
-
-  constructor (sensorDataAccess: SensorDataAccess) {
-    this.sensorService = new SensorService(sensorDataAccess);
-  }
+  constructor (private sensorService: SensorService) {}
 
   async create ({ userPayload, body }: RequestExt, res: Response) {
     try {

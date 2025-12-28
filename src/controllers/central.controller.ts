@@ -1,15 +1,10 @@
 import { Response } from 'express';
-import { CentralDataAccess } from '../schemas';
 import { CentralService } from '../services';
 import { RequestExt } from '../interfaces';
 import { checkPayload, ErrorHandler } from '../utils';
 
 export class CentralController {
-  private centralService: CentralService;
-
-  constructor (centralDataAccess: CentralDataAccess) {
-    this.centralService = new CentralService(centralDataAccess);
-  }
+  constructor (private centralService: CentralService) {}
 
   async getHistory ({ userPayload }: RequestExt, res: Response) {
     try {

@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { CentralDataAccess } from '../schemas';
+import { CentralService } from '../services';
 import { CentralController } from '../controllers';
 import { checkJWT, updateCentralCodeValidator, updateCentralInfoValidator } from '../middleware';
 
-export const createCentralRouter = (centralModel: CentralDataAccess) => {
+export const createCentralRouter = (centralService: CentralService) => {
   const centralRouter = Router();
-  const centralController = new CentralController(centralModel);
+  const centralController = new CentralController(centralService);
 
   // Usuario con token
   centralRouter.get('/',

@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { SensorDataAccess } from '../schemas';
+import { SensorService } from '../services';
 import { SensorController } from '../controllers';
 import { checkJWT, createSensorValidator, updateInfoSensorValidator, updateNameSensorValidator } from '../middleware';
 
-export const createSensorsRouter = (sensorModel: SensorDataAccess) => {
+export const createSensorsRouter = (sensorService: SensorService) => {
   const sensorsRouter = Router();
-  const sensorController = new SensorController(sensorModel);
+  const sensorController = new SensorController(sensorService);
 
   sensorsRouter.get('/:sensorNumber',
     checkJWT, sensorController.getOne.bind(sensorController)

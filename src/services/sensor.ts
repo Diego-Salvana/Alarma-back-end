@@ -1,5 +1,5 @@
 import { Dispositivo, JwtPayloadExt, SensorInfoDTO, SensorNameDTO } from '../interfaces';
-import { SensorDataAccess } from '../schemas';
+import { SensorDataAccess } from '../models';
 import { NotFound } from '../utils';
 
 /** Servicio que administra operaciones con la BD y lógica de negocio vinculada a Sensores. */

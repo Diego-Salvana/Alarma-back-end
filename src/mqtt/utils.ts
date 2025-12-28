@@ -7,3 +7,9 @@ export function verifySensorNumber (sensor: string): number {
 
   return sensorNumber;
 }
+
+/** Extrae los números de sensor y arma un array con ellos. */
+export function extractSensors (sensors: string): string[] {
+  const arraySensors = sensors?.split(',') || [];
+  return arraySensors.map(sensor => sensor.trim());
+}

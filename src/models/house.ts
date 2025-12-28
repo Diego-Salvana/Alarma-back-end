@@ -102,10 +102,10 @@ export class HouseDataAccess {
   }
 
   /** Actualiza el ``estado`` de la Alarma y sus Sensores en una Casa en la BD. */
-  async updateAlarmState (userName: string, houseName: string, exclusionArray?: string[]):
+  async updateAlarmState (username: string, houseName: string, exclusionArray?: string[]):
   Promise<void> {
     const user = await this.userModel
-      .findOne({ nombreUsuario: userName, 'casas.nombreCasa': houseName })
+      .findOne({ nombreUsuario: username, 'casas.nombreCasa': houseName })
       .select(this.withoutHistory);
 
     if (user === null) throw new NotFound('Usuario no encontrado');
@@ -124,6 +124,22 @@ export class HouseDataAccess {
     } else {
       house.central.alarmaEncendida = Estado.APAGADO;
     }
+
+    await user.save();
+  }
+
+  /** Actualiza la propiedad `central.sonando` en una Casa en la BD. */
+  async updateCentralRinging (username: string, houseName: string, ringing: boolean): Promise<void> {
+    const user = await this.userModel
+      .findOne({ nombreUsuario: username, 'casas.nombreCasa': houseName })
+      .select(this.withoutHistory);
+
+    if (user === null) throw new NotFound('Usuario no encontrado');
+
+    const house = user.casas.find(h => h.nombreCasa === houseName);
+    if (house === undefined) throw new NotFound('Casa no encontrada');
+
+    house.central.sonando = ringing;
 
     await user.save();
   }

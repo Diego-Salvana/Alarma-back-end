@@ -1,16 +1,11 @@
 import { Router } from 'express';
-import { HouseDataAccess, UserDataAccess } from '../schemas';
+import { HouseService } from '../services';
 import { HouseController } from '../controllers';
-import { checkJWT, createHouseValidator, exclusionArrayValidator, updateHouseValidator } from '../middleware';
-import { MosquittoAccess } from '../mqtt';
+import { checkJWT, createHouseValidator, exclusionArrayValidator, triggeredValidator, updateHouseValidator } from '../middleware';
 
-export const createHousesRouter = (
-  houseDataAccess: HouseDataAccess,
-  mosquittoAccess: MosquittoAccess,
-  userDataAccess: UserDataAccess
-) => {
+export const createHousesRouter = (houseService: HouseService) => {
   const housesRouter = Router();
-  const houseController = new HouseController(houseDataAccess, mosquittoAccess, userDataAccess);
+  const houseController = new HouseController(houseService);
 
   housesRouter.get('/',
     checkJWT, houseController.getAll.bind(houseController)
@@ -32,6 +27,12 @@ export const createHousesRouter = (
   );
   housesRouter.delete('/:id',
     checkJWT, houseController.delete.bind(houseController)
+  );
+  housesRouter.post('/lights',
+    checkJWT, houseController.setLights.bind(houseController)
+  );
+  housesRouter.post('/trigger',
+    triggeredValidator, checkJWT, houseController.triggerAlarm.bind(houseController)
   );
 
   return housesRouter;

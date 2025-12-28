@@ -1,15 +1,11 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services';
-import { IUserDataAccess, RequestExt } from '../interfaces';
+import { RequestExt } from '../interfaces';
 import { ErrorHandler } from '../utils';
 
 /** Gestiona peticiones y respuestas vinculadas a Usuarios. */
 export class UserController {
-  private userService: UserService;
-
-  constructor (userDataAccess: IUserDataAccess) {
-    this.userService = new UserService(userDataAccess);
-  }
+  constructor (private userService: UserService) {}
 
   async create ({ body }: Request, res: Response) {
     try {

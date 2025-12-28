@@ -1,0 +1,29 @@
+import { AlarmArming, Estado, Lights, WarningType, TriggeredAlarm } from '../interfaces';
+import { HouseService } from '../services';
+
+export class MosquittoEventDispatcher {
+  constructor (private houseService: HouseService) {}
+
+  /** Despacha al Servicio cuando hay un evento de armado de alarma. */
+  onAlarmArming (username: string, houseName: string, state: Estado, excludedSensors: string[]) {
+    const info: AlarmArming = { state, excludedSensors };
+    void this.houseService.sendArmingInfo(username, houseName, info);
+  }
+
+  /** Despacha al Servicio cuando hay un evento de iluminación. */
+  onLightsChange (username: string, houseName: string, sector: string, state: Estado) {
+    const info: Lights = { sector, state };
+    void this.houseService.sendLightsInfo(username, houseName, info);
+  }
+
+  /** Envía información de warning al Servicio */
+  onWarning (username: string, type: WarningType) {
+    void this.houseService.sendWarningByUsername(username, type);
+  }
+
+  /** Despacha al Servicio cuando hay un evento de disparo de alarma. */
+  onTriggered (username: string, houseName: string, state: Estado) {
+    const info: TriggeredAlarm = { house: houseName, state };
+    void this.houseService.sendTriggeredInfo(username, houseName, info);
+  }
+}

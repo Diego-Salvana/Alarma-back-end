@@ -1,6 +1,6 @@
 import { Central, HistorialConNombre, JwtPayloadExt } from '../interfaces';
 import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
-import { CentralDataAccess } from '../schemas';
+import { CentralDataAccess } from '../models';
 import { NotFound } from '../utils';
 
 export class CentralService {

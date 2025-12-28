@@ -3,37 +3,46 @@ import express from 'express';
 import cors from 'cors';
 import { createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
-import { MosquittoAccess } from '../mqtt';
-import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../schemas';
+import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
+import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
+import { CentralService, HouseService, SensorService, UserService } from '../services';
+import { WebSocketAccess } from '../websocket/websocket-access';
 
-/** Proporciona la configuración y arranque del servidor Express, con routers y conexión MQTT. */
+/** Proporciona la configuración y arranque del servidor Express, con routers y acceso a datos. */
 export class App {
-  static centralDataAccess = new CentralDataAccess();
-  static userDataAccess = new UserDataAccess();
-  static houseDataAccess = new HouseDataAccess();
-  static sensorDataAccess = new SensorDataAccess();
-  static mosquittoAccess = new MosquittoAccess(this.houseDataAccess, this.sensorDataAccess);
-
   static create () {
+    const userDataAccess = new UserDataAccess();
+    const houseDataAccess = new HouseDataAccess();
+    const centralDataAccess = new CentralDataAccess();
+    const sensorDataAccess = new SensorDataAccess();
+    const mosquittoAccess = new MosquittoAccess();
+
+    const userService = new UserService(userDataAccess);
+    const centralService = new CentralService(centralDataAccess);
+    const sensorService = new SensorService(sensorDataAccess);
+    const webSocketAccess = new WebSocketAccess();
+    const houseService = new HouseService(
+      userDataAccess, houseDataAccess, webSocketAccess, mosquittoAccess
+    );
+    const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
+
+    mosquittoAccess.setDispatcher(mosquittoEventDispatcher);
+
     const app = express();
 
     app.use(express.json());
     app.disable('x-powered-by');
     app.use(cors());
 
-    app.use('/api-alarma/users', createUsersRouter(this.userDataAccess));
-    app.use('/api-alarma/houses', createHousesRouter(
-      this.houseDataAccess, this.mosquittoAccess, this.userDataAccess
-    ));
-    app.use('/api-alarma/sensors', createSensorsRouter(this.sensorDataAccess));
-    app.use('/api-alarma/central', createCentralRouter(this.centralDataAccess));
+    app.use('/api-alarma/users', createUsersRouter(userService));
+    app.use('/api-alarma/houses', createHousesRouter(houseService));
+    app.use('/api-alarma/sensors', createSensorsRouter(sensorService));
+    app.use('/api-alarma/central', createCentralRouter(centralService));
 
     app.use((req, res) => {
       res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });
     });
 
-    this.mosquittoAccess.connect();
-
-    return app;
+    return { app, webSocketAccess, mosquittoAccess };
   }
 }

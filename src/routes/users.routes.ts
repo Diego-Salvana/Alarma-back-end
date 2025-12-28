@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { UserDataAccess } from '../schemas';
+import { UserService } from '../services';
 import { UserController } from '../controllers';
 import { loginValidator, registerValidator, updateUserValidator } from '../middleware';
 import { checkJWT } from '../middleware/jwt-check';
 
-export const createUsersRouter = (userModel: UserDataAccess) => {
+export const createUsersRouter = (userService: UserService) => {
   const usersRouter = Router();
-  const userController = new UserController(userModel);
+  const userController = new UserController(userService);
 
   usersRouter.get('/',
     checkJWT, userController.getById.bind(userController)
