@@ -103,7 +103,7 @@ export class HouseService {
 
     const exclusionArray = body?.exclusionArray ?? [];
     const excludedSensors = exclusionArray.reduce<string[]>((acum, sensor) => {
-      if (sensor.estado !== 'On') acum.push(sensor.numeroSensor.toString());
+      if (sensor.estado !== Estado.ENCENDIDO) acum.push(sensor.numeroSensor.toString());
       return acum;
     }, []).join(',');
     const message = `${state}:${excludedSensors}`;
@@ -148,12 +148,24 @@ export class HouseService {
 
   /** Envía información `websockets` al usuario y carga datos en la `DB`. */
   async sendArmingInfo (username: string, houseName: string, info: AlarmArming): Promise<void> {
-    const base = process.env.WS_ALARM_ARMING ?? '';
-    const socketEvent = `${base}/${username}/${houseName}`;
+    const armingBase = process.env.WS_ALARM_ARMING ?? '';
+    const triggerBase = process.env.WS_TRIGGER_ALARM ?? '';
+    const armingEvent = `${armingBase}/${username}/${houseName}`;
+    const triggeredEvent = `${triggerBase}/${username}`;
 
-    this.webSocketAccess.emitSocketData(socketEvent, info);
-
+    this.webSocketAccess.emitSocketData(armingEvent, info);
+    
     try {
+      if (info.state === Estado.APAGADO) {
+        const house = await this.houseDataAccess.getByHouseName(username, houseName);
+        if (house === null) throw new NotFound('Casa no encontrada');
+
+        const wasRinging = house.central.sonando;
+        if (wasRinging) {
+          this.webSocketAccess.emitSocketData(triggeredEvent, { houseName, state: Estado.APAGADO });
+        }
+      }
+      
       info.state === Estado.ENCENDIDO
         ? await this.houseDataAccess.updateAlarmState(username, houseName, info.excludedSensors)
         : await this.houseDataAccess.updateAlarmState(username, houseName);

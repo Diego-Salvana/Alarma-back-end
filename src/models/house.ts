@@ -63,6 +63,20 @@ export class HouseDataAccess {
     return house ?? null;
   }
 
+  /** Obtiene una casa específica del usuario por su houseName. */
+  async getByHouseName (username: string, houseName: string): Promise<Casa | null> {
+    const user = await this.userModel
+      .findOne({ nombreUsuario: username, 'casas.nombreCasa': houseName })
+      .select(this.withoutHistory)
+      .lean();
+
+    if (user === null) throw new NotFound('Casa no encontrada');
+      
+    const house = user.casas.find(house => house.nombreCasa === houseName);
+    
+    return house ?? null;
+  }
+
   /** Actualiza una casa específica del usuario. */
   async update (houseId: string, userId: string, houseBody: Partial<Casa>): Promise<Casa> {
     const house = await this.getOne(houseId, userId, true);
@@ -123,6 +137,7 @@ export class HouseDataAccess {
       house.central.alarmaEncendida = Estado.ENCENDIDO;
     } else {
       house.central.alarmaEncendida = Estado.APAGADO;
+      house.central.sonando = false;
     }
 
     await user.save();

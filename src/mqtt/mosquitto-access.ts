@@ -52,7 +52,7 @@ export class MosquittoAccess {
       const payload = message.toString().trim();
       console.log({ topico: topic, mensaje: payload });
 
-      const topicHandler = this.topicHandlers.find(tp => topic.startsWith(tp.prefix));
+      const topicHandler = this.topicHandlers.find(th => topic.startsWith(th.prefix));
       if (!topicHandler) {
         console.log('No existe Handler para el tópico:', topic);
         return;
