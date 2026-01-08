@@ -4,10 +4,10 @@ import { JWTHandler } from '../utils';
 /** Clase que contiene métodos para transformar datos de Casas en objetos DTO. */
 export class HouseDTO {
   /** Transforma datos de una Casa en un objeto HouseResponse. */
-  houseResponse (house: Casa, userId: string = '', newToken: boolean = false): HouseResponse {
+  houseResponse (house: Casa, newToken = false, userId?: string): HouseResponse {
     let token: string | undefined;
 
-    if (newToken) {
+    if (newToken && userId) {
       token = JWTHandler.generateToken({ userId, houseId: house._id });
     }
 
@@ -26,10 +26,8 @@ export class HouseDTO {
   }
 
   /** Transforma datos de una lista de Casas en un array de HouseResponse. */
-  housesListResponse (
-    casas: Array<Pick<Casa, '_id' | 'nombre' | 'nombreCasa' | 'direccion' | 'central'>>
-  ): HouseResponse[] {
-    return casas.map((casa) => ({
+  housesListResponse (casas: Casa[]): HouseResponse[] {
+    return casas.map(casa => ({
       _id: casa._id.toString(),
       nombre: casa.nombre,
       nombreCasa: casa.nombreCasa,

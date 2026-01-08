@@ -1,5 +1,5 @@
 import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Register, RegisterDB, UpdateUser } from '../interfaces';
-import { encrypt, NotFound, Unauthorized, verify } from '../utils';
+import { encrypt, Unauthorized, verifyPass } from '../utils';
 import { UserDTO } from './user-dto';
 
 /** Servicio que administra operaciones con la base de datos y la lógica de negocio de Usuarios. */
@@ -8,6 +8,7 @@ export class UserService {
 
   constructor (private userDataAccess: IUserDataAccess) {}
 
+  /** Crea un nuevo usuario y devuelve su `LoginResponse`. */
   async create (body: Register): Promise<LoginResponse> {
     const passwordHash = await encrypt(body.contrasena);
     const userData = { ...body, contrasena: passwordHash };
@@ -15,7 +16,6 @@ export class UserService {
     const registerBody: RegisterDB = {
       ...userData,
       nombreUsuario: `user_${body.email}`,
-      mosquittoPass: 'creandoMosquittoPass',
       habilitado: false,
       casas: []
     };
@@ -26,71 +26,54 @@ export class UserService {
     return responseUser;
   }
 
+  /** Autentica un usuario y devuelve su `LoginResponse`. */
   async login ({ email, contrasena }: Login): Promise<LoginResponse> {
     const user = await this.userDataAccess.getOne(email);
-
-    if (user === null) {
-      throw new NotFound('Usuario no encontrado');
-    }
-
     const hashedPassword = user.contrasena;
-    const passwordIsCorrect = await verify(contrasena, hashedPassword);
+    const passwordIsCorrect = await verifyPass(contrasena, hashedPassword);
 
-    if (!passwordIsCorrect) {
-      throw new Unauthorized('Usuario o contraseña no válidos');
-    }
+    if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
 
     const responseUser = this.userDTO.loginResponse(user);
 
     return responseUser;
   }
 
+  /** Obtiene un usuario por su ID y devuelve su `ProfileResponse`. */
   async getById (id: string): Promise<ProfileResponse> {
     const user = await this.userDataAccess.getById(id);
-      
-    if (user === null) {
-      throw new NotFound('Usuario no encontrado');
-    }
-
     const responseUser = this.userDTO.profileResponse(user);
 
     return responseUser;
   }
 
+  /** Actualiza datos y/o contraseña de un usuario y devuelve su `ProfileResponse`. */
   async update (id: string, body: UpdateUser): Promise<ProfileResponse> {
     const user = await this.userDataAccess.getById(id);
+    const { contrasenaActual, nuevaContrasena, ...safeBody } = body;
+    const safeBodyIsEmpty = Object.keys(safeBody).length === 0;
+    let responseUser = this.userDTO.profileResponse(user);
 
-    if (user === null) {
-      throw new NotFound('Usuario no encontrado');
-    }
-
-    if (body.contrasenaActual && body.nuevaContrasena) {
+    if (contrasenaActual && nuevaContrasena) {
       const hashedPassword = user.contrasena;
-      const passwordIsCorrect = await verify(body.contrasenaActual, hashedPassword);
+      const passwordIsCorrect = await verifyPass(contrasenaActual, hashedPassword);
 
-      if (!passwordIsCorrect) {
-        throw new Unauthorized('Contraseña actual incorrecta');
-      } else {
-        body = { ...body, contrasena: await encrypt(body.nuevaContrasena) };
-      }
+      if (!passwordIsCorrect) throw new Unauthorized('Contraseña actual incorrecta');
+
+      const newHash = await encrypt(nuevaContrasena);
+      await this.userDataAccess.updatePassword(id, hashedPassword, newHash);
     }
 
-    const updatedUser = await this.userDataAccess.update(id, body);
-
-    if (updatedUser === null) {
-      throw new NotFound('Usuario para actualizar no encontrado');
+    if (!safeBodyIsEmpty) {
+      const updatedUser = await this.userDataAccess.updateInfo(id, safeBody);
+      responseUser = this.userDTO.profileResponse(updatedUser);
     }
-
-    const responseUser = this.userDTO.profileResponse(updatedUser);
 
     return responseUser;
   }
 
+  /** Elimina un usuario de la base de datos. */
   async delete (id: string): Promise<void> {
-    const user = await this.userDataAccess.delete(id);
-
-    if (user === null) {
-      throw new NotFound('Usuario no encontrado');
-    }
+    await this.userDataAccess.delete(id);
   }
 }

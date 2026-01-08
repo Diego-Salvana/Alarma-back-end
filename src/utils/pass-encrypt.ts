@@ -6,6 +6,6 @@ export async function encrypt (password: string): Promise<string> {
 }
 
 /** Verifica si el ``string`` proporcionado coincide con la contraseña encriptada. */
-export async function verify (password: string, passwordHash: string): Promise<boolean> {
+export async function verifyPass (password: string, passwordHash: string): Promise<boolean> {
   return await compare(password, passwordHash);
 }

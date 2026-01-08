@@ -3,8 +3,9 @@ import { IUserDocument, User } from './user.interface';
 
 export interface IUserDataAccess {
   create(userBody: Register): Promise<IUserDocument>;
-  getOne(email: string): Promise<User | null>;
-  getById(id: string): Promise<User | null>;
-  update(id: string, updateBody: Register): Promise<User | null>;
-  delete(id: string): Promise<User | null>;
+  getOne(email: string): Promise<User>;
+  getById(id: string): Promise<User>;
+  updateInfo(id: string, updateBody: Register): Promise<User>;
+  updatePassword(id: string, oldHash: string, newHash: string): Promise<void>;
+  delete(id: string): Promise<void>;
 }

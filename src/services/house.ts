@@ -1,7 +1,7 @@
 import { IncomingHttpHeaders } from 'http2';
 import { Casa, Estado, ExcludeArrayDTO, HouseResponse, JwtPayloadExt, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm } from '../interfaces';
-import { HouseDataAccess, UserDataAccess } from '../models';
-import { AlreadyExists, NotFound, WarningFactory } from '../utils';
+import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
+import { AlreadyExists, WarningFactory } from '../utils';
 import { HouseDTO } from './house-dto';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';
@@ -13,6 +13,8 @@ export class HouseService {
   constructor (
     private userDataAccess: UserDataAccess,
     private houseDataAccess: HouseDataAccess,
+    private centralDataAccess: CentralDataAccess,
+    private sensorDataAccess: SensorDataAccess,
     private webSocketAccess: WebSocketAccess,
     private mosquittoAccess: MosquittoAccess
   ) {}
@@ -21,17 +23,13 @@ export class HouseService {
   async create (body: Casa, userPayload: JwtPayloadExt): Promise<void> {
     const userId = userPayload.sub;
     const houseData: Casa = { ...body, nombreCasa: body.nombre.toLowerCase().replace(/\s/g, '') };
-    const user = await this.houseDataAccess.create(userId, houseData);
-
-    if (user === null) throw new NotFound('Usuario no encontrado');
+    await this.houseDataAccess.create(userId, houseData);
   }
 
   /** Obtiene todas las casas del usuario. */
   async getAll (userPayload: JwtPayloadExt): Promise<HouseResponse[]> {
     const userId = userPayload.sub;
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
-
-    if (allUserHouses === null) throw new NotFound('Casas no encontradas');
 
     return this.houseDTO.housesListResponse(allUserHouses);
   }
@@ -41,12 +39,9 @@ export class HouseService {
   Promise<HouseResponse> {
     const userId = userPayload.sub;
     const house = await this.houseDataAccess.getOne(houseId, userId);
-
-    if (house === null) throw new NotFound('Casa no encontrada');
-
     const tokenRequired = headers['set-house'] === 'true';
 
-    return this.houseDTO.houseResponse(house, tokenRequired ? userId : undefined, tokenRequired);
+    return this.houseDTO.houseResponse(house, tokenRequired, tokenRequired ? userId : undefined);
   }
 
   /**
@@ -58,25 +53,24 @@ export class HouseService {
     const userId = userPayload.sub;
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
     const otherHouses = allUserHouses.filter(house => house._id.toString() !== houseId);
-    const nameExists = otherHouses.some(h =>
-      h.nombre.trim().toLowerCase() === body.nombre?.trim().toLowerCase()
+    const nameExists = otherHouses.some(
+      h => h.nombre.trim().toLowerCase() === body.nombre?.trim().toLowerCase()
     );
 
-    if (nameExists) {
-      throw new AlreadyExists(`Ya existe una casa con el nombre: ${body.nombre ?? ''}`);
+    if (nameExists) throw new AlreadyExists(`Ya existe una casa con el nombre: ${body.nombre ?? ''}`);
+
+    if (body.direccion) {
+      const { calle, numero, ciudad } = body.direccion;
+      const addressExists = otherHouses.some(h =>
+        h.direccion.calle.trim().toLowerCase() === calle.trim().toLowerCase() &&
+        h.direccion.numero === numero &&
+        h.direccion.ciudad.trim().toLowerCase() === ciudad.trim().toLowerCase()
+      );
+
+      if (addressExists) throw new AlreadyExists(`Ya existe otra casa con la dirección: ${calle} ${numero}, ${ciudad}`);
     }
 
-    const addressExists = otherHouses.some(h =>
-      h.direccion.calle.trim().toLowerCase() === body.direccion?.calle.trim().toLowerCase() &&
-      h.direccion.numero === body.direccion?.numero &&
-      h.direccion.ciudad.trim().toLowerCase() === body.direccion?.ciudad.trim().toLowerCase()
-    );
-
-    if (addressExists) {
-      throw new AlreadyExists(`Ya existe otra casa con la dirección: ${body.direccion?.calle ?? ''} ${body.direccion?.numero ?? ''}, ${body.direccion?.ciudad ?? ''}`);
-    }
-
-    const updatedHouse = await this.houseDataAccess.update(houseId, userId, body);
+    const updatedHouse = await this.houseDataAccess.updateHouseInfo(houseId, userId, body);
 
     return this.houseDTO.houseResponse(updatedHouse);
   }
@@ -158,11 +152,11 @@ export class HouseService {
     try {
       if (info.state === Estado.APAGADO) {
         const house = await this.houseDataAccess.getByHouseName(username, houseName);
-        if (house === null) throw new NotFound('Casa no encontrada');
-
         const wasRinging = house.central.sonando;
         if (wasRinging) {
-          this.webSocketAccess.emitSocketData(triggeredEvent, { houseName, state: Estado.APAGADO });
+          this.webSocketAccess.emitSocketData(
+            triggeredEvent, { house: houseName, state: Estado.APAGADO }
+          );
         }
       }
       
@@ -186,12 +180,19 @@ export class HouseService {
   async sendTriggeredInfo (username: string, houseName: string, info: TriggeredAlarm): Promise<void> {
     const base = process.env.WS_TRIGGER_ALARM ?? '';
     const socketEvent = `${base}/${username}`;
-
+    
     this.webSocketAccess.emitSocketData(socketEvent, info);
-
+    
     try {
       const ringing = info.state === Estado.ENCENDIDO;
-      await this.houseDataAccess.updateCentralRinging(username, houseName, ringing);
+      await this.centralDataAccess.updateSirenState(username, houseName, ringing);
+      
+      const sensorNumber = info.sensorNumber;
+      if (sensorNumber) {
+        const date = new Date(Date.now());
+        await this.sensorDataAccess.addToHistory(username, houseName, sensorNumber, date);
+        await this.centralDataAccess.addToHistory(username, houseName, sensorNumber, date);
+      }
     } catch (err: any) {
       console.log(`Error (method: "updateCentralRinging"): ${err.message as string}`);
     }
@@ -219,9 +220,7 @@ export class HouseService {
   private async getUsernameAndHouseName (userPayload: JwtPayloadExt): Promise<[string, string]> {
     const userId = userPayload.sub;
     const houseId = userPayload.hid;
-
     const user = await this.userDataAccess.getById(userId);
-    if (!user) throw new Error('No se encontró usuario.');
 
     const house = user.casas.find(house => house._id.toString() === houseId);
     if (!house) throw new Error('No se encontró la casa.');

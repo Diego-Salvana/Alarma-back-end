@@ -1,11 +1,11 @@
 import { JwtPayload, sign, verify, decode } from 'jsonwebtoken';
-import { BodyPayload, JwtPayloadExt } from '../interfaces';
+import { TokenPayload, JwtPayloadExt } from '../interfaces';
 
 /** Clase que contiene métodos para generar, verificar y decodificar tokens JWT. */
 export class JWTHandler {
   private static JWT_SECRET = process.env.JWT_SECRET as string;
 
-  static generateToken (userBody: BodyPayload): string {
+  static generateToken (userBody: TokenPayload): string {
     const payload: JwtPayloadExt = {
       sub: userBody.userId,
       hid: userBody.houseId

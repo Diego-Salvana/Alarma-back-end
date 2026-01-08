@@ -117,7 +117,9 @@ export class MosquittoAccess {
 
   private triggerHandler (topic: string, payload: string) {
     const [,,, username, houseName] = topic.split('/');
-    const state = capitalize(payload?.trim());
+    const [stateText, sensor] = payload.split(':');
+    const state = capitalize(stateText?.trim());
+    const sensorNumber = Number(sensor?.trim()) ? Number(sensor?.trim()) : null;
 
     if (state !== Estado.ENCENDIDO && state !== Estado.APAGADO) {
       console.log(`Mensaje de disparo incorrecto: ${state}`);
@@ -125,6 +127,6 @@ export class MosquittoAccess {
       return;
     }
 
-    this.dispatcher.onTriggered(username, houseName, state as Estado);
+    this.dispatcher.onTriggered(username, houseName, state as Estado, sensorNumber);
   }
 }

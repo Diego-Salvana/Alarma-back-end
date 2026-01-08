@@ -1,46 +1,56 @@
 import { Central, HistorialConNombre, JwtPayloadExt } from '../interfaces';
 import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
-import { CentralDataAccess } from '../models';
-import { NotFound } from '../utils';
+import { CentralDataAccess, UserDataAccess } from '../models';
+import { NotFound, Unauthorized, verifyPass } from '../utils';
 
 export class CentralService {
-   constructor (private centralDataAccess: CentralDataAccess) {}
+  constructor (
+    private userDataAccess: UserDataAccess,
+    private centralDataAccess: CentralDataAccess
+  ) {}
 
-   async getHistory (userPayload: JwtPayloadExt): Promise<HistorialConNombre[]> {
-      const userId = userPayload.sub;
-      const houseId = userPayload.hid;
+  /** Obtiene el historial de eventos de la Central y mapea los dispositivos a nombres descriptivos. */
+  async getHistory (userPayload: JwtPayloadExt): Promise<HistorialConNombre[]> {
+    const userId = userPayload.sub;
+    const houseId = userPayload.hid;
+    const house = await this.centralDataAccess.getOne(userId, houseId);
 
-      const house = await this.centralDataAccess.getOne(userId, houseId);
-
-      if (house === null) throw new NotFound('Central no encontrada');
-
-      return house.central.historial.map(history => {
-         const sensorName = house.sensores.find(s => s.numeroSensor === history.numeroDispositivo)?.nombre ??
-            history.numeroDispositivo.toString();
+    return house.central.historial.map(history => {
+      const sensor = house.sensores.find(s => s.numeroSensor === history.numeroDispositivo);
+      const sensorName = sensor?.nombre ?? history.numeroDispositivo.toString();
          
-         const historyWithName: HistorialConNombre = { fechaHora: history.fechaHora, nombreDispositivo: sensorName };
-         return historyWithName;
-      });
-   }
+      const historyWithName: HistorialConNombre = {
+        fechaHora: history.fechaHora,
+        nombreDispositivo: sensorName
+      };
 
-   async updateCode (userPayload: JwtPayloadExt, codeBody: CentralCodeDTO): Promise<void> {
-      const userId = userPayload.sub;
-      const houseId = userPayload.hid;
+      return historyWithName;
+    });
+  }
 
-      await this.centralDataAccess.validatePasswordAndCode(userId, houseId, codeBody);
+  /** Actualiza el código de la central para una casa del usuario tras validaciones de identidad y credenciales. */
+  async updateCode (userPayload: JwtPayloadExt, codeBody: CentralCodeDTO): Promise<void> {
+    const userId = userPayload.sub;
+    const houseId = userPayload.hid;
+    const user = await this.userDataAccess.getById(userId);
 
-      const updatedCentral = await this.centralDataAccess.updateCode(userId, houseId, codeBody);
+    const passwordIsCorrect = await verifyPass(codeBody.contrasena, user.contrasena);
+    if (!passwordIsCorrect) throw new Unauthorized('Contraseña de usuario incorrecta.');
 
-      if (updatedCentral === null) throw new NotFound('Central no encontrada');
-   }
+    const house = user.casas.find(h => h._id.toString() === houseId);
+    const centralCode = house?.central.codigo;
+    if (!centralCode) throw new NotFound('Código de alarma no encontrados para validación.');
+    
+    if (centralCode !== codeBody.codigoActual) throw new Unauthorized('Código de alarma actual incorrecto.');
+    
+    await this.centralDataAccess.updateCode(userId, houseId, codeBody);
+  }
 
-   async updateInfo (userPayload: JwtPayloadExt, houseId: string, infoBody: CentralInfoDTO): Promise<Central> {
-      const userId = userPayload.sub;
+  /** Actualiza la información de la central en la casa del usuario. */
+  async updateInfo (userPayload: JwtPayloadExt, houseId: string, infoBody: CentralInfoDTO): Promise<Central> {
+    const userId = userPayload.sub;
+    const updatedCentral = await this.centralDataAccess.updateInfo(userId, houseId, infoBody);
 
-      const updatedCentral = await this.centralDataAccess.updateInfo(userId, houseId, infoBody);
-
-      if (updatedCentral === null) throw new NotFound('Central no encontrada');
-
-      return updatedCentral;
-   }
+    return updatedCentral;
+  }
 }

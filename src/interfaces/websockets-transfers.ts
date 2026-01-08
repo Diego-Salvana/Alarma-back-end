@@ -13,6 +13,7 @@ export interface Lights {
 export interface TriggeredAlarm {
   house: string;
   state: Estado;
+  sensorNumber: number | null;
 }
 
 export enum HouseAction {

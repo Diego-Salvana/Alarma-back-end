@@ -13,7 +13,6 @@ export interface Register extends Login {
 
 export interface RegisterDB extends Register {
   nombreUsuario: string;
-  mosquittoPass: string;
   habilitado: boolean;
   casas: Casa[];
 }
@@ -23,7 +22,7 @@ export interface UpdateUser extends Register {
   nuevaContrasena?: string;
 }
 
-export interface BodyPayload {
+export interface TokenPayload {
   userId: string;
   houseId: string;
 }
@@ -50,6 +49,7 @@ export interface HouseResponse {
 export interface ProfileResponse {
   nombre: string;
   apellido: string;
+  nombreUsuario: string;
   email: string;
   telefono: string;
   habilitado: boolean;

@@ -16,8 +16,8 @@ export class UserDTO {
       nombre: user.nombre,
       email: user.email,
       habilitado: user.habilitado,
-      token,
-      casas: casasResponse
+      casas: casasResponse,
+      token
     };
 
     return responseUser;
@@ -30,6 +30,7 @@ export class UserDTO {
     const userProfile: ProfileResponse = {
       nombre: user.nombre,
       apellido: user.apellido,
+      nombreUsuario: user.nombreUsuario,
       email: user.email,
       telefono: user.telefono,
       habilitado: user.habilitado,

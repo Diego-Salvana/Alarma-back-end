@@ -18,11 +18,16 @@ export class App {
     const mosquittoAccess = new MosquittoAccess();
 
     const userService = new UserService(userDataAccess);
-    const centralService = new CentralService(centralDataAccess);
+    const centralService = new CentralService(userDataAccess, centralDataAccess);
     const sensorService = new SensorService(sensorDataAccess);
     const webSocketAccess = new WebSocketAccess();
     const houseService = new HouseService(
-      userDataAccess, houseDataAccess, webSocketAccess, mosquittoAccess
+      userDataAccess,
+      houseDataAccess,
+      centralDataAccess,
+      sensorDataAccess,
+      webSocketAccess,
+      mosquittoAccess
     );
     const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
 

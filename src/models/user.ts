@@ -1,76 +1,87 @@
 import { UserModel } from '.';
 import { IUserDataAccess, IUserDocument, Register, User } from '../interfaces';
-import { AlreadyExists } from '../utils';
+import { AlreadyExists, NotFound, Unauthorized } from '../utils';
 
 /** Provee acceso a la base de datos para operaciones con Usuarios. */
 export class UserDataAccess implements IUserDataAccess {
   private userModel = UserModel;
+  private withoutHistory =
+    '-casas.sensores.historial -casas.camaras.historial -casas.central.historial';
 
   /** Crea un nuevo usuario en la base de datos. */
   async create (userBody: Register): Promise<IUserDocument> {
-    let newUser: IUserDocument;
-
     try {
-      newUser = await this.userModel.create(userBody);
+      return await this.userModel.create(userBody);
     } catch (err: any) {
-      console.log('Data Access: ', err);
-      if (err.code === 11000) throw new AlreadyExists('El usuario ya existe');
+      if (err.code === 11000) throw new AlreadyExists('Ya existe un usuario con esos datos');
       throw err;
     }
-
-    return newUser;
   }
 
   /** Obtiene un usuario por su email. */
-  async getOne (email: string): Promise<User | null> {
-    const user: User | null = await this.userModel
+  async getOne (email: string): Promise<User> {
+    const user = await this.userModel
       .findOne({ email })
-      .select(
-        '-casas.sensores.historial -casas.camaras.historial -casas.central.historial'
-      )
+      .select(this.withoutHistory)
       .lean();
+
+    if (user === null) throw new NotFound('Usuario no encontrado');
 
     return user;
   }
 
   /** Obtiene un usuario por su id. */
-  async getById (id: string): Promise<User | null> {
-    const user: User | null = await this.userModel
+  async getById (id: string): Promise<User> {
+    const user = await this.userModel
       .findById(id)
-      .select(
-        '-casas.sensores.historial -casas.camaras.historial -casas.central.historial'
-      )
+      .select(this.withoutHistory)
       .lean();
+
+    if (user === null) throw new NotFound('Usuario no encontrado');
 
     return user;
   }
 
   /** Actualiza un usuario por su id. */
-  async update (id: string, updateBody: Register): Promise<User | null> {
+  async updateInfo (id: string, updateBody: Register): Promise<User> {
     let updatedUser: User | null;
 
     try {
       updatedUser = await this.userModel
         .findByIdAndUpdate(id, updateBody, { new: true })
-        .select(
-          '-casas.sensores.historial -casas.camaras.historial -casas.central.historial'
-        )
+        .select(this.withoutHistory)
         .lean();
     } catch (err: any) {
-      console.log('Data Access: ', err);
-      if (err.code === 11000) {
-        throw new AlreadyExists(`El email ${updateBody.email} ya está en uso`);
-      }
+      if (err.code === 11000) throw new AlreadyExists(`El email ${updateBody.email} ya está en uso.`);
       throw err;
     }
+
+    if (updatedUser === null) throw new NotFound('Usuario no encontrado');
 
     return updatedUser;
   }
 
-  /** Elimina un usuario por su id. */
-  async delete (id: string): Promise<User | null> {
-    const user: User | null = await this.userModel.findByIdAndDelete(id);
+  /** Actualiza la contraseña de un usuario por su id. */
+  async updatePassword (id: string, oldHash: string, newHash: string): Promise<void> {
+    const result = await this.userModel.updateOne(
+      {
+        _id: id,
+        contrasena: oldHash
+      },
+      {
+        $set: { contrasena: newHash }
+      }
+    );
 
-    return user;
+    if (result.modifiedCount === 0) {
+      throw new Unauthorized('La contraseña o el usuario no coinciden.');
+    }
+  }
+
+  /** Elimina un usuario por su id. */
+  async delete (id: string): Promise<void> {
+    const deletedUser = await this.userModel.findByIdAndDelete(id);
+
+    if (deletedUser === null) throw new NotFound('Usuario no encontrado');
   }
 }
