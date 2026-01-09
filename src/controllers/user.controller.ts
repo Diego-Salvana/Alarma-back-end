@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services';
 import { RequestExt } from '../interfaces';
-import { ErrorHandler } from '../utils';
+import { BadRequest, ErrorHandler } from '../utils';
 
 /** Gestiona peticiones y respuestas vinculadas a Usuarios. */
 export class UserController {
@@ -9,8 +9,8 @@ export class UserController {
 
   async create ({ body }: Request, res: Response) {
     try {
-      const responseUser = await this.userService.create(body);
-      res.status(201).json({ message: 'Created successfully', data: responseUser });
+      await this.userService.create(body);
+      res.status(201).json({ message: 'Creación exitosa' });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear usuario');
     }
@@ -55,6 +55,20 @@ export class UserController {
       res.status(200).json({ message: 'Deleted successfully' });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al borrar usuario');
+    }
+  }
+
+  async verifyEmail ({ body }: Request, res: Response) {
+    try {
+      console.log('Body: ', body);
+      
+      const { token } = body;
+      if (!token) throw new BadRequest('Falta información para verificar correo');
+
+      const sesionToken = await this.userService.verifyEmail(token);
+      res.status(200).json({ message: 'Verificación exitosa', token: sesionToken });
+    } catch (err: any) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al verificar correo');
     }
   }
 }

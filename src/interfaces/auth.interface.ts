@@ -13,6 +13,7 @@ export interface Register extends Login {
 
 export interface RegisterDB extends Register {
   nombreUsuario: string;
+  mosquittoPass: string;
   habilitado: boolean;
   casas: Casa[];
 }

@@ -1,14 +1,14 @@
 import { Casa, HouseResponse } from '../interfaces';
-import { JWTHandler } from '../utils';
+import { JwtHandler } from '../utils';
 
 /** Clase que contiene métodos para transformar datos de Casas en objetos DTO. */
-export class HouseDTO {
+export class HouseDto {
   /** Transforma datos de una Casa en un objeto HouseResponse. */
   houseResponse (house: Casa, newToken = false, userId?: string): HouseResponse {
     let token: string | undefined;
 
     if (newToken && userId) {
-      token = JWTHandler.generateToken({ userId, houseId: house._id });
+      token = JwtHandler.generateIdToken({ userId, houseId: house._id });
     }
 
     const houseData: HouseResponse = {

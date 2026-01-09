@@ -1,11 +1,11 @@
 import { Casa, HouseResponse, IUserDocument, LoginResponse, ProfileResponse, User } from '../interfaces';
-import { JWTHandler } from '../utils';
+import { JwtHandler } from '../utils';
 
 /** Provee transformaciones de usuario a respuestas de autenticación y perfil. */
-export class UserDTO {
+export class UserDto {
   /** Transforma un usuario en una respuesta de autenticación con token y casas. */
   loginResponse (user: IUserDocument | User): LoginResponse {
-    const token = JWTHandler.generateToken({
+    const token = JwtHandler.generateIdToken({
       userId: user._id as string,
       houseId: user.casas[0] ? user.casas[0]._id : ''
     });

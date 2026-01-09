@@ -2,14 +2,14 @@ import { Router } from 'express';
 import { UserService } from '../services';
 import { UserController } from '../controllers';
 import { loginValidator, registerValidator, updateUserValidator } from '../middleware';
-import { checkJWT } from '../middleware/jwt-check';
+import { checkJwt } from '../middleware/jwt-check';
 
 export const createUsersRouter = (userService: UserService) => {
   const usersRouter = Router();
   const userController = new UserController(userService);
 
   usersRouter.get('/',
-    checkJWT, userController.getById.bind(userController)
+    checkJwt, userController.getById.bind(userController)
   );
   usersRouter.post('/register',
     registerValidator, userController.create.bind(userController)
@@ -17,11 +17,14 @@ export const createUsersRouter = (userService: UserService) => {
   usersRouter.post('/login',
     loginValidator, userController.login.bind(userController)
   );
+  usersRouter.post('/verify-email',
+    userController.verifyEmail.bind(userController)
+  );
   usersRouter.patch('/',
-    updateUserValidator, checkJWT, userController.update.bind(userController)
+    updateUserValidator, checkJwt, userController.update.bind(userController)
   );
   usersRouter.delete('/',
-    checkJWT, userController.delete.bind(userController)
+    checkJwt, userController.delete.bind(userController)
   );
 
   return usersRouter;

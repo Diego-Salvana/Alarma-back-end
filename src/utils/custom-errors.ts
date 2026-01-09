@@ -1,35 +1,35 @@
 export class CustomError extends Error {
-   statusCode: number = 0;
+  statusCode: number = 0;
 }
 
 export class AlreadyExists extends CustomError {
-   constructor (message: string) {
-      super(message);
-      this.name = this.constructor.name;
-      this.statusCode = 409;
-   }
+  constructor (message: string) {
+    super(message);
+    this.name = this.constructor.name;
+    this.statusCode = 409;
+  }
 }
 
 export class NotFound extends CustomError {
-   constructor (message: string) {
-      super(message);
-      this.name = this.constructor.name;
-      this.statusCode = 404;
-   }
+  constructor (message: string) {
+    super(message);
+    this.name = this.constructor.name;
+    this.statusCode = 404;
+  }
 }
 
 export class BadRequest extends CustomError {
-   constructor (message: string) {
-      super(message);
-      this.name = this.constructor.name;
-      this.statusCode = 400;
-   }
+  constructor (message: string) {
+    super(message);
+    this.name = this.constructor.name;
+    this.statusCode = 400;
+  }
 }
 
 export class Unauthorized extends CustomError {
-   constructor (message: string) {
-      super(message);
-      this.name = this.constructor.name;
-      this.statusCode = 401;
-   }
+  constructor (message: string) {
+    super(message);
+    this.name = this.constructor.name;
+    this.statusCode = 401;
+  }
 }

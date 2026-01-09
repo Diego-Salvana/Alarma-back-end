@@ -4,3 +4,4 @@ export * from './house';
 export * from './house-dto';
 export * from './sensor';
 export * from './central';
+export * from './email';

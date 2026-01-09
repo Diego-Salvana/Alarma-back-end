@@ -1,29 +1,30 @@
 import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Register, RegisterDB, UpdateUser } from '../interfaces';
-import { encrypt, Unauthorized, verifyPass } from '../utils';
-import { UserDTO } from './user-dto';
+import { encrypt, JwtHandler, Unauthorized, verifyPass } from '../utils';
+import { EmailService } from './email';
+import { UserDto } from './user-dto';
 
 /** Servicio que administra operaciones con la base de datos y la lógica de negocio de Usuarios. */
 export class UserService {
-  private userDTO = new UserDTO();
+  private userDTO = new UserDto();
 
-  constructor (private userDataAccess: IUserDataAccess) {}
+  constructor (private userDataAccess: IUserDataAccess, private emailService: EmailService) {}
 
-  /** Crea un nuevo usuario y devuelve su `LoginResponse`. */
-  async create (body: Register): Promise<LoginResponse> {
+  /** Crea un nuevo usuario y envía un correo de verificación. */
+  async create (body: Register): Promise<void> {
     const passwordHash = await encrypt(body.contrasena);
     const userData = { ...body, contrasena: passwordHash };
-
+    
     const registerBody: RegisterDB = {
       ...userData,
       nombreUsuario: `user_${body.email}`,
+      mosquittoPass: '-',
       habilitado: false,
       casas: []
     };
-
-    const newUser = await this.userDataAccess.create(registerBody);
-    const responseUser = this.userDTO.loginResponse(newUser);
-
-    return responseUser;
+    const token = JwtHandler.generateUsernameToken(registerBody.nombreUsuario);
+    
+    await this.userDataAccess.create(registerBody);
+    await this.emailService.sendEmail(body.email, token);
   }
 
   /** Autentica un usuario y devuelve su `LoginResponse`. */
@@ -75,5 +76,10 @@ export class UserService {
   /** Elimina un usuario de la base de datos. */
   async delete (id: string): Promise<void> {
     await this.userDataAccess.delete(id);
+  }
+
+  async verifyEmail (token: string): Promise<any> {
+    const jwtPayload = JwtHandler.verifyToken(token);
+    return jwtPayload;
   }
 }

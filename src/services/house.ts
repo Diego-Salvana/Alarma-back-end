@@ -2,13 +2,13 @@ import { IncomingHttpHeaders } from 'http2';
 import { Casa, Estado, ExcludeArrayDTO, HouseResponse, JwtPayloadExt, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm } from '../interfaces';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
 import { AlreadyExists, WarningFactory } from '../utils';
-import { HouseDTO } from './house-dto';
+import { HouseDto } from './house-dto';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';
 
 /** Servicio que administra operaciones con la BD y lógica de negocio vinculada a Casas. */
 export class HouseService {
-  private houseDTO = new HouseDTO();
+  private houseDTO = new HouseDto();
 
   constructor (
     private userDataAccess: UserDataAccess,

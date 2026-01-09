@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CentralService } from '../services';
 import { CentralController } from '../controllers';
-import { checkJWT, updateCentralCodeValidator, updateCentralInfoValidator } from '../middleware';
+import { checkJwt, updateCentralCodeValidator, updateCentralInfoValidator } from '../middleware';
 
 export const createCentralRouter = (centralService: CentralService) => {
   const centralRouter = Router();
@@ -9,15 +9,15 @@ export const createCentralRouter = (centralService: CentralService) => {
 
   // Usuario con token
   centralRouter.get('/',
-    checkJWT, centralController.getHistory.bind(centralController)
+    checkJwt, centralController.getHistory.bind(centralController)
   );
   centralRouter.patch('/code',
-    updateCentralCodeValidator, checkJWT, centralController.updateCode.bind(centralController)
+    updateCentralCodeValidator, checkJwt, centralController.updateCode.bind(centralController)
   );
 
   // Administrador (refactorizar)
   centralRouter.patch('/:houseId/info',
-    updateCentralInfoValidator, checkJWT, centralController.updateInfo.bind(centralController)
+    updateCentralInfoValidator, checkJwt, centralController.updateInfo.bind(centralController)
   );
 
   return centralRouter;

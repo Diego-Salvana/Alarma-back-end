@@ -5,7 +5,7 @@ import { createCentralRouter, createHousesRouter, createUsersRouter } from '../r
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
-import { CentralService, HouseService, SensorService, UserService } from '../services';
+import { CentralService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 
 /** Proporciona la configuración y arranque del servidor Express, con routers y acceso a datos. */
@@ -16,11 +16,12 @@ export class App {
     const centralDataAccess = new CentralDataAccess();
     const sensorDataAccess = new SensorDataAccess();
     const mosquittoAccess = new MosquittoAccess();
+    const webSocketAccess = new WebSocketAccess();
 
-    const userService = new UserService(userDataAccess);
+    const emailService = new EmailService();
+    const userService = new UserService(userDataAccess, emailService);
     const centralService = new CentralService(userDataAccess, centralDataAccess);
     const sensorService = new SensorService(sensorDataAccess);
-    const webSocketAccess = new WebSocketAccess();
     const houseService = new HouseService(
       userDataAccess,
       houseDataAccess,
@@ -32,6 +33,10 @@ export class App {
     const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
 
     mosquittoAccess.setDispatcher(mosquittoEventDispatcher);
+
+    // Prueba de conexión al email
+    emailService.checkConnection();
+    // emailService.sendEmail('diegofturcutto@gmail.com', 'token-username');
 
     const app = express();
 

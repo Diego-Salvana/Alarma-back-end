@@ -58,8 +58,25 @@ export class SensorDataAccess {
   async updateName (userId: string, houseId: string, sensorNumber: number, name: string):
   Promise<Dispositivo> {
     const user = await this.userModel
-      .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
-      .select(`${this.noCentralHistory}`);
+      .findOneAndUpdate(
+        {
+          _id: userId,
+          'casas._id': houseId,
+          'casas.sensores.numeroSensor': sensorNumber
+        },
+        {
+          $set: { 'casas.$[casa].sensores.$[sensor].nombre': name }
+        },
+        {
+          arrayFilters: [
+            { 'casa._id': houseId },
+            { 'sensor.numeroSensor': sensorNumber }
+          ],
+          new: true
+        }
+      )
+      .select(this.noCentralHistory)
+      .lean();
 
     if (user === null) throw new NotFound('Usuario o sensor no encontrados');
 
@@ -68,10 +85,6 @@ export class SensorDataAccess {
 
     const sensor = house.sensores.find(s => s.numeroSensor === sensorNumber);
     if (!sensor) throw new NotFound('Sensor no encontrado');
-
-    sensor.nombre = name;
-
-    await user.save();
 
     return sensor;
   }
@@ -86,14 +99,14 @@ export class SensorDataAccess {
     if (user === null) throw new NotFound('Sensor no encontrado');
       
     const house = user.casas.find(h => h._id.toString() === houseId);
-    if (house === undefined) throw new NotFound('Casa no encontrada');
+    if (!house) throw new NotFound('Casa no encontrada');
 
     const sensor = house.sensores.find(s => s.numeroSensor === sensorNumber);
-    if (sensor === undefined) throw new NotFound('Sensor no encontrado');
+    if (!sensor) throw new NotFound('Sensor no encontrado');
 
-    if (infoBody.dispositivoId !== undefined) sensor.dispositivoId = infoBody.dispositivoId;
-    if (infoBody.numeroSensor !== undefined) sensor.numeroSensor = infoBody.numeroSensor;
-    if (infoBody.tipo !== undefined) sensor.tipo = infoBody.tipo;
+    sensor.dispositivoId = infoBody.dispositivoId;
+    sensor.numeroSensor = infoBody.numeroSensor;
+    sensor.tipo = infoBody.tipo;
 
     await user.save();
 
