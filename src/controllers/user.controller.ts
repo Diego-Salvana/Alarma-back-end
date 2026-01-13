@@ -60,8 +60,6 @@ export class UserController {
 
   async verifyEmail ({ body }: Request, res: Response) {
     try {
-      console.log('Body: ', body);
-      
       const { token } = body;
       if (!token) throw new BadRequest('Falta información para verificar correo');
 

@@ -1,7 +1,9 @@
+import { JwtPayload } from 'jsonwebtoken';
 import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Register, RegisterDB, UpdateUser } from '../interfaces';
-import { encrypt, JwtHandler, Unauthorized, verifyPass } from '../utils';
+import { BadRequest, encrypt, JwtHandler, Unauthorized, verifyPass } from '../utils';
 import { EmailService } from './email';
 import { UserDto } from './user-dto';
+import { Types } from 'mongoose';
 
 /** Servicio que administra operaciones con la base de datos y la lógica de negocio de Usuarios. */
 export class UserService {
@@ -78,8 +80,22 @@ export class UserService {
     await this.userDataAccess.delete(id);
   }
 
-  async verifyEmail (token: string): Promise<any> {
-    const jwtPayload = JwtHandler.verifyToken(token);
-    return jwtPayload;
+  async verifyEmail (token: string): Promise<string> {
+    let payload: JwtPayload;
+
+    try {
+      payload = JwtHandler.verifyToken(token) as JwtPayload;
+    } catch (err) {
+      throw new BadRequest('Token inválido');
+    }
+
+    const username = payload.username;
+    if (!username) throw new BadRequest('Token inválido');
+    
+    const user = await this.userDataAccess.updateEmailVerification(username);
+    const id = (user._id as Types.ObjectId).toString();
+    const sesionToken = JwtHandler.generateIdToken({ userId: id, houseId: '' });
+    
+    return sesionToken;
   }
 }

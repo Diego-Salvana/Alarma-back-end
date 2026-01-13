@@ -78,6 +78,27 @@ export class UserDataAccess implements IUserDataAccess {
     }
   }
 
+  /** Actualiza la verificación de un usuario por su nombre de usuario. */
+  async updateEmailVerification (username: string): Promise<User> {
+    const user = await this.userModel.findOneAndUpdate(
+      {
+        nombreUsuario: username
+      },
+      {
+        $set: { habilitado: true }
+      },
+      {
+        new: true
+      }
+    );
+
+    if (!user) {
+      throw new Unauthorized('El usuario no coincide para verificar el email.');
+    }
+
+    return user;
+  }
+
   /** Elimina un usuario por su id. */
   async delete (id: string): Promise<void> {
     const deletedUser = await this.userModel.findByIdAndDelete(id);

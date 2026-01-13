@@ -56,3 +56,8 @@ export interface ProfileResponse {
   habilitado: boolean;
   casas: HouseResponse[];
 }
+
+export interface EmailVerification {
+  message: string;
+  token: string;
+}

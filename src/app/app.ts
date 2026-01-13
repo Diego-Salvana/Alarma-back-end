@@ -36,7 +36,6 @@ export class App {
 
     // Prueba de conexión al email
     emailService.checkConnection();
-    // emailService.sendEmail('diegofturcutto@gmail.com', 'token-username');
 
     const app = express();
 
