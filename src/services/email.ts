@@ -37,6 +37,9 @@ export class EmailService {
   }
 
   private createEmailHtml (token: string) {
+    const host = 'https://alarmstech.vercel.app';
+    const verifyEmailPath = 'auth/verify-email';
+
     return `
       <!DOCTYPE html>
       <html lang="en">
@@ -68,7 +71,7 @@ export class EmailService {
                     </p>
                     <p style="font-size: 16px;">
                       <a
-                        href="http://localhost:4200/auth/verify-email/${token}"
+                        href="${host}/${verifyEmailPath}/${token}"
                         target="_blank"
                         rel="noopener noreferrer"
                         style="

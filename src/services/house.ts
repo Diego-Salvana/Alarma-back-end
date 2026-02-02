@@ -67,7 +67,11 @@ export class HouseService {
         h.direccion.ciudad.trim().toLowerCase() === ciudad.trim().toLowerCase()
       );
 
-      if (addressExists) throw new AlreadyExists(`Ya existe otra casa con la dirección: ${calle} ${numero}, ${ciudad}`);
+      if (addressExists) {
+        throw new AlreadyExists(
+          `Ya existe otra casa con la dirección: ${calle} ${numero}, ${ciudad}`
+        );
+      }
     }
 
     const updatedHouse = await this.houseDataAccess.updateHouseInfo(houseId, userId, body);
