@@ -20,6 +20,12 @@ export const createUsersRouter = (userService: UserService) => {
   usersRouter.post('/verify-email',
     userController.verifyEmail.bind(userController)
   );
+  usersRouter.post('/forgot-password',
+    userController.forgotPassword.bind(userController)
+  );
+  usersRouter.post('/reset-password',
+    userController.resetPassword.bind(userController)
+  );
   usersRouter.patch('/',
     updateUserValidator, checkJwt, userController.update.bind(userController)
   );

@@ -52,7 +52,7 @@ export class UserDataAccess implements IUserDataAccess {
         .select(this.withoutHistory)
         .lean();
     } catch (err: any) {
-      if (err.code === 11000) throw new AlreadyExists(`El email ${updateBody.email} ya está en uso.`);
+      if (err.code === 11000) throw new AlreadyExists(`El email ${updateBody.email} ya está en uso`);
       throw err;
     }
 
@@ -74,7 +74,7 @@ export class UserDataAccess implements IUserDataAccess {
     );
 
     if (result.modifiedCount === 0) {
-      throw new Unauthorized('La contraseña o el usuario no coinciden.');
+      throw new Unauthorized('La contraseña o el usuario no coinciden');
     }
   }
 
@@ -93,7 +93,7 @@ export class UserDataAccess implements IUserDataAccess {
     );
 
     if (!user) {
-      throw new Unauthorized('El usuario no coincide para verificar el email.');
+      throw new Unauthorized('El usuario no coincide para verificar el email');
     }
 
     return user;

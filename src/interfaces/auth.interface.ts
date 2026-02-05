@@ -23,9 +23,14 @@ export interface UpdateUser extends Register {
   nuevaContrasena?: string;
 }
 
-export interface TokenPayload {
+export interface SesionToken {
   userId: string;
   houseId: string;
+}
+
+export enum Purpose {
+  EMAIL_VERIFICATION,
+  PASSWORD_RESET
 }
 
 export interface LoginResponse {

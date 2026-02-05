@@ -1,5 +1,4 @@
-import { JwtPayload } from 'jsonwebtoken';
-import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Register, RegisterDB, UpdateUser } from '../interfaces';
+import { IUserDataAccess, JwtPayloadExt, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, UpdateUser } from '../interfaces';
 import { BadRequest, encrypt, JwtHandler, Unauthorized, verifyPass } from '../utils';
 import { EmailService } from './email';
 import { UserDto } from './user-dto';
@@ -8,6 +7,7 @@ import { Types } from 'mongoose';
 /** Servicio que administra operaciones con la base de datos y la lógica de negocio de Usuarios. */
 export class UserService {
   private userDTO = new UserDto();
+  private userPrefix = process.env.USER_PREFIX;
 
   constructor (private userDataAccess: IUserDataAccess, private emailService: EmailService) {}
 
@@ -15,18 +15,22 @@ export class UserService {
   async create (body: Register): Promise<void> {
     const passwordHash = await encrypt(body.contrasena);
     const userData = { ...body, contrasena: passwordHash };
+
+    if (!this.userPrefix) throw new Error('Prefix de usuario no configurado');
     
     const registerBody: RegisterDB = {
       ...userData,
-      nombreUsuario: `user_${body.email}`,
+      nombreUsuario: `${this.userPrefix}${body.email}`,
       mosquittoPass: '-',
       habilitado: false,
       casas: []
     };
-    const token = JwtHandler.generateUsernameToken(registerBody.nombreUsuario);
+    const token = JwtHandler.generateUsernameToken(
+      registerBody.nombreUsuario, Purpose.EMAIL_VERIFICATION
+    );
     
     await this.userDataAccess.create(registerBody);
-    await this.emailService.sendEmail(body.email, token);
+    await this.emailService.sendVerificationEmail(body.email, token);
   }
 
   /** Autentica un usuario y devuelve su `LoginResponse`. */
@@ -40,6 +44,62 @@ export class UserService {
     const responseUser = this.userDTO.loginResponse(user);
 
     return responseUser;
+  }
+
+  /** Verifica el correo del usuario y devuelve un token de sesión. */
+  async verifyEmail (token: string): Promise<string> {
+    let payload: JwtPayloadExt;
+
+    try {
+      payload = JwtHandler.verifyToken(token) as JwtPayloadExt;
+    } catch (err) {
+      throw new BadRequest('Token inválido');
+    }
+
+    const { username, purpose } = payload;
+    if (!username) throw new BadRequest('Token inválido');
+    if (purpose !== Purpose.EMAIL_VERIFICATION) throw new Unauthorized('Tipo de token no válido');
+    
+    const user = await this.userDataAccess.updateEmailVerification(username);
+    const id = (user._id as Types.ObjectId).toString();
+    const sesionToken = JwtHandler.generateIdToken({ userId: id, houseId: '' });
+    
+    return sesionToken;
+  }
+
+  /** Solicita restablecimiento de contraseña y envía un email con un token. */
+  async forgotPassword (email: string): Promise<void> {
+    const user = await this.userDataAccess.getOne(email);
+    const token = JwtHandler.generateUsernameToken(user.nombreUsuario, Purpose.PASSWORD_RESET);
+    
+    await this.emailService.sendResetPassEmail(email, token);
+  }
+
+  /** Restablece la contraseña del usuario. */
+  async resetPassword (token: string, password: string): Promise<string> {
+    let payload: JwtPayloadExt;
+
+    try {
+      payload = JwtHandler.verifyToken(token) as JwtPayloadExt;
+    } catch (err) {
+      throw new BadRequest('Token inválido');
+    }
+
+    const { username, purpose } = payload;
+    if (!username) throw new BadRequest('Token inválido');
+    if (purpose !== Purpose.PASSWORD_RESET) throw new Unauthorized('Tipo de token no válido');
+
+    const email = username.split(this.userPrefix ?? '-')[1];
+    const user = await this.userDataAccess.getOne(email);
+    const userId = (user._id as Types.ObjectId).toString();
+    const hashedPassword = user.contrasena;
+    const newHash = await encrypt(password);
+
+    await this.userDataAccess.updatePassword(userId, hashedPassword, newHash);
+
+    const sesionToken = JwtHandler.generateIdToken({ userId, houseId: '' });
+    
+    return sesionToken;
   }
 
   /** Obtiene un usuario por su ID y devuelve su `ProfileResponse`. */
@@ -78,24 +138,5 @@ export class UserService {
   /** Elimina un usuario de la base de datos. */
   async delete (id: string): Promise<void> {
     await this.userDataAccess.delete(id);
-  }
-
-  async verifyEmail (token: string): Promise<string> {
-    let payload: JwtPayload;
-
-    try {
-      payload = JwtHandler.verifyToken(token) as JwtPayload;
-    } catch (err) {
-      throw new BadRequest('Token inválido');
-    }
-
-    const username = payload.username;
-    if (!username) throw new BadRequest('Token inválido');
-    
-    const user = await this.userDataAccess.updateEmailVerification(username);
-    const id = (user._id as Types.ObjectId).toString();
-    const sesionToken = JwtHandler.generateIdToken({ userId: id, houseId: '' });
-    
-    return sesionToken;
   }
 }
