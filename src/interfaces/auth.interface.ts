@@ -26,6 +26,7 @@ export interface UpdateUser extends Register {
 export interface SesionToken {
   userId: string;
   houseId: string;
+  verified: boolean;
 }
 
 export enum Purpose {

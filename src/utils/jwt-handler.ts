@@ -8,7 +8,8 @@ export class JwtHandler {
   static generateIdToken (userBody: SesionToken): string {
     const payload: JwtPayloadExt = {
       sub: userBody.userId,
-      hid: userBody.houseId
+      hid: userBody.houseId,
+      verified: userBody.verified ?? false
     };
 
     return sign(payload, this.JWT_SECRET, { expiresIn: '90 days' });

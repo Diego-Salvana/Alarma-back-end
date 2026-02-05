@@ -1,13 +1,15 @@
 import { NextFunction, Response } from 'express';
 import { JwtPayloadExt, RequestExt } from '../interfaces';
-import { BadRequest, CustomError, JwtHandler } from '../utils';
+import { BadRequest, CustomError, JwtHandler, Unauthorized } from '../utils';
 
 export function checkJwt (req: RequestExt, res: Response, next: NextFunction) {
   try {
-    const token = req.headers.authorization?.split(' ').pop() ?? '';
-    const jwtPayload = JwtHandler.verifyToken(token) as JwtPayloadExt;
+    const token = req.headers.authorization?.split(' ').pop();
+    if (!token) throw new BadRequest('Token no proporcionado');
 
-    if (!jwtPayload.sub) throw new BadRequest('Falta información para encontrar usuario');
+    const jwtPayload = JwtHandler.verifyToken(token) as JwtPayloadExt;
+    if (!jwtPayload.sub) throw new Unauthorized('Falta información para encontrar usuario');
+    if (!jwtPayload.verified) throw new Unauthorized('Usuario no verificado');
 
     req.userPayload = jwtPayload;
 

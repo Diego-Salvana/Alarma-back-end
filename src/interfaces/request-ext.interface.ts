@@ -5,6 +5,7 @@ import { Purpose } from './auth.interface';
 export interface JwtPayloadExt extends JwtPayload {
   hid: string;
   sub: string;
+  verified?: boolean;
   username?: string;
   purpose?: Purpose;
 }

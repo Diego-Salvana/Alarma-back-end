@@ -38,10 +38,11 @@ export class HouseService {
   async getOne (houseId: string, userPayload: JwtPayloadExt, headers: IncomingHttpHeaders):
   Promise<HouseResponse> {
     const userId = userPayload.sub;
+    const verified = userPayload.verified;
     const house = await this.houseDataAccess.getOne(houseId, userId);
     const tokenRequired = headers['set-house'] === 'true';
 
-    return this.houseDTO.houseResponse(house, tokenRequired, tokenRequired ? userId : undefined);
+    return this.houseDTO.houseResponse(house, tokenRequired, userId, verified);
   }
 
   /**

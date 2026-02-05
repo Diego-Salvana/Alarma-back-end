@@ -62,7 +62,7 @@ export class UserService {
     
     const user = await this.userDataAccess.updateEmailVerification(username);
     const id = (user._id as Types.ObjectId).toString();
-    const sesionToken = JwtHandler.generateIdToken({ userId: id, houseId: '' });
+    const sesionToken = JwtHandler.generateIdToken({ userId: id, houseId: '', verified: true });
     
     return sesionToken;
   }
@@ -92,12 +92,13 @@ export class UserService {
     const email = username.split(this.userPrefix ?? '-')[1];
     const user = await this.userDataAccess.getOne(email);
     const userId = (user._id as Types.ObjectId).toString();
+    const verified = user.habilitado;
     const hashedPassword = user.contrasena;
     const newHash = await encrypt(password);
 
     await this.userDataAccess.updatePassword(userId, hashedPassword, newHash);
 
-    const sesionToken = JwtHandler.generateIdToken({ userId, houseId: '' });
+    const sesionToken = JwtHandler.generateIdToken({ userId, houseId: '', verified });
     
     return sesionToken;
   }
