@@ -46,6 +46,14 @@ export class UserService {
     return responseUser;
   }
 
+  /** Envía un correo de verificación al usuario. */
+  async sendVerificationEmail (email: string): Promise<void> {
+    const user = await this.userDataAccess.getOne(email);
+    const token = JwtHandler.generateUsernameToken(user.nombreUsuario, Purpose.EMAIL_VERIFICATION);
+    
+    await this.emailService.sendVerificationEmail(email, token);
+  }
+
   /** Verifica el correo del usuario y devuelve un token de sesión. */
   async verifyEmail (token: string): Promise<string> {
     let payload: JwtPayloadExt;

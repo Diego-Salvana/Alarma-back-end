@@ -25,6 +25,18 @@ export class UserController {
     }
   }
 
+  async sendVerificationEmail ({ body }: Request, res: Response) {
+    try {
+      const { email } = body;
+      if (!email) throw new BadRequest('Falta información para enviar correo de verificación');
+
+      await this.userService.sendVerificationEmail(email);
+      res.status(204).send();
+    } catch (err: any) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al enviar correo de verificación');
+    }
+  }
+
   async verifyEmail ({ body }: Request, res: Response) {
     try {
       const { token } = body;

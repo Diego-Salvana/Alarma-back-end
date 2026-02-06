@@ -17,6 +17,9 @@ export const createUsersRouter = (userService: UserService) => {
   usersRouter.post('/login',
     loginValidator, userController.login.bind(userController)
   );
+  usersRouter.post('/send-verification-email',
+    userController.sendVerificationEmail.bind(userController)
+  );
   usersRouter.post('/verify-email',
     userController.verifyEmail.bind(userController)
   );
