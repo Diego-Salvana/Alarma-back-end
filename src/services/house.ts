@@ -1,8 +1,8 @@
 import { IncomingHttpHeaders } from 'http2';
-import { Casa, Estado, ExcludeArrayDTO, HouseResponse, JwtPayloadExt, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm } from '../interfaces';
+import { Casa, Estado, ExcludeArrayDTO, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, SessionJwtPayload } from '../interfaces';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
 import { AlreadyExists, WarningFactory } from '../utils';
-import { HouseDto } from './house-dto';
+import { HouseDto } from '../utils/house-dto';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';
 
@@ -20,14 +20,14 @@ export class HouseService {
   ) {}
 
   /** Crea una nueva casa para el usuario. */
-  async create (body: Casa, userPayload: JwtPayloadExt): Promise<void> {
+  async create (body: Casa, userPayload: SessionJwtPayload): Promise<void> {
     const userId = userPayload.sub;
     const houseData: Casa = { ...body, nombreCasa: body.nombre.toLowerCase().replace(/\s/g, '') };
     await this.houseDataAccess.create(userId, houseData);
   }
 
   /** Obtiene todas las casas del usuario. */
-  async getAll (userPayload: JwtPayloadExt): Promise<HouseResponse[]> {
+  async getAll (userPayload: SessionJwtPayload): Promise<HouseResponse[]> {
     const userId = userPayload.sub;
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
 
@@ -35,7 +35,7 @@ export class HouseService {
   }
 
   /** Obtiene una casa específica del usuario. */
-  async getOne (houseId: string, userPayload: JwtPayloadExt, headers: IncomingHttpHeaders):
+  async getOne (houseId: string, userPayload: SessionJwtPayload, headers: IncomingHttpHeaders):
   Promise<HouseResponse> {
     const userId = userPayload.sub;
     const verified = userPayload.verified;
@@ -49,7 +49,7 @@ export class HouseService {
     * Actualiza una casa del usuario
     * verificando que no exista otra con el mismo nombre o dirección.
   */
-  async update (houseId: string, userPayload: JwtPayloadExt, body: Partial<Casa>):
+  async update (houseId: string, userPayload: SessionJwtPayload, body: Partial<Casa>):
   Promise<HouseResponse> {
     const userId = userPayload.sub;
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
@@ -81,13 +81,13 @@ export class HouseService {
   }
 
   /** Borra una casa del usuario. */
-  async delete (houseId: string, userPayload: JwtPayloadExt): Promise<void> {
+  async delete (houseId: string, userPayload: SessionJwtPayload): Promise<void> {
     const userId = userPayload.sub;
     await this.houseDataAccess.delete(houseId, userId);
   }
 
   /** Publica a Mosquitto mensaje de Encendido o Apagado de alarma según los parámetros. */
-  async setAlarmState (userPayload: JwtPayloadExt, state: Estado, body?: ExcludeArrayDTO):
+  async setAlarmState (userPayload: SessionJwtPayload, state: Estado, body?: ExcludeArrayDTO):
   Promise<void> {
     let username = '';
     let houseName = '';
@@ -111,7 +111,7 @@ export class HouseService {
   }
 
   /** Publica mensaje para cambiar estado de luces en Mosquitto */
-  async setLightsState (userPayload: JwtPayloadExt, { sector, state }: Lights): Promise<void> {
+  async setLightsState (userPayload: SessionJwtPayload, { sector, state }: Lights): Promise<void> {
     let username = '';
     let houseName = '';
     
@@ -129,7 +129,7 @@ export class HouseService {
   }
 
   /** Publica a Mosquitto mensaje de disparo de alarma (sonando) según los parámetros. */
-  async setTriggeredState (userPayload: JwtPayloadExt, state: Estado): Promise<void> {
+  async setTriggeredState (userPayload: SessionJwtPayload, state: Estado): Promise<void> {
     let username = '';
     let houseName = '';
 
@@ -222,7 +222,7 @@ export class HouseService {
   }
 
   /** Método privado que prepara usuario y nombre de casa para operaciones de Mosquitto. */
-  private async getUsernameAndHouseName (userPayload: JwtPayloadExt): Promise<[string, string]> {
+  private async getUsernameAndHouseName (userPayload: SessionJwtPayload): Promise<[string, string]> {
     const userId = userPayload.sub;
     const houseId = userPayload.hid;
     const user = await this.userDataAccess.getById(userId);

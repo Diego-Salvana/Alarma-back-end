@@ -1,7 +1,6 @@
-import { IUserDataAccess, JwtPayloadExt, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, UpdateUser } from '../interfaces';
-import { BadRequest, encrypt, JwtHandler, Unauthorized, verifyPass } from '../utils';
+import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, UpdateUser, VerificationJwtPayload } from '../interfaces';
+import { BadRequest, encrypt, JwtHandler, Unauthorized, verifyPass, UserDto } from '../utils';
 import { EmailService } from './email';
-import { UserDto } from './user-dto';
 import { Types } from 'mongoose';
 
 /** Servicio que administra operaciones con la base de datos y la lógica de negocio de Usuarios. */
@@ -56,10 +55,10 @@ export class UserService {
 
   /** Verifica el correo del usuario y devuelve un token de sesión. */
   async verifyEmail (token: string): Promise<string> {
-    let payload: JwtPayloadExt;
+    let payload: VerificationJwtPayload;
 
     try {
-      payload = JwtHandler.verifyToken(token) as JwtPayloadExt;
+      payload = JwtHandler.verifyToken(token) as VerificationJwtPayload;
     } catch (err) {
       throw new BadRequest('Token inválido');
     }
@@ -70,7 +69,7 @@ export class UserService {
     
     const user = await this.userDataAccess.updateEmailVerification(username);
     const id = (user._id as Types.ObjectId).toString();
-    const sesionToken = JwtHandler.generateIdToken({ userId: id, houseId: '', verified: true });
+    const sesionToken = JwtHandler.generateIdToken(id, true);
     
     return sesionToken;
   }
@@ -85,10 +84,10 @@ export class UserService {
 
   /** Restablece la contraseña del usuario. */
   async resetPassword (token: string, password: string): Promise<string> {
-    let payload: JwtPayloadExt;
+    let payload: VerificationJwtPayload;
 
     try {
-      payload = JwtHandler.verifyToken(token) as JwtPayloadExt;
+      payload = JwtHandler.verifyToken(token) as VerificationJwtPayload;
     } catch (err) {
       throw new BadRequest('Token inválido');
     }
@@ -106,7 +105,7 @@ export class UserService {
 
     await this.userDataAccess.updatePassword(userId, hashedPassword, newHash);
 
-    const sesionToken = JwtHandler.generateIdToken({ userId, houseId: '', verified });
+    const sesionToken = JwtHandler.generateIdToken(userId, verified);
     
     return sesionToken;
   }

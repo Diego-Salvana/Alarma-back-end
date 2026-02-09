@@ -1,5 +1,4 @@
-import { Central, HistorialConNombre, JwtPayloadExt } from '../interfaces';
-import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
+import { Central, HistorialConNombre, SessionJwtPayload, CentralCodeDTO, CentralInfoDTO } from '../interfaces';
 import { CentralDataAccess, UserDataAccess } from '../models';
 import { NotFound, Unauthorized, verifyPass } from '../utils';
 
@@ -10,9 +9,9 @@ export class CentralService {
   ) {}
 
   /** Obtiene el historial de eventos de la Central y mapea los dispositivos a nombres descriptivos. */
-  async getHistory (userPayload: JwtPayloadExt): Promise<HistorialConNombre[]> {
+  async getHistory (userPayload: SessionJwtPayload): Promise<HistorialConNombre[]> {
     const userId = userPayload.sub;
-    const houseId = userPayload.hid;
+    const houseId = userPayload.hid ?? '';
     const house = await this.centralDataAccess.getOne(userId, houseId);
 
     return house.central.historial.map(history => {
@@ -29,9 +28,9 @@ export class CentralService {
   }
 
   /** Actualiza el código de la central para una casa del usuario tras validaciones de identidad y credenciales. */
-  async updateCode (userPayload: JwtPayloadExt, codeBody: CentralCodeDTO): Promise<void> {
+  async updateCode (userPayload: SessionJwtPayload, codeBody: CentralCodeDTO): Promise<void> {
     const userId = userPayload.sub;
-    const houseId = userPayload.hid;
+    const houseId = userPayload.hid ?? '';
     const user = await this.userDataAccess.getById(userId);
 
     const passwordIsCorrect = await verifyPass(codeBody.contrasena, user.contrasena);
@@ -47,7 +46,7 @@ export class CentralService {
   }
 
   /** Actualiza la información de la central en la casa del usuario. */
-  async updateInfo (userPayload: JwtPayloadExt, houseId: string, infoBody: CentralInfoDTO): Promise<Central> {
+  async updateInfo (userPayload: SessionJwtPayload, houseId: string, infoBody: CentralInfoDTO): Promise<Central> {
     const userId = userPayload.sub;
     const updatedCentral = await this.centralDataAccess.updateInfo(userId, houseId, infoBody);
 

@@ -1,9 +1,12 @@
-import { BadRequest } from './custom-errors';
-import { JwtPayloadExt } from '../interfaces';
+import { Unauthorized } from './custom-errors';
+import { SessionJwtPayload } from '../interfaces';
 
-/** Chequea si existe un `payload`, y lo retorna. De lo contrario lanza un error con el mensaje del 2° parámetro */
-export function checkPayload (payload: JwtPayloadExt | undefined, message: string): JwtPayloadExt {
-  if (payload === undefined) throw new BadRequest(message);
+/** Chequea `payload` de usuario, y lo retorna. De lo contrario lanza un error. */
+export function checkUserPayload (
+  payload: SessionJwtPayload | undefined,
+  message = 'No se proporcionó un token válido'
+): SessionJwtPayload {
+  if (!payload) throw new Unauthorized(message);
 
   return payload;
 }

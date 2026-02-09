@@ -1,4 +1,4 @@
-import { Estado } from './user.interface';
+import { Estado } from './schemas.interface';
 
 export interface AlarmArming {
   state: Estado;

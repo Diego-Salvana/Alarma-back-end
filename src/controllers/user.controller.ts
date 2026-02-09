@@ -75,8 +75,8 @@ export class UserController {
     }
   }
 
-  async getById ({ userPayload }: RequestExt, res: Response) {
-    const id = userPayload?.sub as string;
+  async getById ({ user }: RequestExt, res: Response) {
+    const id = user?.sub as string;
 
     try {
       const responseUser = await this.userService.getById(id);
@@ -86,25 +86,14 @@ export class UserController {
     }
   }
 
-  async update ({ body, userPayload }: RequestExt, res: Response) {
-    const id = userPayload?.sub as string;
+  async update ({ body, user }: RequestExt, res: Response) {
+    const id = user?.sub as string;
 
     try {
       const responseUser = await this.userService.update(id, body);
       res.status(200).json({ message: 'Updated successfully', data: responseUser });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
-    }
-  }
-
-  async delete ({ userPayload }: RequestExt, res: Response) {
-    const id = userPayload?.sub as string;
-
-    try {
-      await this.userService.delete(id);
-      res.status(200).json({ message: 'Deleted successfully' });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al borrar usuario');
     }
   }
 }

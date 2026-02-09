@@ -5,11 +5,11 @@ import { JwtHandler } from '../utils';
 export class UserDto {
   /** Transforma un usuario en una respuesta de autenticación con token y casas. */
   loginResponse (user: IUserDocument | User): LoginResponse {
-    const token = JwtHandler.generateIdToken({
-      userId: user._id as string,
-      houseId: user.casas[0] ? user.casas[0]._id : '',
-      verified: user.habilitado
-    });
+    const token = JwtHandler.generateIdToken(
+      user._id as string,
+      user.habilitado,
+      user.casas[0]?._id
+    );
 
     const casasResponse: HouseResponse[] = this.housesMap(user.casas);
 

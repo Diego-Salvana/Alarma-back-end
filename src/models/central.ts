@@ -1,5 +1,4 @@
-import { Casa, Central, HistorialCentral } from '../interfaces';
-import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
+import { Casa, Central, HistorialCentral, CentralCodeDTO, CentralInfoDTO } from '../interfaces';
 import { NotFound } from '../utils';
 import { UserModel } from '.';
 

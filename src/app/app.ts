@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
+import { createAdminRouter, createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
@@ -47,6 +47,7 @@ export class App {
     app.use('/api-alarma/houses', createHousesRouter(houseService));
     app.use('/api-alarma/sensors', createSensorsRouter(sensorService));
     app.use('/api-alarma/central', createCentralRouter(centralService));
+    app.use('/api-alarma/admin', createAdminRouter(userService));
 
     app.use((req, res) => {
       res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });

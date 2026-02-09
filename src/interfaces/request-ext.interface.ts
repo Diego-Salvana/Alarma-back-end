@@ -1,15 +1,8 @@
 import { Request } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
-import { Purpose } from './auth.interface';
-
-export interface JwtPayloadExt extends JwtPayload {
-  hid: string;
-  sub: string;
-  verified?: boolean;
-  username?: string;
-  purpose?: Purpose;
-}
+import { AdminJwtPayload, SessionJwtPayload, VerificationJwtPayload } from './jwt.interfaces';
 
 export interface RequestExt extends Request {
-  userPayload?: JwtPayloadExt;
+  user?: SessionJwtPayload;
+  verificationToken?: VerificationJwtPayload;
+  admin?: AdminJwtPayload;
 }

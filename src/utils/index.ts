@@ -6,3 +6,5 @@ export * from './jwt-handler';
 export * from './check-payload';
 export * from './pass-encrypt';
 export * from './warning-factory';
+export * from './user-dto';
+export * from './house-dto';

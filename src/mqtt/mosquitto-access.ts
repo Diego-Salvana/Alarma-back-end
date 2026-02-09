@@ -1,7 +1,7 @@
 import mqtt from 'mqtt';
 import { Estado, MQTTtopicHandler } from '../interfaces';
 import { capitalize } from 'lodash';
-import { HouseAction, WarningType } from '../interfaces/websockets-transfers';
+import { HouseAction, WarningType } from '../interfaces/websockets.interfaces';
 import { extractSensors } from './utils';
 import { MosquittoEventDispatcher } from './mosquitto-event-dispatcher';
 

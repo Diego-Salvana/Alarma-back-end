@@ -1,26 +1,15 @@
 import { Response } from 'express';
 import { HouseService } from '../services';
 import { Estado, ExclusionSensor, RequestExt } from '../interfaces';
-import { BadRequest, checkPayload, ErrorHandler } from '../utils';
+import { BadRequest, checkUserPayload, ErrorHandler } from '../utils';
 
 /** Gestiona peticiones y respuestas vinculadas a Casas. */
 export class HouseController {
   constructor (private houseService: HouseService) {}
 
-  async create ({ body, userPayload }: RequestExt, res: Response) {
+  async getAll ({ user }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-      await this.houseService.create(body, payload);
-
-      res.status(201).json({ message: 'Created successfully' });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
-    }
-  }
-
-  async getAll ({ userPayload }: RequestExt, res: Response) {
-    try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
       const responseHouse = await this.houseService.getAll(payload);
 
       res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
@@ -29,9 +18,9 @@ export class HouseController {
     }
   }
 
-  async getOne ({ params, userPayload, headers }: RequestExt, res: Response) {
+  async getOne ({ params, user, headers }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
       const houseId = params.id;
       const responseHouse = await this.houseService.getOne(houseId, payload, headers);
 
@@ -41,9 +30,9 @@ export class HouseController {
     }
   }
 
-  async update ({ params, body, userPayload }: RequestExt, res: Response) {
+  async update ({ params, body, user }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
       const houseId = params.id;
       const responseHouse = await this.houseService.update(houseId, payload, body);
 
@@ -53,21 +42,9 @@ export class HouseController {
     }
   }
 
-  async delete ({ params, userPayload }: RequestExt, res: Response) {
+  async armAlarm ({ body, user }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-      const houseId = params.id;
-      await this.houseService.delete(houseId, payload);
-
-      res.status(200).json({ message: 'Deleted successfully' });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al borrar la casa');
-    }
-  }
-
-  async armAlarm ({ body, userPayload }: RequestExt, res: Response) {
-    try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
       const someActivated = body.exclusionArray.some(
         (sensor: ExclusionSensor) => sensor.estado === Estado.ENCENDIDO
       );
@@ -84,9 +61,9 @@ export class HouseController {
     }
   }
 
-  async disarmAlarm ({ userPayload }: RequestExt, res: Response) {
+  async disarmAlarm ({ user }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
 
       res.status(202).json({ message: 'Deactivation in process', status: 'pending' });
 
@@ -96,9 +73,9 @@ export class HouseController {
     }
   }
 
-  async setLights ({ body, userPayload }: RequestExt, res: Response) {
+  async setLights ({ body, user }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
 
       res.status(202).json({ message: 'Set lights state in process', status: 'pending' });
 
@@ -108,9 +85,9 @@ export class HouseController {
     }
   }
 
-  async triggerAlarm ({ body, userPayload }: RequestExt, res: Response) {
+  async triggerAlarm ({ body, user }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
 
       res.status(202).json({ message: 'Trigger in process', status: 'pending' });
 

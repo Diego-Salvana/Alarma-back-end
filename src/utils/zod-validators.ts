@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { Casa, Dispositivo, Estado, ExcludeArrayDTO, Login, Register } from '../interfaces';
-import { CentralCodeDTO, CentralInfoDTO } from '../interfaces/central.interface';
+import { Casa, Dispositivo, Estado, ExcludeArrayDTO, Login, Register, CentralCodeDTO, CentralInfoDTO } from '../interfaces';
 import { CasaSchema, CentralSchema, DispositivoSchema, UserSchema, ExclusionSensorSchema, TriggeredSchema } from './user-zod-schemas';
 
 export class ZodValidators {

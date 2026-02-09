@@ -1,5 +1,5 @@
-import { Register } from './auth.interface';
-import { IUserDocument, User } from './user.interface';
+import { Register } from './dtos.interfaces';
+import { IUserDocument, User } from './schemas.interface';
 
 export interface IUserDataAccess {
   create(userBody: Register): Promise<IUserDocument>;

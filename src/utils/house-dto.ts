@@ -1,5 +1,5 @@
 import { Casa, HouseResponse } from '../interfaces';
-import { JwtHandler } from '../utils';
+import { JwtHandler } from '.';
 
 /** Clase que contiene métodos para transformar datos de Casas en objetos DTO. */
 export class HouseDto {
@@ -8,7 +8,7 @@ export class HouseDto {
     let token: string | undefined;
 
     if (newToken && userId) {
-      token = JwtHandler.generateIdToken({ userId, houseId: house._id, verified });
+      token = JwtHandler.generateIdToken(userId, verified, house._id);
     }
 
     const houseData: HouseResponse = {

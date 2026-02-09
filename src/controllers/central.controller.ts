@@ -1,14 +1,14 @@
 import { Response } from 'express';
 import { CentralService } from '../services';
 import { RequestExt } from '../interfaces';
-import { checkPayload, ErrorHandler } from '../utils';
+import { checkUserPayload, ErrorHandler } from '../utils';
 
 export class CentralController {
   constructor (private centralService: CentralService) {}
 
-  async getHistory ({ userPayload }: RequestExt, res: Response) {
+  async getHistory ({ user }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
 
       const responseHistory = await this.centralService.getHistory(payload);
       res.status(200).json({ message: 'Satisfactory request', data: responseHistory });
@@ -17,24 +17,12 @@ export class CentralController {
     }
   }
 
-  async updateCode ({ userPayload, body }: RequestExt, res: Response) {
+  async updateCode ({ user, body }: RequestExt, res: Response) {
     try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
+      const payload = checkUserPayload(user, 'Falta información para encontrar usuario');
 
       await this.centralService.updateCode(payload, body);
       res.status(200).json({ message: 'Updated successfully' });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
-    }
-  }
-
-  async updateInfo ({ userPayload, params, body }: RequestExt, res: Response) {
-    try {
-      const payload = checkPayload(userPayload, 'Falta información para encontrar usuario');
-      const houseId = params.houseId;
-
-      const responseCentral = await this.centralService.updateInfo(payload, houseId, body);
-      res.status(200).json({ message: 'Updated successfully', data: responseCentral });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
     }
