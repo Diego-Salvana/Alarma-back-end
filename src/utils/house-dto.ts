@@ -8,7 +8,7 @@ export class HouseDto {
     let token: string | undefined;
 
     if (newToken && userId) {
-      token = JwtHandler.generateIdToken(userId, verified, house._id);
+      token = JwtHandler.generateUserIdToken(userId, verified, house._id);
     }
 
     const houseData: HouseResponse = {

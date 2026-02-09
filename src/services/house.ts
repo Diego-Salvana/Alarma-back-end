@@ -1,8 +1,6 @@
-import { IncomingHttpHeaders } from 'http2';
-import { Casa, Estado, ExcludeArrayDTO, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, SessionJwtPayload } from '../interfaces';
+import { Casa, Estado, ExcludeArrayDTO, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, SessionJwtPayload, ExclusionSensor } from '../interfaces';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
-import { AlreadyExists, WarningFactory } from '../utils';
-import { HouseDto } from '../utils/house-dto';
+import { AlreadyExists, WarningFactory, HouseDto, BadRequest } from '../utils';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';
 
@@ -27,20 +25,16 @@ export class HouseService {
   }
 
   /** Obtiene todas las casas del usuario. */
-  async getAll (userPayload: SessionJwtPayload): Promise<HouseResponse[]> {
-    const userId = userPayload.sub;
+  async getAll (userId: string): Promise<HouseResponse[]> {
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
 
     return this.houseDTO.housesListResponse(allUserHouses);
   }
 
   /** Obtiene una casa específica del usuario. */
-  async getOne (houseId: string, userPayload: SessionJwtPayload, headers: IncomingHttpHeaders):
+  async getOne (userId: string, houseId: string, verified: boolean, tokenRequired: boolean):
   Promise<HouseResponse> {
-    const userId = userPayload.sub;
-    const verified = userPayload.verified;
     const house = await this.houseDataAccess.getOne(houseId, userId);
-    const tokenRequired = headers['set-house'] === 'true';
 
     return this.houseDTO.houseResponse(house, tokenRequired, userId, verified);
   }
@@ -49,9 +43,8 @@ export class HouseService {
     * Actualiza una casa del usuario
     * verificando que no exista otra con el mismo nombre o dirección.
   */
-  async update (houseId: string, userPayload: SessionJwtPayload, body: Partial<Casa>):
+  async update (userId: string, houseId: string, body: Partial<Casa>):
   Promise<HouseResponse> {
-    const userId = userPayload.sub;
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
     const otherHouses = allUserHouses.filter(house => house._id.toString() !== houseId);
     const nameExists = otherHouses.some(
@@ -81,22 +74,30 @@ export class HouseService {
   }
 
   /** Borra una casa del usuario. */
-  async delete (houseId: string, userPayload: SessionJwtPayload): Promise<void> {
-    const userId = userPayload.sub;
+  async delete (userId: string, houseId: string): Promise<void> {
     await this.houseDataAccess.delete(houseId, userId);
   }
 
+  /** Valida que al menos un sensor esté encendido. */
+  validateArmAlarm (body: ExcludeArrayDTO): void {
+    const someActivated = body.exclusionArray.some(
+      (sensor: ExclusionSensor) => sensor.estado === Estado.ENCENDIDO
+    );
+
+    if (!someActivated) throw new BadRequest('No hay sensores encendidos');
+  }
+
   /** Publica a Mosquitto mensaje de Encendido o Apagado de alarma según los parámetros. */
-  async setAlarmState (userPayload: SessionJwtPayload, state: Estado, body?: ExcludeArrayDTO):
+  async setAlarmState (userId: string, houseId: string, state: Estado, body?: ExcludeArrayDTO):
   Promise<void> {
     let username = '';
     let houseName = '';
     
     try {
-      [username, houseName] = await this.getUsernameAndHouseName(userPayload);
+      [username, houseName] = await this.getUsernameAndHouseName(userId, houseId);
     } catch (err: any) {
       console.log('Error al Setear la Alarma: ', err.message);
-      this.sendWarningById(userPayload.sub, WarningType.DEVICE_STATE);
+      this.sendWarningById(userId, WarningType.DEVICE_STATE);
       return;
     }
 
@@ -111,15 +112,15 @@ export class HouseService {
   }
 
   /** Publica mensaje para cambiar estado de luces en Mosquitto */
-  async setLightsState (userPayload: SessionJwtPayload, { sector, state }: Lights): Promise<void> {
+  async setLightsState (userId: string, houseId: string, { sector, state }: Lights): Promise<void> {
     let username = '';
     let houseName = '';
     
     try {
-      [username, houseName] = await this.getUsernameAndHouseName(userPayload);
+      [username, houseName] = await this.getUsernameAndHouseName(userId, houseId);
     } catch (err: any) {
       console.log('Error al Setear Luces: ', err.message);
-      this.sendWarningById(userPayload.sub, WarningType.LIGHTS_STATE);
+      this.sendWarningById(userId, WarningType.LIGHTS_STATE);
       return;
     }
     
@@ -129,15 +130,15 @@ export class HouseService {
   }
 
   /** Publica a Mosquitto mensaje de disparo de alarma (sonando) según los parámetros. */
-  async setTriggeredState (userPayload: SessionJwtPayload, state: Estado): Promise<void> {
+  async setTriggeredState (userId: string, houseId: string, state: Estado): Promise<void> {
     let username = '';
     let houseName = '';
 
     try {
-      [username, houseName] = await this.getUsernameAndHouseName(userPayload);
+      [username, houseName] = await this.getUsernameAndHouseName(userId, houseId);
     } catch (err: any) {
       console.log('Error al Disparar la Alarma: ', err.message);
-      this.sendWarningById(userPayload.sub, WarningType.TRIGGER_ALARM);
+      this.sendWarningById(userId, WarningType.TRIGGER_ALARM);
       return;
     }
 
@@ -222,9 +223,7 @@ export class HouseService {
   }
 
   /** Método privado que prepara usuario y nombre de casa para operaciones de Mosquitto. */
-  private async getUsernameAndHouseName (userPayload: SessionJwtPayload): Promise<[string, string]> {
-    const userId = userPayload.sub;
-    const houseId = userPayload.hid;
+  private async getUsernameAndHouseName (userId: string, houseId: string): Promise<[string, string]> {
     const user = await this.userDataAccess.getById(userId);
 
     const house = user.casas.find(house => house._id.toString() === houseId);

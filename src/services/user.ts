@@ -1,5 +1,5 @@
-import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, UpdateUser, VerificationJwtPayload } from '../interfaces';
-import { BadRequest, encrypt, JwtHandler, Unauthorized, verifyPass, UserDto } from '../utils';
+import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, Role, UpdateUser } from '../interfaces';
+import { encrypt, JwtHandler, Unauthorized, verifyPass, UserDto } from '../utils';
 import { EmailService } from './email';
 import { Types } from 'mongoose';
 
@@ -40,7 +40,13 @@ export class UserService {
 
     if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
 
-    const responseUser = this.userDTO.loginResponse(user);
+    const role: Role = user.mosquittoPass === '1' ? 'admin' : 'user';
+    const sessionToken =
+      role === 'admin'
+        ? JwtHandler.generateAdminToken(user._id as string)
+        : JwtHandler.generateUserIdToken(user._id as string, user.habilitado);
+
+    const responseUser = this.userDTO.loginResponse(user, sessionToken);
 
     return responseUser;
   }
@@ -54,24 +60,14 @@ export class UserService {
   }
 
   /** Verifica el correo del usuario y devuelve un token de sesión. */
-  async verifyEmail (token: string): Promise<string> {
-    let payload: VerificationJwtPayload;
-
-    try {
-      payload = JwtHandler.verifyToken(token) as VerificationJwtPayload;
-    } catch (err) {
-      throw new BadRequest('Token inválido');
-    }
-
-    const { username, purpose } = payload;
-    if (!username) throw new BadRequest('Token inválido');
+  async verifyEmail (username: string, purpose: Purpose): Promise<string> {
     if (purpose !== Purpose.EMAIL_VERIFICATION) throw new Unauthorized('Tipo de token no válido');
-    
+
     const user = await this.userDataAccess.updateEmailVerification(username);
     const id = (user._id as Types.ObjectId).toString();
-    const sesionToken = JwtHandler.generateIdToken(id, true);
+    const sessionToken = JwtHandler.generateUserIdToken(id, user.habilitado);
     
-    return sesionToken;
+    return sessionToken;
   }
 
   /** Solicita restablecimiento de contraseña y envía un email con un token. */
@@ -83,17 +79,7 @@ export class UserService {
   }
 
   /** Restablece la contraseña del usuario. */
-  async resetPassword (token: string, password: string): Promise<string> {
-    let payload: VerificationJwtPayload;
-
-    try {
-      payload = JwtHandler.verifyToken(token) as VerificationJwtPayload;
-    } catch (err) {
-      throw new BadRequest('Token inválido');
-    }
-
-    const { username, purpose } = payload;
-    if (!username) throw new BadRequest('Token inválido');
+  async resetPassword (username: string, purpose: Purpose, password: string): Promise<string> {
     if (purpose !== Purpose.PASSWORD_RESET) throw new Unauthorized('Tipo de token no válido');
 
     const email = username.split(this.userPrefix ?? '-')[1];
@@ -105,9 +91,9 @@ export class UserService {
 
     await this.userDataAccess.updatePassword(userId, hashedPassword, newHash);
 
-    const sesionToken = JwtHandler.generateIdToken(userId, verified);
+    const sessionToken = JwtHandler.generateUserIdToken(userId, verified);
     
-    return sesionToken;
+    return sessionToken;
   }
 
   /** Obtiene un usuario por su ID y devuelve su `ProfileResponse`. */

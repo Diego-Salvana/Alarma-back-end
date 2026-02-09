@@ -1,29 +1,36 @@
 import { JwtPayload, sign, verify, decode } from 'jsonwebtoken';
-import { SessionJwtPayload, Purpose, VerificationJwtPayload } from '../interfaces';
+import { SessionJwtPayload, Purpose, VerificationJwtPayload, AdminJwtPayload, Role } from '../interfaces';
 
 /** Clase que contiene métodos para generar, verificar y decodificar tokens JWT. */
 export class JwtHandler {
-  private static JWT_SECRET = process.env.JWT_SECRET as string;
+  private static USER_JWT = process.env.USER_JWT_SECRET as string;
+  private static ADMIN_JWT = process.env.ADMIN_JWT_SECRET as string;
 
-  static generateIdToken (userId: string, verified: boolean, houseId?: string): string {
+  static generateUserIdToken (userId: string, verified: boolean, houseId?: string): string {
     const payload: SessionJwtPayload = {
       sub: userId,
       verified,
       hid: houseId ?? ''
     };
 
-    return sign(payload, this.JWT_SECRET, { expiresIn: '90 days' });
+    return sign(payload, this.USER_JWT, { expiresIn: '90 days' });
   };
 
   /* Utilizado para verificación de correo y restablecimiento de contraseña */
   static generateUsernameToken (username: string, purpose: Purpose, expiresIn = '90 days'): string {
     const payload: VerificationJwtPayload = { username, purpose };
 
-    return sign(payload, this.JWT_SECRET, { expiresIn });
+    return sign(payload, this.USER_JWT, { expiresIn });
+  };
+
+  static generateAdminToken (userId: string): string {
+    const payload: AdminJwtPayload = { sub: userId, role: 'admin' };
+
+    return sign(payload, this.ADMIN_JWT, { expiresIn: '90 days' });
   };
    
-  static verifyToken <T> (token: string): T {
-    return verify(token, this.JWT_SECRET) as T;
+  static verifyToken <T> (token: string, role: Role = 'user'): T {
+    return verify(token, role === 'user' ? this.USER_JWT : this.ADMIN_JWT) as T;
   };
 
   static decode (token: string): JwtPayload | string | null {

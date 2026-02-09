@@ -13,6 +13,8 @@ export interface UpdateUser extends Register {
   nuevaContrasena?: string;
 }
 
+export type Role = 'user' | 'admin';
+
 export type CentralProperty = 'alarmaEncendida' | 'sonando' | 'historial';
 
 export type SensorProperty = 'estado' | 'activado';

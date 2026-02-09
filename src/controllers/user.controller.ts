@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services';
-import { RequestExt } from '../interfaces';
+import { RequestExt, SessionJwtPayload, VerificationJwtPayload } from '../interfaces';
 import { BadRequest, ErrorHandler } from '../utils';
 
 /** Gestiona peticiones y respuestas vinculadas a Usuarios. */
@@ -37,13 +37,12 @@ export class UserController {
     }
   }
 
-  async verifyEmail ({ body }: Request, res: Response) {
+  async verifyEmail ({ verificationToken }: RequestExt, res: Response) {
     try {
-      const { token } = body;
-      if (!token) throw new BadRequest('Falta información para verificar correo');
+      const { username, purpose } = verificationToken as VerificationJwtPayload;
+      const sessionToken = await this.userService.verifyEmail(username, purpose);
 
-      const sesionToken = await this.userService.verifyEmail(token);
-      res.status(200).json({ message: 'Verificación exitosa', token: sesionToken });
+      res.status(200).json({ message: 'Verificación exitosa', token: sessionToken });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al verificar correo');
     }
@@ -63,23 +62,26 @@ export class UserController {
     }
   }
 
-  async resetPassword ({ body }: Request, res: Response) {
+  async resetPassword ({ body, verificationToken }: RequestExt, res: Response) {
     try {
-      const { token, password } = body;
-      if (!token || !password) throw new BadRequest('Falta información para restablecer contraseña');
+      const { username, purpose } = verificationToken as VerificationJwtPayload;
+      const { password } = body;
 
-      const sesionToken = await this.userService.resetPassword(token, password);
-      res.status(200).json({ message: 'Contraseña restablecida exitosamente', token: sesionToken });
+      if (!password) throw new BadRequest('Falta información para restablecer contraseña');
+
+      const sessionToken = await this.userService.resetPassword(username, purpose, password);
+
+      res.status(200).json({ message: 'Contraseña restablecida exitosamente', token: sessionToken });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al restablecer contraseña');
     }
   }
 
   async getById ({ user }: RequestExt, res: Response) {
-    const id = user?.sub as string;
+    const { sub } = user as SessionJwtPayload;
 
     try {
-      const responseUser = await this.userService.getById(id);
+      const responseUser = await this.userService.getById(sub);
       res.status(200).json({ message: 'Get by id successfully', data: responseUser });
     } catch (e) {
       ErrorHandler.generateResponse(res, e, 'Ocurrió un error al obtener usuario');
@@ -87,10 +89,10 @@ export class UserController {
   }
 
   async update ({ body, user }: RequestExt, res: Response) {
-    const id = user?.sub as string;
+    const { sub } = user as SessionJwtPayload;
 
     try {
-      const responseUser = await this.userService.update(id, body);
+      const responseUser = await this.userService.update(sub, body);
       res.status(200).json({ message: 'Updated successfully', data: responseUser });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
