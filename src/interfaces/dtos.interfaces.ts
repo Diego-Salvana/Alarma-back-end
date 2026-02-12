@@ -1,17 +1,29 @@
-import { ExclusionSensor } from './domain.interfaces';
+import { loginSchema, registerSchema, updateUserSchema, userSystemInfoSchema } from '../utils/zod-validators';
+import { ExclusionSensor, House } from './domain.interfaces';
+import { z } from 'zod';
 
 // -------------------
 /* User */
 // -------------------
-export interface Login {
-  email: string;
-  contrasena: string;
-}
+export type Login = z.infer<typeof loginSchema>;
 
-export interface Register extends Login {
-  nombre: string;
-  apellido: string;
-  telefono: string;
+export type Register = z.infer<typeof registerSchema>;
+
+export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
+
+export type UserSystemInfoDTO = z.infer<typeof userSystemInfoSchema>;
+
+// -------------------
+/* Houses */
+// -------------------
+type CreateHouseRequired = Pick<House, 'nombre' | 'direccion' | 'central'>;
+type CreateHouseOptional = Partial<Pick<House, 'sensores' | 'camaras'>>;
+
+export interface CreateHouseDTO extends CreateHouseRequired, CreateHouseOptional {}
+
+export interface HouseSystemInfoDTO {
+  nombreCasa?: string;
+  central?: CentralInfoDTO;
 }
 
 // -------------------
@@ -31,6 +43,13 @@ export interface CentralInfoDTO {
 // -------------------
 /* Sensors */
 // -------------------
+export interface CreateSensorDTO {
+  dispositivoId: string;
+  numeroSensor: number;
+  nombre: string;
+  tipo: string;
+}
+
 export interface SensorNameDTO {
   numeroSensor: number;
   nombre: string;

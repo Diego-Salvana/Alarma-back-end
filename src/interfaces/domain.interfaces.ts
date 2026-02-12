@@ -1,25 +1,108 @@
-import { Register } from './dtos.interfaces';
-import { Casa, Estado } from './schemas.interface';
+// -------------------
+// Enums
+// -------------------
+export enum State {
+  ON = 'On',
+  OFF = 'Off'
+}
 
-export interface RegisterDB extends Register {
+export enum DeviceType {
+  MOVEMENT = 'Movimiento',
+  WINDOW = 'Ventana',
+  SMOKE = 'Humo',
+  CAMERA = 'Camara'
+}
+
+// -------------------
+// Value Objects
+// -------------------
+export interface EventLog {
+  fechaHora: Date;
+}
+
+export interface ControlPanelEventLog {
+  fechaHora: Date;
+  numeroDispositivo: number;
+}
+
+export interface EventLogWithName {
+  fechaHora: Date;
+  nombreDispositivo: string;
+}
+
+export interface Address {
+  calle: string;
+  numero: number;
+  ciudad: string;
+}
+
+// -------------------
+// Entities
+// -------------------
+export interface ControlPanel {
+  centralId: string;
+  nombre: string;
+  codigo: number;
+  alarmaEncendida: State;
+  sonando: boolean;
+  historial: ControlPanelEventLog[];
+}
+
+export interface Device {
+  dispositivoId: string;
+  numeroSensor: number;
+  nombre: string;
+  tipo: string;
+  estado: State;
+  historial: EventLog[];
+}
+
+export interface House {
+  _id: string;
+  nombre: string;
+  nombreCasa: string;
+  direccion: Address;
+  central: ControlPanel;
+  sensores: Device[];
+  camaras: Device[];
+}
+
+export interface User {
+  _id: string;
+  nombre: string;
+  apellido: string;
   nombreUsuario: string;
+  email: string;
+  contrasena: string;
   mosquittoPass: string;
+  telefono: string;
   habilitado: boolean;
-  casas: Casa[];
+  casas: House[];
 }
 
-export interface UpdateUser extends Register {
-  contrasenaActual?: string;
-  nuevaContrasena?: string;
-}
-
+// -------------------
+// Users
+// -------------------
 export type Role = 'user' | 'admin';
 
+export interface UpdateBody {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  telefono?: string;
+}
+
+// -------------------
+// Central
+// -------------------
 export type CentralProperty = 'alarmaEncendida' | 'sonando' | 'historial';
 
-export type SensorProperty = 'estado' | 'activado';
+// -------------------
+// Sensors
+// -------------------
+export type SensorProperty = 'estado';
 
 export interface ExclusionSensor {
   numeroSensor: string;
-  estado: Estado;
+  estado: State;
 };

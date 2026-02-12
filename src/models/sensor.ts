@@ -1,4 +1,4 @@
-import { Dispositivo, Historial, SensorInfoDTO } from '../interfaces';
+import { Device, EventLog, SensorInfoDTO } from '../interfaces';
 import { AlreadyExists, NotFound } from '../utils';
 import { UserModel } from '.';
 
@@ -9,7 +9,7 @@ export class SensorDataAccess {
   private noCentralHistory = '-casas.central.historial';
   
   /** Crea un nuevo sensor para el usuario, evitando números duplicados. */
-  async create (userId: string, houseId: string, sensor: Dispositivo): Promise<Dispositivo> {
+  async create (userId: string, houseId: string, sensor: Device): Promise<Device> {
     const user = await this.userModel
       .findOneAndUpdate(
         {
@@ -37,7 +37,7 @@ export class SensorDataAccess {
   }
 
   /** Obtiene un Sensor de una Casa del Usuario. */
-  async getOne (userId: string, houseId: string, sensorNumber: number): Promise<Dispositivo> {
+  async getOne (userId: string, houseId: string, sensorNumber: number): Promise<Device> {
     const user = await this.userModel
       .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
       .select(this.noCentralHistory)
@@ -56,7 +56,7 @@ export class SensorDataAccess {
 
   /** Actualiza el nombre de un Sensor de una Casa del Usuario. */
   async updateName (userId: string, houseId: string, sensorNumber: number, name: string):
-  Promise<Dispositivo> {
+  Promise<Device> {
     const user = await this.userModel
       .findOneAndUpdate(
         {
@@ -91,7 +91,7 @@ export class SensorDataAccess {
 
   /** Actualiza la información de un Sensor de una Casa del Usuario. */
   async updateInfo (userId: string, houseId: string, sensorNumber: number, infoBody: SensorInfoDTO):
-  Promise<Dispositivo> {
+  Promise<Device> {
     const user = await this.userModel
       .findOne({ _id: userId, 'casas._id': houseId, 'casas.sensores.numeroSensor': sensorNumber })
       .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
@@ -127,7 +127,7 @@ export class SensorDataAccess {
   async addToHistory (userName: string, houseName: string, sensorNumber: number, date: Date):
   Promise<void> {
     const utcDate = new Date(date.toISOString());
-    const activationDate: Historial = { fechaHora: utcDate };
+    const activationDate: EventLog = { fechaHora: utcDate };
 
     const result = await this.userModel.updateOne(
       {

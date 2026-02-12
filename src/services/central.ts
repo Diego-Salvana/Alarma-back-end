@@ -1,4 +1,4 @@
-import { Central, HistorialConNombre, CentralCodeDTO, CentralInfoDTO } from '../interfaces';
+import { EventLogWithName, CentralCodeDTO } from '../interfaces';
 import { CentralDataAccess, UserDataAccess } from '../models';
 import { NotFound, Unauthorized, verifyPass } from '../utils';
 
@@ -9,14 +9,14 @@ export class CentralService {
   ) {}
 
   /** Obtiene el historial de eventos de la Central y mapea los dispositivos a nombres descriptivos. */
-  async getHistory (userId: string, houseId: string): Promise<HistorialConNombre[]> {
+  async getHistory (userId: string, houseId: string): Promise<EventLogWithName[]> {
     const house = await this.centralDataAccess.getOne(userId, houseId);
 
     return house.central.historial.map(history => {
       const sensor = house.sensores.find(s => s.numeroSensor === history.numeroDispositivo);
       const sensorName = sensor?.nombre ?? history.numeroDispositivo.toString();
          
-      const historyWithName: HistorialConNombre = {
+      const historyWithName: EventLogWithName = {
         fechaHora: history.fechaHora,
         nombreDispositivo: sensorName
       };
@@ -40,12 +40,5 @@ export class CentralService {
     }
     
     await this.centralDataAccess.updateCode(userId, houseId, codeBody);
-  }
-
-  /** Actualiza la información de la central en la casa del usuario. */
-  async updateInfo (userId: string, houseId: string, infoBody: CentralInfoDTO): Promise<Central> {
-    const updatedCentral = await this.centralDataAccess.updateInfo(userId, houseId, infoBody);
-
-    return updatedCentral;
   }
 }

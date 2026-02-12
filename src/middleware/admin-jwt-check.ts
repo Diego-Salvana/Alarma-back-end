@@ -7,7 +7,7 @@ export function checkAdminJwt (req: RequestExt, res: Response, next: NextFunctio
     const token = req.headers.authorization?.split(' ').pop();
     if (!token) throw new Unauthorized('Token no proporcionado');
 
-    const payload = JwtHandler.verifyToken<AdminJwtPayload>(token);
+    const payload = JwtHandler.verifyToken<AdminJwtPayload>(token, 'admin');
     if (!payload.sub) throw new Unauthorized('Falta información para encontrar usuario');
     if (payload.role !== 'admin') throw new Unauthorized('No tienes permiso para acceder');
 

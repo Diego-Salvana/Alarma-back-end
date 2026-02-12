@@ -1,7 +1,6 @@
-import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, Role, UpdateUser } from '../interfaces';
+import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, Role, UserSystemInfoDTO, UpdateUserDTO } from '../interfaces';
 import { encrypt, JwtHandler, Unauthorized, verifyPass, UserDto } from '../utils';
 import { EmailService } from './email';
-import { Types } from 'mongoose';
 
 /** Servicio que administra operaciones con la base de datos y la lógica de negocio de Usuarios. */
 export class UserService {
@@ -32,6 +31,23 @@ export class UserService {
     await this.emailService.sendVerificationEmail(body.email, token);
   }
 
+  /** Autentica un administrador y devuelve su `LoginResponse`. */
+  async adminLogin ({ email, contrasena }: Login): Promise<LoginResponse> {
+    const user = await this.userDataAccess.getOne(email);
+    const hashedPassword = user.contrasena;
+    const passwordIsCorrect = await verifyPass(contrasena, hashedPassword);
+
+    if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
+
+    const role: Role = user.mosquittoPass === '1' ? 'admin' : 'user';
+    if (role !== 'admin' || !user.habilitado) throw new Unauthorized('Usuario no autorizado');
+
+    const adminToken = JwtHandler.generateAdminToken(user._id);
+    const responseUser = this.userDTO.loginResponse(user, adminToken);
+
+    return responseUser;
+  }
+
   /** Autentica un usuario y devuelve su `LoginResponse`. */
   async login ({ email, contrasena }: Login): Promise<LoginResponse> {
     const user = await this.userDataAccess.getOne(email);
@@ -40,12 +56,7 @@ export class UserService {
 
     if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
 
-    const role: Role = user.mosquittoPass === '1' ? 'admin' : 'user';
-    const sessionToken =
-      role === 'admin'
-        ? JwtHandler.generateAdminToken(user._id as string)
-        : JwtHandler.generateUserIdToken(user._id as string, user.habilitado);
-
+    const sessionToken = JwtHandler.generateUserIdToken(user._id, user.habilitado);
     const responseUser = this.userDTO.loginResponse(user, sessionToken);
 
     return responseUser;
@@ -64,7 +75,7 @@ export class UserService {
     if (purpose !== Purpose.EMAIL_VERIFICATION) throw new Unauthorized('Tipo de token no válido');
 
     const user = await this.userDataAccess.updateEmailVerification(username);
-    const id = (user._id as Types.ObjectId).toString();
+    const id = user._id;
     const sessionToken = JwtHandler.generateUserIdToken(id, user.habilitado);
     
     return sessionToken;
@@ -84,7 +95,7 @@ export class UserService {
 
     const email = username.split(this.userPrefix ?? '-')[1];
     const user = await this.userDataAccess.getOne(email);
-    const userId = (user._id as Types.ObjectId).toString();
+    const userId = user._id;
     const verified = user.habilitado;
     const hashedPassword = user.contrasena;
     const newHash = await encrypt(password);
@@ -104,8 +115,15 @@ export class UserService {
     return responseUser;
   }
 
+  async getAllUsers () {
+    const users = await this.userDataAccess.getAll();
+    const responseUsers = users.map(user => this.userDTO.profileResponse(user));
+
+    return responseUsers;
+  }
+
   /** Actualiza datos y/o contraseña de un usuario y devuelve su `ProfileResponse`. */
-  async update (id: string, body: UpdateUser): Promise<ProfileResponse> {
+  async update (id: string, body: UpdateUserDTO): Promise<ProfileResponse> {
     const user = await this.userDataAccess.getById(id);
     const { contrasenaActual, nuevaContrasena, ...safeBody } = body;
     const safeBodyIsEmpty = Object.keys(safeBody).length === 0;
@@ -125,6 +143,13 @@ export class UserService {
       const updatedUser = await this.userDataAccess.updateInfo(id, safeBody);
       responseUser = this.userDTO.profileResponse(updatedUser);
     }
+
+    return responseUser;
+  }
+
+  async updateInfoByAdmin (userId: string, body: UserSystemInfoDTO): Promise<ProfileResponse> {
+    const updatedUser = await this.userDataAccess.updateSystemData(userId, body);
+    const responseUser = this.userDTO.profileResponse(updatedUser);
 
     return responseUser;
   }

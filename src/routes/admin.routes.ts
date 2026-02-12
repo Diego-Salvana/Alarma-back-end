@@ -1,11 +1,17 @@
 import { Router } from 'express';
-import { UserService } from '../services';
+import { HouseService, UserService } from '../services';
 import { AdminController } from '../controllers/admin.controller';
-import { checkAdminJwt, createHouseValidator, createSensorValidator, updateInfoSensorValidator } from '../middleware';
+import { checkAdminJwt, validateBody } from '../middleware';
+import { createHouseSchema, createSensorSchema, loginSchema, sensorSystemInfoSchema, userSystemInfoSchema } from '../utils/zod-validators';
 
-export function createAdminRouter (userService: UserService) {
+export function createAdminRouter (userService: UserService, houseService: HouseService) {
   const adminRouter = Router();
-  const adminController = new AdminController(userService);
+  const adminController = new AdminController(userService, houseService);
+
+  // Login
+  adminRouter.post('/login',
+    validateBody(loginSchema), adminController.login.bind(adminController)
+  );
 
   // Users
   adminRouter.get('/users',
@@ -15,7 +21,9 @@ export function createAdminRouter (userService: UserService) {
     checkAdminJwt, adminController.getUser.bind(adminController)
   );
   adminRouter.patch('/users/:userId',
-    checkAdminJwt, adminController.modifyUser.bind(adminController)
+    validateBody(userSystemInfoSchema),
+    checkAdminJwt,
+    adminController.modifyUser.bind(adminController)
   );
   adminRouter.delete('/users/:userId',
     checkAdminJwt, adminController.deleteUser.bind(adminController)
@@ -23,7 +31,7 @@ export function createAdminRouter (userService: UserService) {
 
   // Houses
   adminRouter.post('/users/:userId/houses',
-    createHouseValidator, checkAdminJwt, adminController.createHouse.bind(adminController)
+    validateBody(createHouseSchema), checkAdminJwt, adminController.createHouse.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId',
     checkAdminJwt, adminController.modifyHouse.bind(adminController)
@@ -34,10 +42,12 @@ export function createAdminRouter (userService: UserService) {
 
   // Sensors
   adminRouter.post('/users/:userId/houses/:houseId/sensors',
-    createSensorValidator, checkAdminJwt, adminController.createSensor.bind(adminController)
+    validateBody(createSensorSchema),
+    checkAdminJwt,
+    adminController.createSensor.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId/sensors/:sensorNumber',
-    updateInfoSensorValidator, checkAdminJwt, adminController.updateSensor.bind(adminController)
+    validateBody(sensorSystemInfoSchema), checkAdminJwt, adminController.updateSensor.bind(adminController)
   );
   adminRouter.delete('/users/:userId/houses/:houseId/sensors/:sensorNumber',
     checkAdminJwt, adminController.deleteSensor.bind(adminController)

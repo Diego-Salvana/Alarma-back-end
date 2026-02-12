@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { SensorService } from '../services';
 import { SensorController } from '../controllers';
-import { checkUserJwt, updateNameSensorValidator } from '../middleware';
+import { checkUserJwt, validateBody } from '../middleware';
+import { sensorNameSchema } from '../utils/zod-validators';
 
 export const createSensorsRouter = (sensorService: SensorService) => {
   const sensorsRouter = Router();
@@ -11,7 +12,7 @@ export const createSensorsRouter = (sensorService: SensorService) => {
     checkUserJwt, sensorController.getOne.bind(sensorController)
   );
   sensorsRouter.patch('/sensor-name',
-    updateNameSensorValidator, checkUserJwt, sensorController.updateName.bind(sensorController)
+    validateBody(sensorNameSchema), checkUserJwt, sensorController.updateName.bind(sensorController)
   );
 
   return sensorsRouter;

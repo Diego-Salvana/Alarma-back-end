@@ -1,5 +1,4 @@
 export * from './data-access.interface';
-export * from './schemas.interface';
 export * from './request-ext.interface';
 export * from './websockets.interfaces';
 export * from './mqtt.interfaces';

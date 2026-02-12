@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { HouseService } from '../services';
 import { HouseController } from '../controllers';
-import { checkUserJwt, exclusionArrayValidator, triggeredValidator, updateHouseValidator } from '../middleware';
+import { checkUserJwt, validateBody } from '../middleware';
+import { exclusionArraySchema, triggeredSchema, updateHouseSchema } from '../utils/zod-validators';
 
 export const createHousesRouter = (houseService: HouseService) => {
   const housesRouter = Router();
@@ -14,19 +15,19 @@ export const createHousesRouter = (houseService: HouseService) => {
     checkUserJwt, houseController.getOne.bind(houseController)
   );
   housesRouter.post('/arm',
-    exclusionArrayValidator, checkUserJwt, houseController.armAlarm.bind(houseController)
+    validateBody(exclusionArraySchema), checkUserJwt, houseController.armAlarm.bind(houseController)
   );
   housesRouter.post('/disarm',
     checkUserJwt, houseController.disarmAlarm.bind(houseController)
   );
   housesRouter.patch('/name-dir/:id',
-    updateHouseValidator, checkUserJwt, houseController.update.bind(houseController)
+    validateBody(updateHouseSchema), checkUserJwt, houseController.update.bind(houseController)
   );
   housesRouter.post('/lights',
     checkUserJwt, houseController.setLights.bind(houseController)
   );
   housesRouter.post('/trigger',
-    triggeredValidator, checkUserJwt, houseController.triggerAlarm.bind(houseController)
+    validateBody(triggeredSchema), checkUserJwt, houseController.triggerAlarm.bind(houseController)
   );
 
   return housesRouter;

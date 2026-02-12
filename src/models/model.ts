@@ -1,5 +1,5 @@
-import mongoose, { Schema } from 'mongoose';
-import { IUserDocument } from '../interfaces';
+import mongoose, { HydratedDocument, Schema } from 'mongoose';
+import { User } from '../interfaces';
 
 // Historial Dispositivo Schema
 const HistorialSchema = new Schema(
@@ -89,4 +89,4 @@ const UsuarioSchema = new Schema(
 );
 
 /** Modelo de ``mongoose`` para acceder a la base de datos. */
-export const UserModel = mongoose.model<IUserDocument>('Usuario', UsuarioSchema);
+export const UserModel = mongoose.model<HydratedDocument<User>>('Usuario', UsuarioSchema);

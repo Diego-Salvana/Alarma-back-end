@@ -47,7 +47,7 @@ export class App {
     app.use('/api-alarma/houses', createHousesRouter(houseService));
     app.use('/api-alarma/sensors', createSensorsRouter(sensorService));
     app.use('/api-alarma/central', createCentralRouter(centralService));
-    app.use('/api-alarma/admin', createAdminRouter(userService));
+    app.use('/api-alarma/admin', createAdminRouter(userService, houseService));
 
     app.use((req, res) => {
       res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });

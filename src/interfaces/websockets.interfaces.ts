@@ -1,18 +1,18 @@
-import { Estado } from './schemas.interface';
+import { State } from './domain.interfaces';
 
 export interface AlarmArming {
-  state: Estado;
+  state: State;
   excludedSensors: string[];
 }
 
 export interface Lights {
   sector: string;
-  state: Estado
+  state: State
 }
 
 export interface TriggeredAlarm {
   house: string;
-  state: Estado;
+  state: State;
   sensorNumber: number | null;
 }
 

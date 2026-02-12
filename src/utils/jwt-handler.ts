@@ -26,11 +26,11 @@ export class JwtHandler {
   static generateAdminToken (userId: string): string {
     const payload: AdminJwtPayload = { sub: userId, role: 'admin' };
 
-    return sign(payload, this.ADMIN_JWT, { expiresIn: '90 days' });
+    return sign(payload, this.ADMIN_JWT, { expiresIn: '1d' });
   };
    
   static verifyToken <T> (token: string, role: Role = 'user'): T {
-    return verify(token, role === 'user' ? this.USER_JWT : this.ADMIN_JWT) as T;
+    return verify(token, role === 'admin' ? this.ADMIN_JWT : this.USER_JWT) as T;
   };
 
   static decode (token: string): JwtPayload | string | null {

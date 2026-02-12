@@ -1,5 +1,4 @@
-export * from './user-zod-schemas';
-export * from './zod-validators';
+export * from './zod-schemas';
 export * from './custom-errors';
 export * from './error-handler';
 export * from './jwt-handler';

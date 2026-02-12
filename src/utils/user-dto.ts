@@ -1,9 +1,9 @@
-import { Casa, HouseResponse, IUserDocument, LoginResponse, ProfileResponse, User } from '../interfaces';
+import { House, HouseResponse, LoginResponse, ProfileResponse, User } from '../interfaces';
 
 /** Provee transformaciones de usuario a respuestas de autenticación y perfil. */
 export class UserDto {
   /** Transforma un usuario en una respuesta de autenticación con token y casas. */
-  loginResponse (user: IUserDocument | User, token: string): LoginResponse {
+  loginResponse (user: User, token: string): LoginResponse {
     const casasResponse: HouseResponse[] = this.housesMap(user.casas);
 
     const responseUser: LoginResponse = {
@@ -18,10 +18,11 @@ export class UserDto {
   }
 
   /** Transforma un usuario en una respuesta de perfil con casas. */
-  profileResponse (user: IUserDocument | User): ProfileResponse {
+  profileResponse (user: User): ProfileResponse {
     const casasResponse: HouseResponse[] = this.housesMap(user.casas);
 
     const userProfile: ProfileResponse = {
+      _id: user._id,
       nombre: user.nombre,
       apellido: user.apellido,
       nombreUsuario: user.nombreUsuario,
@@ -35,9 +36,9 @@ export class UserDto {
   };
 
   /** Transforma un arreglo de `Casa` a un arreglo de `HouseResponse`. */
-  private housesMap (houses: Casa[]): HouseResponse[] {
+  private housesMap (houses: House[]): HouseResponse[] {
     return houses.map(casa => ({
-      _id: casa._id.toString(),
+      _id: casa._id,
       nombre: casa.nombre,
       nombreCasa: casa.nombreCasa,
       direccion: casa.direccion,

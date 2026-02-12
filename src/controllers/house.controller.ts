@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { HouseService } from '../services';
-import { Estado, RequestExt, SessionJwtPayload } from '../interfaces';
+import { State, RequestExt, SessionJwtPayload } from '../interfaces';
 import { ErrorHandler, requireUserIdAndHouseId } from '../utils';
 
 /** Gestiona peticiones y respuestas vinculadas a Casas. */
@@ -53,7 +53,7 @@ export class HouseController {
       res.status(202).json({ message: 'Activation in process', status: 'pending' });
       
       // Inicia el proceso de activación de la alarma en segundo plano.
-      void this.houseService.setAlarmState(sub, hid, Estado.ENCENDIDO, body);
+      void this.houseService.setAlarmState(sub, hid, State.ON, body);
     } catch (err) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al activar la alarma');
     }
@@ -65,7 +65,7 @@ export class HouseController {
 
       res.status(202).json({ message: 'Deactivation in process', status: 'pending' });
 
-      void this.houseService.setAlarmState(sub, hid, Estado.APAGADO);
+      void this.houseService.setAlarmState(sub, hid, State.OFF);
     } catch (err) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
     }

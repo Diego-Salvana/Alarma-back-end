@@ -1,4 +1,9 @@
-import { Direccion, Dispositivo, Estado } from './schemas.interface';
+import { State, Address, Device } from './domain.interfaces';
+
+export interface ApiResponse<T> {
+  message: string;
+  data?: T;
+}
 
 export interface LoginResponse {
   nombre: string;
@@ -12,14 +17,15 @@ export interface HouseResponse {
   _id: string;
   nombre: string;
   nombreCasa: string;
-  direccion: Direccion;
-  alarmaEncendida: Estado;
+  direccion: Address;
+  alarmaEncendida: State;
   sonando?: boolean;
-  sensores?: Dispositivo[];
+  sensores?: Device[];
   token?: string;
 }
 
 export interface ProfileResponse {
+  _id: string;
   nombre: string;
   apellido: string;
   nombreUsuario: string;

@@ -1,5 +1,5 @@
 import mqtt from 'mqtt';
-import { Estado, MQTTtopicHandler } from '../interfaces';
+import { State, MQTTtopicHandler } from '../interfaces';
 import { capitalize } from 'lodash';
 import { HouseAction, WarningType } from '../interfaces/websockets.interfaces';
 import { extractSensors } from './utils';
@@ -92,13 +92,13 @@ export class MosquittoAccess {
     const state = capitalize(stateText?.trim());
     const excludedSensors = extractSensors(sensors);
 
-    if (state !== Estado.ENCENDIDO && state !== Estado.APAGADO) {
+    if (state !== State.ON && state !== State.OFF) {
       console.log(`Mensaje de activación incorrento: ${state}`);
       this.dispatcher.onWarning(username, WarningType.DEVICE_STATE);
       return;
     }
     
-    this.dispatcher.onAlarmArming(username, houseName, state as Estado, excludedSensors);
+    this.dispatcher.onAlarmArming(username, houseName, state as State, excludedSensors);
   }
   
   private lightsHandler (topic: string, payload: string) {
@@ -106,13 +106,13 @@ export class MosquittoAccess {
     const [sector, stateText] = payload.split(':');
     const state = capitalize(stateText?.trim());
     
-    if (state !== Estado.ENCENDIDO && state !== Estado.APAGADO) {
+    if (state !== State.ON && state !== State.OFF) {
       console.log(`Mensaje de activación incorrento: ${state}`);
       this.dispatcher.onWarning(username, WarningType.LIGHTS_STATE);
       return;
     }
 
-    this.dispatcher.onLightsChange(username, houseName, sector, state as Estado);
+    this.dispatcher.onLightsChange(username, houseName, sector, state as State);
   }
 
   private triggerHandler (topic: string, payload: string) {
@@ -121,12 +121,12 @@ export class MosquittoAccess {
     const state = capitalize(stateText?.trim());
     const sensorNumber = Number(sensor?.trim()) ? Number(sensor?.trim()) : null;
 
-    if (state !== Estado.ENCENDIDO && state !== Estado.APAGADO) {
+    if (state !== State.ON && state !== State.OFF) {
       console.log(`Mensaje de disparo incorrecto: ${state}`);
       this.dispatcher.onWarning(username, WarningType.TRIGGER_ALARM);
       return;
     }
 
-    this.dispatcher.onTriggered(username, houseName, state as Estado, sensorNumber);
+    this.dispatcher.onTriggered(username, houseName, state as State, sensorNumber);
   }
 }
