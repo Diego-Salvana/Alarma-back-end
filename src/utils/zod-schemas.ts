@@ -75,7 +75,8 @@ export const UserSchema = z.object({
 
 // Petición de activación de sirena
 export const TriggeredSchema = z.object({
-  sonando: CentralSchema.shape.sonando
+  sonando: CentralSchema.shape.sonando,
+  numeroSensor: DeviceSchema.shape.numeroSensor
 });
 
 // Array de Exclusión
@@ -83,5 +84,5 @@ export const ExclusionSensorSchema = z.object({
   exclusionArray: z.object({
     numeroSensor: DeviceSchema.shape.numeroSensor,
     estado: DeviceSchema.shape.estado
-  }).array()
+  }).strict().array()
 });

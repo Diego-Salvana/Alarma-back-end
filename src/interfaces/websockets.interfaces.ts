@@ -12,14 +12,8 @@ export interface Lights {
 
 export interface TriggeredAlarm {
   house: string;
-  state: State;
+  ringing: boolean;
   sensorNumber: number | null;
-}
-
-export enum HouseAction {
-  SET_ARMED_STATE = 'SET_ARMED_STATE',
-  TRIGGER_ALARM = 'TRIGGER_ALARM',
-  SET_LIGHTS = 'SET_LIGHTS',
 }
 
 export enum WarningType {

@@ -86,10 +86,11 @@ export class HouseController {
   async triggerAlarm ({ body, user }: RequestExt, res: Response) {
     try {
       const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
+      const { sonando, numeroSensor } = body;
 
       res.status(202).json({ message: 'Trigger in process', status: 'pending' });
 
-      void this.houseService.setTriggeredState(sub, hid, body.state);
+      void this.houseService.setTriggeredState(sub, hid, sonando, numeroSensor);
     } catch (err) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al disparar la alarma');
     }

@@ -142,7 +142,8 @@ export class HouseService {
   }
 
   /** Publica a Mosquitto mensaje de disparo de alarma (sonando) según los parámetros. */
-  async setTriggeredState (userId: string, houseId: string, state: State): Promise<void> {
+  async setTriggeredState (userId: string, houseId: string, sonando: boolean, numeroSensor?: number):
+  Promise<void> {
     let username = '';
     let houseName = '';
 
@@ -154,7 +155,7 @@ export class HouseService {
       return;
     }
 
-    const message = `${state}`;
+    const message = `${sonando.toString()}:${numeroSensor ?? ''}`;
     this.mosquittoAccess.publicMessage(HouseAction.TRIGGER_ALARM, message, username, houseName);
   }
 
@@ -202,8 +203,7 @@ export class HouseService {
     this.webSocketAccess.emitSocketData(socketEvent, info);
     
     try {
-      const ringing = info.state === State.ON;
-      await this.centralDataAccess.updateSirenState(username, houseName, ringing);
+      await this.centralDataAccess.updateSirenState(username, houseName, info.ringing);
       
       const sensorNumber = info.sensorNumber;
       if (sensorNumber) {

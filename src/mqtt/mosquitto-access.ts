@@ -1,9 +1,8 @@
 import mqtt from 'mqtt';
-import { State, MQTTtopicHandler } from '../interfaces';
 import { capitalize } from 'lodash';
-import { HouseAction, WarningType } from '../interfaces/websockets.interfaces';
 import { extractSensors } from './utils';
 import { MosquittoEventDispatcher } from './mosquitto-event-dispatcher';
+import { State, MQTTtopicHandler, HouseAction, WarningType } from '../interfaces';
 
 /** Clase que gestiona la conexión ``MQTT`` y maneja la subscripción y publicación a tópicos. */
 export class MosquittoAccess {
@@ -117,16 +116,17 @@ export class MosquittoAccess {
 
   private triggerHandler (topic: string, payload: string) {
     const [,,, username, houseName] = topic.split('/');
-    const [stateText, sensor] = payload.split(':');
-    const state = capitalize(stateText?.trim());
+    const [ringing, sensor] = payload.split(':');
     const sensorNumber = Number(sensor?.trim()) ? Number(sensor?.trim()) : null;
-
-    if (state !== State.ON && state !== State.OFF) {
-      console.log(`Mensaje de disparo incorrecto: ${state}`);
+    
+    if (ringing.trim() !== 'true' && ringing.trim() !== 'false') {
+      console.log(`Mensaje de disparo incorrecto: ${ringing}`);
       this.dispatcher.onWarning(username, WarningType.TRIGGER_ALARM);
       return;
     }
 
-    this.dispatcher.onTriggered(username, houseName, state as State, sensorNumber);
+    const sirenRinging = ringing.trim() === 'true';
+
+    this.dispatcher.onTriggered(username, houseName, sirenRinging, sensorNumber);
   }
 }

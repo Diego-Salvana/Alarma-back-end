@@ -13,6 +13,12 @@ export enum DeviceType {
   CAMERA = 'Camara'
 }
 
+export enum HouseAction {
+  SET_ARMED_STATE = 'SET_ARMED_STATE',
+  TRIGGER_ALARM = 'TRIGGER_ALARM',
+  SET_LIGHTS = 'SET_LIGHTS',
+}
+
 // -------------------
 // Value Objects
 // -------------------

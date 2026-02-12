@@ -47,4 +47,4 @@ export const centralCodeSchema = UserSchema
 
 export const centralSystemInfoSchema = CentralSchema.pick({ centralId: true, nombre: true }).strict();
 
-export const triggeredSchema = TriggeredSchema.strict();
+export const triggeredSchema = TriggeredSchema.partial({ numeroSensor: true }).strict();
