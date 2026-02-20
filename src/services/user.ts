@@ -56,7 +56,8 @@ export class UserService {
 
     if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
 
-    const sessionToken = JwtHandler.generateUserIdToken(user._id, user.habilitado);
+    const houseId = user.casas[0]?._id;
+    const sessionToken = JwtHandler.generateUserIdToken(user._id, user.habilitado, houseId);
     const responseUser = this.userDTO.loginResponse(user, sessionToken);
 
     return responseUser;

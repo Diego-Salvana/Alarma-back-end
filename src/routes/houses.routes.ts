@@ -11,6 +11,9 @@ export const createHousesRouter = (houseService: HouseService) => {
   housesRouter.get('/',
     checkUserJwt, houseController.getAll.bind(houseController)
   );
+  housesRouter.get('/current',
+    checkUserJwt, houseController.getCurrent.bind(houseController)
+  );
   housesRouter.get('/:id',
     checkUserJwt, houseController.getOne.bind(houseController)
   );

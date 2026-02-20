@@ -31,6 +31,19 @@ export class HouseController {
     }
   }
 
+  async getCurrent ({ user }: RequestExt, res: Response) {
+    try {
+      const payload = user as SessionJwtPayload;
+      const { sub, hid } = requireUserIdAndHouseId(payload);
+      const { verified } = payload;
+      const responseHouse = await this.houseService.getOne(sub, hid, verified, false);
+
+      res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
+    } catch (err) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
+    }
+  }
+
   async update ({ params, body, user }: RequestExt, res: Response) {
     try {
       const { sub } = user as SessionJwtPayload;
