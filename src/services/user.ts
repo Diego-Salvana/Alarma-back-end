@@ -1,4 +1,4 @@
-import { IUserDataAccess, Login, LoginResponse, ProfileResponse, Purpose, Register, RegisterDB, Role, UserSystemInfoDTO, UpdateUserDTO } from '../interfaces';
+import { IUserDataAccess, LoginResponse, ProfileResponse, Purpose, RegisterDB, Role, UpdateUserDTO, Register, User } from '../interfaces';
 import { encrypt, JwtHandler, Unauthorized, verifyPass, UserDto } from '../utils';
 import { EmailService } from './email';
 
@@ -10,15 +10,15 @@ export class UserService {
   constructor (private userDataAccess: IUserDataAccess, private emailService: EmailService) {}
 
   /** Crea un nuevo usuario y envía un correo de verificación. */
-  async create (body: Register): Promise<void> {
-    const passwordHash = await encrypt(body.contrasena);
-    const userData = { ...body, contrasena: passwordHash };
+  async create (userInfo: Register): Promise<void> {
+    const passwordHash = await encrypt(userInfo.contrasena);
+    const userData = { ...userInfo, contrasena: passwordHash };
 
     if (!this.userPrefix) throw new Error('Prefix de usuario no configurado');
     
     const registerBody: RegisterDB = {
       ...userData,
-      nombreUsuario: `${this.userPrefix}${body.email}`,
+      nombreUsuario: `${this.userPrefix}${userInfo.email}`,
       mosquittoPass: '-',
       habilitado: false,
       casas: []
@@ -28,11 +28,11 @@ export class UserService {
     );
     
     await this.userDataAccess.create(registerBody);
-    await this.emailService.sendVerificationEmail(body.email, token);
+    await this.emailService.sendVerificationEmail(userInfo.email, token);
   }
 
   /** Autentica un administrador y devuelve su `LoginResponse`. */
-  async adminLogin ({ email, contrasena }: Login): Promise<LoginResponse> {
+  async adminLogin (email: string, contrasena: string): Promise<LoginResponse> {
     const user = await this.userDataAccess.getOne(email);
     const hashedPassword = user.contrasena;
     const passwordIsCorrect = await verifyPass(contrasena, hashedPassword);
@@ -49,7 +49,7 @@ export class UserService {
   }
 
   /** Autentica un usuario y devuelve su `LoginResponse`. */
-  async login ({ email, contrasena }: Login): Promise<LoginResponse> {
+  async login (email: string, contrasena: string): Promise<LoginResponse> {
     const user = await this.userDataAccess.getOne(email);
     const hashedPassword = user.contrasena;
     const passwordIsCorrect = await verifyPass(contrasena, hashedPassword);
@@ -123,9 +123,9 @@ export class UserService {
   }
 
   /** Actualiza datos y/o contraseña de un usuario y devuelve su `ProfileResponse`. */
-  async update (id: string, body: UpdateUserDTO): Promise<ProfileResponse> {
+  async update (id: string, userInfo: UpdateUserDTO): Promise<ProfileResponse> {
     const user = await this.userDataAccess.getById(id);
-    const { contrasenaActual, nuevaContrasena, ...safeBody } = body;
+    const { contrasenaActual, nuevaContrasena, ...safeBody } = userInfo;
     const safeBodyIsEmpty = Object.keys(safeBody).length === 0;
     let responseUser = this.userDTO.profileResponse(user);
 
@@ -147,7 +147,7 @@ export class UserService {
     return responseUser;
   }
 
-  async updateInfoByAdmin (userId: string, body: UserSystemInfoDTO): Promise<ProfileResponse> {
+  async updateInfoByAdmin (userId: string, body: Partial<User>): Promise<ProfileResponse> {
     const updatedUser = await this.userDataAccess.updateSystemData(userId, body);
     const responseUser = this.userDTO.profileResponse(updatedUser);
 

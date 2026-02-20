@@ -1,5 +1,5 @@
 import { UserModel } from '.';
-import { IUserDataAccess, Register, UpdateBody, UserSystemInfoDTO, User } from '../interfaces';
+import { IUserDataAccess, User } from '../interfaces';
 import { AlreadyExists, NotFound, Unauthorized } from '../utils';
 
 /** Provee acceso a la base de datos para operaciones con Usuarios. */
@@ -9,7 +9,7 @@ export class UserDataAccess implements IUserDataAccess {
     '-casas.sensores.historial -casas.camaras.historial -casas.central.historial';
 
   /** Crea un nuevo usuario en la base de datos. */
-  async create (userBody: Register): Promise<void> {
+  async create (userBody: Partial<User>): Promise<void> {
     try {
       await this.userModel.create(userBody);
     } catch (err: any) {
@@ -48,7 +48,7 @@ export class UserDataAccess implements IUserDataAccess {
   }
 
   /** Actualiza un usuario por su id. */
-  async updateInfo (id: string, updateBody: UpdateBody): Promise<User> {
+  async updateInfo (id: string, updateBody: Partial<User>): Promise<User> {
     const newInfo = {
       ...(updateBody.nombre && { nombre: updateBody.nombre }),
       ...(updateBody.apellido && { apellido: updateBody.apellido }),
@@ -74,7 +74,7 @@ export class UserDataAccess implements IUserDataAccess {
   }
 
   /** Actualiza información de sistema para el usuario. */
-  async updateSystemData (id: string, updateBody: UserSystemInfoDTO): Promise<User> {
+  async updateSystemData (id: string, updateBody: Partial<User>): Promise<User> {
     const newInfo = {
       ...(updateBody.nombreUsuario && { nombreUsuario: updateBody.nombreUsuario }),
       ...(updateBody.mosquittoPass && { mosquittoPass: updateBody.mosquittoPass }),

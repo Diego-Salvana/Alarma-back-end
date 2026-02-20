@@ -1,4 +1,5 @@
-import { HouseSchema, CentralSchema, DeviceSchema, UserSchema, ExclusionSensorSchema, TriggeredSchema } from './zod-schemas';
+import { State } from '../interfaces';
+import { CentralSchema, DeviceSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema } from './zod-schemas';
 
 export const loginSchema = UserSchema.pick({ email: true, contrasena: true }).strict();
 export const registerSchema = UserSchema.pick({
@@ -30,8 +31,7 @@ export const updateHouseSchema = HouseSchema
   .strict();
 
 export const createSensorSchema = DeviceSchema.omit({ estado: true }).strict();
-export const exclusionArraySchema = ExclusionSensorSchema.strict();
-export const sensorNameSchema = DeviceSchema.pick({ nombre: true }).strict();
+export const sensorNameSchema = DeviceSchema.pick({ nombre: true, numeroSensor: true }).strict();
 export const sensorSystemInfoSchema = DeviceSchema
   .pick({ dispositivoId: true, numeroSensor: true, tipo: true })
   .partial()
@@ -45,6 +45,21 @@ export const centralCodeSchema = UserSchema
   })
   .strict();
 
-export const centralSystemInfoSchema = CentralSchema.pick({ centralId: true, nombre: true }).strict();
+export const centralSystemInfoSchema = CentralSchema
+  .pick({ centralId: true, nombre: true })
+  .partial()
+  .strict();
+
+export const houseSystemInfoSchema = HouseSchema.pick({ nombreCasa: true })
+  .extend({ central: centralSystemInfoSchema })
+  .partial()
+  .strict();
+
+export const armConfigurationSchema = ArmConfigurationSchema
+  .strict()
+  .refine(
+    ({ sensors }) => sensors.some(sensor => sensor.estado === State.ON),
+    { message: 'Al menos un sensor debe estar encendido' }
+  );
 
 export const triggeredSchema = TriggeredSchema.partial({ numeroSensor: true }).strict();

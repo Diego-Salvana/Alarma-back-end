@@ -1,6 +1,6 @@
-import { House, State, ExcludeArrayDTO, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, ExclusionSensor, CreateHouseDTO, HouseSystemInfoDTO } from '../interfaces';
+import { House, State, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, CreateHouseInfo, SensorArmConfig } from '../interfaces';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
-import { AlreadyExists, WarningFactory, HouseDto, BadRequest } from '../utils';
+import { AlreadyExists, WarningFactory, HouseDto } from '../utils';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';
 
@@ -18,12 +18,12 @@ export class HouseService {
   ) {}
 
   /** Crea una nueva casa para el usuario. */
-  async create (userId: string, houseData: CreateHouseDTO): Promise<void> {
+  async create (userId: string, houseData: CreateHouseInfo): Promise<void> {
     const house: Omit<House, '_id'> = {
       ...houseData,
       nombreCasa: this.createHouseName(houseData.nombre),
-      sensores: [],
-      camaras: []
+      sensores: houseData.sensores ?? [],
+      camaras: houseData.camaras ?? []
     };
     
     await this.houseDataAccess.create(userId, house);
@@ -56,7 +56,9 @@ export class HouseService {
       h => h.nombre.trim().toLowerCase() === houseInfo.nombre?.trim().toLowerCase()
     );
 
-    if (nameExists) throw new AlreadyExists(`Ya existe una casa con el nombre: ${houseInfo.nombre ?? ''}`);
+    if (nameExists) {
+      throw new AlreadyExists(`Ya existe una casa con el nombre: ${houseInfo.nombre ?? ''}`);
+    }
 
     if (houseInfo.direccion) {
       const { calle, numero, ciudad } = houseInfo.direccion;
@@ -78,9 +80,9 @@ export class HouseService {
     return this.houseDTO.houseResponse(updatedHouse);
   }
 
-  async updateInfoByAdmin (userId: string, houseId: string, body: HouseSystemInfoDTO):
+  async updateInfoByAdmin (userId: string, houseId: string, houseInfo: Partial<House>):
   Promise<HouseResponse> {
-    const updatedHouse = await this.houseDataAccess.updateSystemInfo(userId, houseId, body);
+    const updatedHouse = await this.houseDataAccess.updateSystemInfo(userId, houseId, houseInfo);
 
     return this.houseDTO.houseResponse(updatedHouse);
   }
@@ -90,17 +92,8 @@ export class HouseService {
     await this.houseDataAccess.delete(userId, houseId);
   }
 
-  /** Valida que al menos un sensor esté encendido. */
-  validateArmAlarm (body: ExcludeArrayDTO): void {
-    const someActivated = body.exclusionArray.some(
-      (sensor: ExclusionSensor) => sensor.estado === State.ON
-    );
-
-    if (!someActivated) throw new BadRequest('No hay sensores encendidos');
-  }
-
   /** Publica a Mosquitto mensaje de Encendido o Apagado de alarma según los parámetros. */
-  async setAlarmState (userId: string, houseId: string, state: State, body?: ExcludeArrayDTO):
+  async setAlarmState (userId: string, houseId: string, state: State, sensors?: SensorArmConfig[]):
   Promise<void> {
     let username = '';
     let houseName = '';
@@ -113,12 +106,12 @@ export class HouseService {
       return;
     }
 
-    const exclusionArray = body?.exclusionArray ?? [];
-    const excludedSensors = exclusionArray.reduce<string[]>((acum, sensor) => {
-      if (sensor.estado !== State.ON) acum.push(sensor.numeroSensor.toString());
+    const excludedSensors = sensors?.reduce<number[]>((acum, sensor) => {
+      if (sensor.estado !== State.ON) acum.push(sensor.numeroSensor);
       return acum;
     }, []).join(',');
-    const message = `${state}:${excludedSensors}`;
+    
+    const message = `${state}:${excludedSensors ?? ''}`;
 
     this.mosquittoAccess.publicMessage(HouseAction.SET_ARMED_STATE, message, username, houseName);
   }
@@ -156,6 +149,7 @@ export class HouseService {
     }
 
     const message = `${sonando.toString()}:${numeroSensor ?? ''}`;
+
     this.mosquittoAccess.publicMessage(HouseAction.TRIGGER_ALARM, message, username, houseName);
   }
 
@@ -172,10 +166,9 @@ export class HouseService {
       if (info.state === State.OFF) {
         const house = await this.houseDataAccess.getByHouseName(username, houseName);
         const wasRinging = house.central.sonando;
+        
         if (wasRinging) {
-          this.webSocketAccess.emitSocketData(
-            triggeredEvent, { house: houseName, state: State.OFF }
-          );
+          this.webSocketAccess.emitSocketData(triggeredEvent, { house: houseName, state: State.OFF });
         }
       }
       

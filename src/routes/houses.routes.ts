@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { HouseService } from '../services';
 import { HouseController } from '../controllers';
 import { checkUserJwt, validateBody } from '../middleware';
-import { exclusionArraySchema, triggeredSchema, updateHouseSchema } from '../utils/zod-validators';
+import { armConfigurationSchema, triggeredSchema, updateHouseSchema } from '../utils/zod-validators';
 
 export const createHousesRouter = (houseService: HouseService) => {
   const housesRouter = Router();
@@ -15,7 +15,7 @@ export const createHousesRouter = (houseService: HouseService) => {
     checkUserJwt, houseController.getOne.bind(houseController)
   );
   housesRouter.post('/arm',
-    validateBody(exclusionArraySchema), checkUserJwt, houseController.armAlarm.bind(houseController)
+    validateBody(armConfigurationSchema), checkUserJwt, houseController.armAlarm.bind(houseController)
   );
   housesRouter.post('/disarm',
     checkUserJwt, houseController.disarmAlarm.bind(houseController)

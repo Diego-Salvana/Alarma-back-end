@@ -58,7 +58,7 @@ export interface Device {
   dispositivoId: string;
   numeroSensor: number;
   nombre: string;
-  tipo: string;
+  tipo: DeviceType;
   estado: State;
   historial: EventLog[];
 }
@@ -91,12 +91,21 @@ export interface User {
 // -------------------
 export type Role = 'user' | 'admin';
 
-export interface UpdateBody {
-  nombre?: string;
-  apellido?: string;
-  email?: string;
-  telefono?: string;
+export interface Register {
+  nombre: string;
+  apellido: string;
+  email: string;
+  contrasena: string;
+  telefono: string;
 }
+
+// -------------------
+// Houses
+// -------------------
+type CreateHouseRequired = Pick<House, 'nombre' | 'direccion' | 'central'>;
+type CreateHouseOptional = Partial<Pick<House, 'sensores' | 'camaras'>>;
+
+export interface CreateHouseInfo extends CreateHouseRequired, CreateHouseOptional {}
 
 // -------------------
 // Central
@@ -108,7 +117,9 @@ export type CentralProperty = 'alarmaEncendida' | 'sonando' | 'historial';
 // -------------------
 export type SensorProperty = 'estado';
 
-export interface ExclusionSensor {
-  numeroSensor: string;
+export interface SensorArmConfig {
+  numeroSensor: number;
   estado: State;
 };
+
+export type CreateSensor = Pick<Device, 'dispositivoId' | 'nombre' | 'numeroSensor' | 'tipo'>;

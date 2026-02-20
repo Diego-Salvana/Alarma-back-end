@@ -28,17 +28,17 @@ export class CentralService {
   /** Actualiza el código de la central para una casa del usuario tras validaciones de identidad y credenciales. */
   async updateCode (userId: string, houseId: string, codeBody: CentralCodeDTO): Promise<void> {
     const user = await this.userDataAccess.getById(userId);
+    const { contrasena, codigoActual, nuevoCodigo } = codeBody;
 
-    const passwordIsCorrect = await verifyPass(codeBody.contrasena, user.contrasena);
+    const passwordIsCorrect = await verifyPass(contrasena, user.contrasena);
     if (!passwordIsCorrect) throw new Unauthorized('Contraseña de usuario incorrecta.');
 
     const house = user.casas.find(h => h._id.toString() === houseId);
     const centralCode = house?.central.codigo;
+
     if (!centralCode) throw new NotFound('Código de alarma no encontrados para validación.');
-    if (centralCode !== codeBody.codigoActual) {
-      throw new Unauthorized('Código de alarma actual incorrecto.');
-    }
+    if (centralCode !== codigoActual) throw new Unauthorized('Código actual de alarma incorrecto.');
     
-    await this.centralDataAccess.updateCode(userId, houseId, codeBody);
+    await this.centralDataAccess.updateCode(userId, houseId, nuevoCodigo);
   }
 }

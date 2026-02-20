@@ -51,6 +51,7 @@ export const DeviceSchema = z.object({
 // Casa
 export const HouseSchema = z.object({
   nombre: z.string().trim().min(1, { message: 'El nombre de la casa es requerido.' }),
+  nombreCasa: z.string().trim().min(1, { message: 'El nombre de la casa es requerido.' }),
   direccion: AddressSchema,
   central: CentralSchema,
   sensores: z.array(DeviceSchema),
@@ -73,16 +74,20 @@ export const UserSchema = z.object({
   casas: z.array(HouseSchema)
 });
 
-// Petición de activación de sirena
-export const TriggeredSchema = z.object({
-  sonando: CentralSchema.shape.sonando,
-  numeroSensor: DeviceSchema.shape.numeroSensor
-});
+// -------------------
+/* Schemas Acciones */
+// -------------------
 
-// Array de Exclusión
-export const ExclusionSensorSchema = z.object({
-  exclusionArray: z.object({
+// Configuración de armado de alarma
+export const ArmConfigurationSchema = z.object({
+  sensors: z.object({
     numeroSensor: DeviceSchema.shape.numeroSensor,
     estado: DeviceSchema.shape.estado
   }).strict().array()
+});
+
+// Disparo de alarma
+export const TriggeredSchema = z.object({
+  sonando: CentralSchema.shape.sonando,
+  numeroSensor: DeviceSchema.shape.numeroSensor
 });

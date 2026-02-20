@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { HouseService } from '../services';
-import { State, RequestExt, SessionJwtPayload } from '../interfaces';
+import { State, RequestExt, SessionJwtPayload, ArmConfigurationDTO } from '../interfaces';
 import { ErrorHandler, requireUserIdAndHouseId } from '../utils';
 
 /** Gestiona peticiones y respuestas vinculadas a Casas. */
@@ -46,14 +46,13 @@ export class HouseController {
   async armAlarm ({ body, user }: RequestExt, res: Response) {
     try {
       const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
-      
-      this.houseService.validateArmAlarm(body);
+      const { sensors } = body as ArmConfigurationDTO;
       
       // Responde inmediatamente que la solicitud fue aceptada para su procesamiento.
       res.status(202).json({ message: 'Activation in process', status: 'pending' });
       
       // Inicia el proceso de activación de la alarma en segundo plano.
-      void this.houseService.setAlarmState(sub, hid, State.ON, body);
+      void this.houseService.setAlarmState(sub, hid, State.ON, sensors);
     } catch (err) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al activar la alarma');
     }

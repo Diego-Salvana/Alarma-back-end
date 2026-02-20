@@ -1,5 +1,5 @@
 import { merge } from 'lodash';
-import { House, State, HouseSystemInfoDTO } from '../interfaces';
+import { House, State } from '../interfaces';
 import { AlreadyExists, NotFound } from '../utils';
 import { UserModel } from '.';
 
@@ -25,7 +25,11 @@ export class HouseDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (user === null) throw new AlreadyExists(`La casa ${houseData.nombreCasa} ya existe o el usuario no fue encontrado`);
+    if (user === null) {
+      throw new AlreadyExists(
+        `La casa ${houseData.nombreCasa} ya existe o el usuario no fue encontrado`
+      );
+    }
 
     const updatedHouse = user.casas.find(h => h.nombreCasa === houseData.nombreCasa);
     if (!updatedHouse) throw new NotFound('Casa no encontrada');
@@ -106,7 +110,7 @@ export class HouseDataAccess {
     return responseHouse;
   }
 
-  async updateSystemInfo (userId: string, houseId: string, houseBody: HouseSystemInfoDTO): Promise<House> {
+  async updateSystemInfo (userId: string, houseId: string, houseBody: Partial<House>): Promise<House> {
     const house = await this.getOne(userId, houseId, true);
     if (house === null) throw new NotFound('Casa no encontrada');
 

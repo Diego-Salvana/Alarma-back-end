@@ -1,14 +1,18 @@
 import { Request, Response } from 'express';
-import { HouseService, UserService } from '../services';
-import { RequestExt } from '../interfaces';
-import { ErrorHandler } from '../utils';
+import { HouseService, SensorService, UserService } from '../services';
+import { BadRequest, ErrorHandler } from '../utils';
 
 export class AdminController {
-  constructor (private userService: UserService, private houseService: HouseService) {}
+  constructor (
+    private userService: UserService,
+    private houseService: HouseService,
+    private sensorService: SensorService
+  ) {}
 
   async login ({ body }: Request, res: Response) {
     try {
-      const responseUser = await this.userService.adminLogin(body);
+      const { email, contrasena } = body;
+      const responseUser = await this.userService.adminLogin(email, contrasena);
 
       res.status(200).json({ message: 'Inicio de sesión exitoso', data: responseUser });
     } catch (err) {
@@ -53,7 +57,7 @@ export class AdminController {
       const { userId } = params;
       await this.userService.delete(userId);
 
-      res.status(200).json({ message: 'Usuario eliminado exitosamente' });
+      res.status(204).send();
     } catch (err) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al eliminar el usuario');
     }
@@ -64,7 +68,7 @@ export class AdminController {
       const { userId } = params;
       const house = await this.houseService.create(userId, body);
 
-      res.status(200).json({ message: 'Casa creada exitosamente', data: house });
+      res.status(201).json({ message: 'Casa creada exitosamente', data: house });
     } catch (err) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
     }
@@ -84,23 +88,53 @@ export class AdminController {
   async deleteHouse ({ params }: Request, res: Response) {
     try {
       const { userId, houseId } = params;
+      
       await this.houseService.delete(userId, houseId);
 
-      res.status(200).json({ message: 'Casa eliminada exitosamente' });
+      res.status(204).send();
     } catch (err) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al eliminar la casa');
     }
   }
 
-  async createSensor (req: RequestExt, res: Response) {
-    // TODO: Implementar
+  async createSensor ({ params, body }: Request, res: Response) {
+    try {
+      const { userId, houseId } = params;
+      const newSensor = await this.sensorService.create(userId, houseId, body);
+
+      res.status(201).json({ message: 'Sensor agregado', data: newSensor });
+    } catch (err) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear el sensor');
+    }
   }
 
-  async updateSensor (req: RequestExt, res: Response) {
-    // TODO: Implementar
+  async updateSensor ({ params, body }: Request, res: Response) {
+    try {
+      const { userId, houseId, sensorNumber } = params;
+      const sensorId = parseInt(sensorNumber);
+      
+      if (isNaN(sensorId)) throw new BadRequest('El número de sensor no es válido');
+
+      const updatedSensor = await this.sensorService.updateInfo(userId, houseId, sensorId, body);
+
+      res.status(200).json({ message: 'Sensor modificado', data: updatedSensor });
+    } catch (err) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear el sensor');
+    }
   }
 
-  async deleteSensor (req: RequestExt, res: Response) {
-    // TODO: Implementar
+  async deleteSensor ({ params }: Request, res: Response) {
+    try {
+      const { userId, houseId, sensorNumber } = params;
+      const sensorId = parseInt(sensorNumber);
+      
+      if (isNaN(sensorId)) throw new BadRequest('El número de sensor no es válido');
+
+      await this.sensorService.delete(userId, houseId, sensorId);
+
+      res.status(204).send();
+    } catch (err) {
+      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear el sensor');
+    }
   }
 }

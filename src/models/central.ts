@@ -1,4 +1,4 @@
-import { House, ControlPanelEventLog, CentralCodeDTO } from '../interfaces';
+import { House, ControlPanelEventLog } from '../interfaces';
 import { NotFound } from '../utils';
 import { UserModel } from '.';
 
@@ -21,10 +21,10 @@ export class CentralDataAccess {
   }
 
   /** Actualiza el código de la central de una casa en la BD y devuelve la central actualizada. */
-  async updateCode (userId: string, houseId: string, codeBody: CentralCodeDTO): Promise<void> {
+  async updateCode (userId: string, houseId: string, newCode: number): Promise<void> {
     const result = await this.userModel.updateOne(
       { _id: userId, 'casas._id': houseId },
-      { $set: { 'casas.$.central.codigo': codeBody.nuevoCodigo } }
+      { $set: { 'casas.$.central.codigo': newCode } }
     );
 
     if (result.matchedCount === 0) throw new NotFound('Usuario o casa no encontrados');

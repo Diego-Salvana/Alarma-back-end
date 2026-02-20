@@ -16,6 +16,7 @@ export class SensorController {
       if (isNaN(sensorNumber)) throw new BadRequest('Número de sensor no válido');
 
       const responseSensor = await this.sensorService.getOne(sub, hid, sensorNumber);
+      
       res.status(200).json({ message: 'Satisfactory request', data: responseSensor });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
@@ -25,8 +26,9 @@ export class SensorController {
   async updateName ({ user, body }: RequestExt, res: Response) {
     try {
       const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
+      const { numeroSensor, nombre } = body;
+      const responseSensor = await this.sensorService.updateName(sub, hid, numeroSensor, nombre);
 
-      const responseSensor = await this.sensorService.updateName(sub, hid, body);
       res.status(200).json({ message: 'Updated successfully', data: responseSensor });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');

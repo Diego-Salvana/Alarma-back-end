@@ -18,7 +18,11 @@ export class UserController {
 
   async login ({ body }: Request, res: Response) {
     try {
-      const responseUser = await this.userService.login(body);
+      const { email, contrasena } = body;
+      if (!email || !contrasena) throw new BadRequest('Falta información para iniciar sesión');
+
+      const responseUser = await this.userService.login(email, contrasena);
+
       res.status(200).json({ message: 'Inicio de sesión exitoso', data: responseUser });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al iniciar sesión');

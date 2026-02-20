@@ -1,12 +1,14 @@
 import { Router } from 'express';
-import { HouseService, UserService } from '../services';
+import { HouseService, SensorService, UserService } from '../services';
 import { AdminController } from '../controllers/admin.controller';
 import { checkAdminJwt, validateBody } from '../middleware';
-import { createHouseSchema, createSensorSchema, loginSchema, sensorSystemInfoSchema, userSystemInfoSchema } from '../utils/zod-validators';
+import { createHouseSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, sensorSystemInfoSchema, userSystemInfoSchema } from '../utils/zod-validators';
 
-export function createAdminRouter (userService: UserService, houseService: HouseService) {
+export function createAdminRouter (
+  userService: UserService, houseService: HouseService, sensorService: SensorService
+): Router {
   const adminRouter = Router();
-  const adminController = new AdminController(userService, houseService);
+  const adminController = new AdminController(userService, houseService, sensorService);
 
   // Login
   adminRouter.post('/login',
@@ -34,7 +36,9 @@ export function createAdminRouter (userService: UserService, houseService: House
     validateBody(createHouseSchema), checkAdminJwt, adminController.createHouse.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId',
-    checkAdminJwt, adminController.modifyHouse.bind(adminController)
+    validateBody(houseSystemInfoSchema),
+    checkAdminJwt,
+    adminController.modifyHouse.bind(adminController)
   );
   adminRouter.delete('/users/:userId/houses/:houseId',
     checkAdminJwt, adminController.deleteHouse.bind(adminController)
@@ -47,7 +51,9 @@ export function createAdminRouter (userService: UserService, houseService: House
     adminController.createSensor.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId/sensors/:sensorNumber',
-    validateBody(sensorSystemInfoSchema), checkAdminJwt, adminController.updateSensor.bind(adminController)
+    validateBody(sensorSystemInfoSchema),
+    checkAdminJwt,
+    adminController.updateSensor.bind(adminController)
   );
   adminRouter.delete('/users/:userId/houses/:houseId/sensors/:sensorNumber',
     checkAdminJwt, adminController.deleteSensor.bind(adminController)
