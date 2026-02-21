@@ -154,55 +154,57 @@ export class HouseService {
   }
 
   /** Envía información `websockets` al usuario y carga datos en la `DB`. */
-  async sendArmingInfo (username: string, houseName: string, info: AlarmArming): Promise<void> {
+  async sendArmingInfo (username: string, info: AlarmArming): Promise<void> {
     const armingBase = process.env.WS_ALARM_ARMING ?? '';
     const triggerBase = process.env.WS_TRIGGER_ALARM ?? '';
-    const armingEvent = `${armingBase}/${username}/${houseName}`;
+    const armingEvent = `${armingBase}/${username}`;
     const triggeredEvent = `${triggerBase}/${username}`;
 
     this.webSocketAccess.emitSocketData(armingEvent, info);
     
     try {
       if (info.state === State.OFF) {
-        const house = await this.houseDataAccess.getByHouseName(username, houseName);
+        const house = await this.houseDataAccess.getByHouseName(username, info.house);
         const wasRinging = house.central.sonando;
         
         if (wasRinging) {
-          this.webSocketAccess.emitSocketData(triggeredEvent, { house: houseName, state: State.OFF });
+          this.webSocketAccess.emitSocketData(
+            triggeredEvent, { house: info.house, state: State.OFF }
+          );
         }
       }
       
       info.state === State.ON
-        ? await this.houseDataAccess.updateAlarmState(username, houseName, info.excludedSensors)
-        : await this.houseDataAccess.updateAlarmState(username, houseName);
+        ? await this.houseDataAccess.updateAlarmState(username, info.house, info.excludedSensors)
+        : await this.houseDataAccess.updateAlarmState(username, info.house);
     } catch (err: any) {
       console.log(`Error (method: "updateCentralState"): ${err.message as string}`);
     }
   }
 
   /** Publica información de iluminación a través de sockets para un usuario y casa específicos. */
-  sendLightsInfo (username: string, houseName: string, info: Lights) {
+  sendLightsInfo (username: string, info: Lights) {
     const base = process.env.WS_LIGHTS ?? '';
-    const socketEvent = `${base}/${username}/${houseName}`;
+    const socketEvent = `${base}/${username}/${info.house}`;
 
     this.webSocketAccess.emitSocketData(socketEvent, info);
   }
 
   /** Publica información de disparo a través de sockets y actualiza BD. */
-  async sendTriggeredInfo (username: string, houseName: string, info: TriggeredAlarm): Promise<void> {
+  async sendTriggeredInfo (username: string, info: TriggeredAlarm): Promise<void> {
     const base = process.env.WS_TRIGGER_ALARM ?? '';
     const socketEvent = `${base}/${username}`;
     
     this.webSocketAccess.emitSocketData(socketEvent, info);
     
     try {
-      await this.centralDataAccess.updateSirenState(username, houseName, info.ringing);
+      await this.centralDataAccess.updateSirenState(username, info.house, info.ringing);
       
       const sensorNumber = info.sensorNumber;
       if (sensorNumber) {
         const date = new Date(Date.now());
-        await this.sensorDataAccess.addToHistory(username, houseName, sensorNumber, date);
-        await this.centralDataAccess.addToHistory(username, houseName, sensorNumber, date);
+        await this.sensorDataAccess.addToHistory(username, info.house, sensorNumber, date);
+        await this.centralDataAccess.addToHistory(username, info.house, sensorNumber, date);
       }
     } catch (err: any) {
       console.log(`Error (method: "updateCentralRinging"): ${err.message as string}`);

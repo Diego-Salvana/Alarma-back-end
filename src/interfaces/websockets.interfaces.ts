@@ -1,17 +1,20 @@
 import { State } from './domain.interfaces';
 
-export interface AlarmArming {
+interface WebSocketTransferBase {
+  house: string;
+}
+
+export interface AlarmArming extends WebSocketTransferBase {
   state: State;
   excludedSensors: string[];
 }
 
-export interface Lights {
+export interface Lights extends WebSocketTransferBase {
   sector: string;
   state: State
 }
 
-export interface TriggeredAlarm {
-  house: string;
+export interface TriggeredAlarm extends WebSocketTransferBase {
   ringing: boolean;
   sensorNumber: number | null;
 }
