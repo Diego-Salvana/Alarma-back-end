@@ -1,4 +1,4 @@
-import { State, Address, Device } from './domain.interfaces';
+import { State, DeviceType, EventLog } from './domain.interfaces';
 
 export interface ApiResponse<T> {
   message: string;
@@ -17,10 +17,10 @@ export interface HouseResponse {
   _id: string;
   nombre: string;
   nombreCasa: string;
-  direccion: Address;
+  direccion: AddressResponse;
   alarmaEncendida: State;
   sonando?: boolean;
-  sensores?: Device[];
+  sensores?: DeviceResponse[];
   token?: string;
 }
 
@@ -38,4 +38,19 @@ export interface ProfileResponse {
 export interface EmailVerification {
   message: string;
   token: string;
+}
+
+export interface DeviceResponse {
+  dispositivoId: string;
+  numeroSensor: number;
+  nombre: string;
+  tipo: DeviceType;
+  estado: State;
+  historial: EventLog[];
+}
+
+export interface AddressResponse {
+  calle: string;
+  numero: number;
+  ciudad: string;
 }

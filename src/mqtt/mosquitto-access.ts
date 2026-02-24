@@ -117,7 +117,7 @@ export class MosquittoAccess {
   private triggerHandler (topic: string, payload: string) {
     const [,,, username, houseName] = topic.split('/');
     const [ringing, sensor] = payload.split(':');
-    const sensorNumber = Number(sensor?.trim()) ? Number(sensor?.trim()) : null;
+    const sensorNumber = Number(sensor?.trim()) ? Number(sensor?.trim()) : undefined;
     
     if (ringing.trim() !== 'true' && ringing.trim() !== 'false') {
       console.log(`Mensaje de disparo incorrecto: ${ringing}`);

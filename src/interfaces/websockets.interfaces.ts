@@ -16,7 +16,7 @@ export interface Lights extends WebSocketTransferBase {
 
 export interface TriggeredAlarm extends WebSocketTransferBase {
   ringing: boolean;
-  sensorNumber: number | null;
+  sensorNumber?: number;
 }
 
 export enum WarningType {

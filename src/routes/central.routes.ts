@@ -11,7 +11,7 @@ export const createCentralRouter = (centralService: CentralService) => {
   centralRouter.get('/',
     checkUserJwt, centralController.getHistory.bind(centralController)
   );
-  centralRouter.patch('/code',
+  centralRouter.patch('/code/:houseId',
     validateBody(centralCodeSchema),
     checkUserJwt,
     centralController.updateCode.bind(centralController)

@@ -1,4 +1,4 @@
-import { House, State, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, CreateHouseInfo, SensorArmConfig } from '../interfaces';
+import { House, State, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, CreateHouseInfo, SensorArmConfig, Warning } from '../interfaces';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
 import { AlreadyExists, WarningFactory, HouseDto } from '../utils';
 import { MosquittoAccess } from '../mqtt';
@@ -160,7 +160,7 @@ export class HouseService {
     const armingEvent = `${armingBase}/${username}`;
     const triggeredEvent = `${triggerBase}/${username}`;
 
-    this.webSocketAccess.emitSocketData(armingEvent, info);
+    this.webSocketAccess.emitSocketData<AlarmArming>(armingEvent, info);
     
     try {
       if (info.state === State.OFF) {
@@ -168,8 +168,8 @@ export class HouseService {
         const wasRinging = house.central.sonando;
         
         if (wasRinging) {
-          this.webSocketAccess.emitSocketData(
-            triggeredEvent, { house: info.house, state: State.OFF }
+          this.webSocketAccess.emitSocketData<TriggeredAlarm>(
+            triggeredEvent, { house: info.house, ringing: false }
           );
         }
       }
@@ -187,7 +187,7 @@ export class HouseService {
     const base = process.env.WS_LIGHTS ?? '';
     const socketEvent = `${base}/${username}/${info.house}`;
 
-    this.webSocketAccess.emitSocketData(socketEvent, info);
+    this.webSocketAccess.emitSocketData<Lights>(socketEvent, info);
   }
 
   /** Publica información de disparo a través de sockets y actualiza BD. */
@@ -195,7 +195,7 @@ export class HouseService {
     const base = process.env.WS_TRIGGER_ALARM ?? '';
     const socketEvent = `${base}/${username}`;
     
-    this.webSocketAccess.emitSocketData(socketEvent, info);
+    this.webSocketAccess.emitSocketData<TriggeredAlarm>(socketEvent, info);
     
     try {
       await this.centralDataAccess.updateSirenState(username, info.house, info.ringing);
@@ -217,7 +217,7 @@ export class HouseService {
     const socketEvent = `${base}/${username}`;
     const warning = WarningFactory.fromType(warningType);
 
-    this.webSocketAccess.emitSocketData(socketEvent, warning);
+    this.webSocketAccess.emitSocketData<Warning>(socketEvent, warning);
   }
 
   /** Envía warning a través de sockets al usuario por uesrId. */
@@ -226,7 +226,7 @@ export class HouseService {
     const socketEvent = `${base}/${userId}`;
     const warning = WarningFactory.fromType(warningType);
 
-    this.webSocketAccess.emitSocketData(socketEvent, warning);
+    this.webSocketAccess.emitSocketData<Warning>(socketEvent, warning);
   }
 
   /** Método privado que prepara usuario y nombre de casa para operaciones de Mosquitto. */

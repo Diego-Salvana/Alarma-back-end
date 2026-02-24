@@ -19,7 +19,7 @@ export class WebSocketAccess {
   }
     
   /** Envía datos a través de ``websockets``. */
-  emitSocketData (topic: string, data: any) {
+  emitSocketData <T>(topic: string, data: T) {
     this.io.emit(topic, data);
   };
 }

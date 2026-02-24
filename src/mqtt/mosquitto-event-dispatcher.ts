@@ -22,7 +22,7 @@ export class MosquittoEventDispatcher {
   }
 
   /** Despacha al Servicio cuando hay un evento de disparo de alarma. */
-  onTriggered (username: string, houseName: string, ringing: boolean, sensorNumber: number | null) {
+  onTriggered (username: string, houseName: string, ringing: boolean, sensorNumber?: number) {
     const info: TriggeredAlarm = { house: houseName, ringing, sensorNumber };
     void this.houseService.sendTriggeredInfo(username, info);
   }
