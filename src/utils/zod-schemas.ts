@@ -13,15 +13,15 @@ export const DeviceTypeSchema = z.nativeEnum(
 // Dirección
 export const AddressSchema = z.object({
   calle: z
-    .string({ invalid_type_error: 'La calle debe ser cadena de texto.' })
+    .string()
     .trim()
     .min(1, { message: 'La calle es requerida' }),
   numero: z
-    .number()
-    .int()
-    .positive({ message: 'El número debe ser positivo.' }),
+    .string()
+    .trim()
+    .min(1, { message: 'El número es requerido' }),
   ciudad: z
-    .string({ invalid_type_error: 'La ciudad debe ser cadena de texto.' })
+    .string()
     .trim()
     .min(1, { message: 'La ciudad es requerida' })
 });

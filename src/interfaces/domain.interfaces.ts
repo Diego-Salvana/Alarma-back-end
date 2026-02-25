@@ -38,7 +38,7 @@ export interface EventLogWithName {
 
 export interface Address {
   calle: string;
-  numero: number;
+  numero: string;
   ciudad: string;
 }
 

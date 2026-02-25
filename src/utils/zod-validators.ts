@@ -24,7 +24,11 @@ export const userSystemInfoSchema = UserSchema
   .partial()
   .strict();
 
-export const createHouseSchema = HouseSchema.partial({ sensores: true, camaras: true }).strict();
+export const createHouseSchema = HouseSchema
+  .partial({ sensores: true, camaras: true })
+  .omit({ nombreCasa: true })
+  .strict();
+  
 export const updateHouseSchema = HouseSchema
   .pick({ nombre: true, direccion: true })
   .deepPartial()

@@ -22,7 +22,7 @@ const HistorialCentralSchema = new Schema(
 const DireccionSchema = new Schema(
   {
     calle: { type: String, required: true },
-    numero: { type: Number, required: true },
+    numero: { type: String, required: true },
     ciudad: { type: String, required: true }
   },
   { _id: false }

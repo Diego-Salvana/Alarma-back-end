@@ -51,6 +51,6 @@ export interface DeviceResponse {
 
 export interface AddressResponse {
   calle: string;
-  numero: number;
+  numero: string;
   ciudad: string;
 }
