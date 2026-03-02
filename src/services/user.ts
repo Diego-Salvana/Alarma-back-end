@@ -39,6 +39,7 @@ export class UserService {
 
     if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
 
+    // TODO: modificar obtención de rol al cambiar schemas de la BD.
     const role: Role = user.mosquittoPass === '1' ? 'admin' : 'user';
     if (role !== 'admin' || !user.habilitado) throw new Unauthorized('Usuario no autorizado');
 
@@ -98,12 +99,13 @@ export class UserService {
     const user = await this.userDataAccess.getOne(email);
     const userId = user._id;
     const verified = user.habilitado;
+    const firstHouseId = user.casas[0]?._id;
     const hashedPassword = user.contrasena;
     const newHash = await encrypt(password);
 
     await this.userDataAccess.updatePassword(userId, hashedPassword, newHash);
 
-    const sessionToken = JwtHandler.generateUserIdToken(userId, verified);
+    const sessionToken = JwtHandler.generateUserIdToken(userId, verified, firstHouseId);
     
     return sessionToken;
   }

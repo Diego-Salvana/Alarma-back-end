@@ -8,7 +8,6 @@ import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } 
 import { CentralService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 
-/** Proporciona la configuración y arranque del servidor Express, con routers y acceso a datos. */
 export class App {
   static create () {
     const userDataAccess = new UserDataAccess();
@@ -41,7 +40,9 @@ export class App {
 
     app.use(express.json());
     app.disable('x-powered-by');
-    app.use(cors());
+    app.use(cors({
+      origin: ['http://localhost:4200', 'https://alarmstech.vercel.app']
+    }));
 
     app.use('/api-alarma/users', createUsersRouter(userService));
     app.use('/api-alarma/houses', createHousesRouter(houseService));

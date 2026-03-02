@@ -8,7 +8,7 @@ export function checkVerificationJwt (req: RequestExt, res: Response, next: Next
     if (!token) throw new Unauthorized('Token no proporcionado');
 
     const payload = JwtHandler.verifyToken<VerificationJwtPayload>(token);
-    if (!payload.sub) throw new Unauthorized('Falta información para encontrar usuario');
+    if (!payload.username) throw new Unauthorized('Falta información para encontrar usuario');
     if (!payload.purpose) throw new Unauthorized('Falta propósito');
 
     req.verificationToken = payload;

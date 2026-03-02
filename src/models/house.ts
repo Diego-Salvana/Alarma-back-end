@@ -114,11 +114,17 @@ export class HouseDataAccess {
     const house = await this.getOne(userId, houseId, true);
     if (house === null) throw new NotFound('Casa no encontrada');
 
-    const updateBody = {
+    const updateBody: Partial<House> = {
       nombreCasa: houseBody.nombreCasa ?? house.nombreCasa,
       central: {
+        ...house.central,
         centralId: houseBody.central?.centralId ?? house.central.centralId,
         nombre: houseBody.central?.nombre ?? house.central.nombre
+      },
+      direccion: {
+        calle: houseBody.direccion?.calle ?? house.direccion.calle,
+        numero: houseBody.direccion?.numero ?? house.direccion.numero,
+        ciudad: houseBody.direccion?.ciudad ?? house.direccion.ciudad
       }
     };
 

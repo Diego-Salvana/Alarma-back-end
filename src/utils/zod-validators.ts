@@ -1,5 +1,5 @@
 import { State } from '../interfaces';
-import { CentralSchema, DeviceSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema } from './zod-schemas';
+import { CentralSchema, DeviceSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema, AddressSchema } from './zod-schemas';
 
 export const loginSchema = UserSchema.pick({ email: true, contrasena: true }).strict();
 export const registerSchema = UserSchema.pick({
@@ -54,8 +54,9 @@ export const centralSystemInfoSchema = CentralSchema
   .partial()
   .strict();
 
-export const houseSystemInfoSchema = HouseSchema.pick({ nombreCasa: true })
-  .extend({ central: centralSystemInfoSchema })
+export const houseSystemInfoSchema = HouseSchema
+  .pick({ nombreCasa: true })
+  .extend({ central: centralSystemInfoSchema, direccion: AddressSchema.partial() })
   .partial()
   .strict();
 

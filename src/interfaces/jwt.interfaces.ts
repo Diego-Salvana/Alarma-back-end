@@ -1,7 +1,7 @@
 import { JwtPayload } from 'jsonwebtoken';
 
 export enum Purpose {
-  EMAIL_VERIFICATION,
+  EMAIL_VERIFICATION = 1,
   PASSWORD_RESET
 }
 

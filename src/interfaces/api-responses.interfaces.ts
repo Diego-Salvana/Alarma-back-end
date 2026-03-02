@@ -35,11 +35,6 @@ export interface ProfileResponse {
   casas: HouseResponse[];
 }
 
-export interface EmailVerification {
-  message: string;
-  token: string;
-}
-
 export interface DeviceResponse {
   dispositivoId: string;
   numeroSensor: number;

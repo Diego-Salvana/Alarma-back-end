@@ -13,7 +13,7 @@ export class CentralController {
 
       const responseHistory = await this.centralService.getHistory(sub, hid);
       
-      res.status(200).json({ message: 'Satisfactory request', data: responseHistory });
+      res.status(200).json({ message: 'Satisfactory request', data: { history: responseHistory } });
     } catch (err: any) {
       ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
     }
