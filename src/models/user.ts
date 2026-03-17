@@ -2,7 +2,6 @@ import { UserModel } from '.';
 import { IUserDataAccess, User } from '../interfaces';
 import { AlreadyExists, NotFound, Unauthorized } from '../utils';
 
-/** Provee acceso a la base de datos para operaciones con Usuarios. */
 export class UserDataAccess implements IUserDataAccess {
   private userModel = UserModel;
   private withoutHistory =

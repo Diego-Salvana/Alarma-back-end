@@ -1,7 +1,6 @@
 import { JwtPayload, sign, verify, decode } from 'jsonwebtoken';
 import { SessionJwtPayload, Purpose, VerificationJwtPayload, AdminJwtPayload, Role } from '../interfaces';
 
-/** Clase que contiene métodos para generar, verificar y decodificar tokens JWT. */
 export class JwtHandler {
   private static USER_JWT = process.env.USER_JWT_SECRET as string;
   private static ADMIN_JWT = process.env.ADMIN_JWT_SECRET as string;
@@ -14,26 +13,22 @@ export class JwtHandler {
     };
 
     return sign(payload, this.USER_JWT, { expiresIn: '90 days' });
-  };
+  }
 
   /* Utilizado para verificación de correo y restablecimiento de contraseña */
   static generateUsernameToken (username: string, purpose: Purpose, expiresIn = '90 days'): string {
     const payload: VerificationJwtPayload = { username, purpose };
 
     return sign(payload, this.USER_JWT, { expiresIn });
-  };
+  }
 
   static generateAdminToken (userId: string): string {
     const payload: AdminJwtPayload = { sub: userId, role: 'admin' };
 
     return sign(payload, this.ADMIN_JWT, { expiresIn: '1d' });
-  };
+  }
    
   static verifyToken <T> (token: string, role: Role = 'user'): T {
     return verify(token, role === 'admin' ? this.ADMIN_JWT : this.USER_JWT) as T;
-  };
-
-  static decode (token: string): JwtPayload | string | null {
-    return decode(token);
   }
 }

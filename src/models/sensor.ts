@@ -2,7 +2,6 @@ import { CreateSensor, Device, EventLog, State } from '../interfaces';
 import { AlreadyExists, NotFound } from '../utils';
 import { UserModel } from '.';
 
-/** Provee acceso a la base de datos para operaciones con Sensores. */
 export class SensorDataAccess {
   private userModel = UserModel;
   private noSensorsHistory = '-casas.sensores.historial -casas.camaras.historial';

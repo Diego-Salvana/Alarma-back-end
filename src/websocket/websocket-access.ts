@@ -6,7 +6,7 @@ export class WebSocketAccess {
 
   connect (serverApp: any) {
     this.io = new Server(serverApp, {
-      cors: { origin: ['http://localhost:4200'] },
+      cors: { origin: ['http://localhost:4200', 'https://alarmstech.vercel.app'] },
       path: '/api-alarma/socket'
     });
 

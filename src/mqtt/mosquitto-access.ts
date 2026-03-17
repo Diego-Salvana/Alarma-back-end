@@ -36,7 +36,6 @@ export class MosquittoAccess {
   /** Conecta al servidor MQTT y suscribe a los tópicos. */
   connect () {
     this.client.on('connect', () => {
-      // Subscripción a todos los tópicos de la app.
       this.client.subscribe(`${this.baseTopic}/#`, (err) => {
         if (!err) {
           console.log(`Suscrito a ${this.baseTopic}/#`);

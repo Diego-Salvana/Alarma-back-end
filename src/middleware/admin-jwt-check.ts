@@ -2,6 +2,7 @@ import { NextFunction, Response } from 'express';
 import { AdminJwtPayload, RequestExt } from '../interfaces';
 import { ErrorHandler, JwtHandler, Unauthorized } from '../utils';
 
+/** Middleware que verifica el token de administrador. */
 export function checkAdminJwt (req: RequestExt, res: Response, next: NextFunction) {
   try {
     const token = req.headers.authorization?.split(' ').pop();

@@ -2,6 +2,7 @@ import { NextFunction, Response } from 'express';
 import { RequestExt, SessionJwtPayload } from '../interfaces';
 import { ErrorHandler, JwtHandler, Unauthorized } from '../utils';
 
+/** Middleware que verifica el token de sesión de usuario. */
 export function checkUserJwt (req: RequestExt, res: Response, next: NextFunction) {
   try {
     const token = req.headers.authorization?.split(' ').pop();

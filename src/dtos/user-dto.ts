@@ -1,6 +1,5 @@
 import { House, HouseResponse, LoginResponse, ProfileResponse, User } from '../interfaces';
 
-/** Provee transformaciones de usuario a respuestas de autenticación y perfil. */
 export class UserDto {
   /** Transforma un usuario en una respuesta de autenticación con token y casas. */
   loginResponse (user: User, token: string): LoginResponse {

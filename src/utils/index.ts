@@ -4,6 +4,4 @@ export * from './error-handler';
 export * from './jwt-handler';
 export * from './pass-encrypt';
 export * from './warning-factory';
-export * from './user-dto';
-export * from './house-dto';
 export * from './required-ids';

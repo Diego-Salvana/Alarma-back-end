@@ -3,7 +3,6 @@ import { HouseService } from '../services';
 import { State, RequestExt, SessionJwtPayload, ArmConfigurationDTO } from '../interfaces';
 import { ErrorHandler, requireUserIdAndHouseId } from '../utils';
 
-/** Gestiona peticiones y respuestas vinculadas a Casas. */
 export class HouseController {
   constructor (private houseService: HouseService) {}
 

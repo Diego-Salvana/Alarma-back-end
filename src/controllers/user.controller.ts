@@ -3,7 +3,6 @@ import { UserService } from '../services';
 import { RequestExt, SessionJwtPayload, VerificationJwtPayload } from '../interfaces';
 import { BadRequest, ErrorHandler } from '../utils';
 
-/** Gestiona peticiones y respuestas vinculadas a Usuarios. */
 export class UserController {
   constructor (private userService: UserService) {}
 

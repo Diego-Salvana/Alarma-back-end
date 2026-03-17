@@ -1,10 +1,10 @@
 import { House, State, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, CreateHouseInfo, SensorArmConfig, Warning } from '../interfaces';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
-import { AlreadyExists, WarningFactory, HouseDto } from '../utils';
+import { AlreadyExists, WarningFactory } from '../utils';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';
+import { HouseDto } from '../dtos';
 
-/** Servicio que administra operaciones con la BD y lógica de negocio vinculada a Casas. */
 export class HouseService {
   private houseDTO = new HouseDto();
 

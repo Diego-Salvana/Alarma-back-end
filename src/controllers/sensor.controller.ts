@@ -4,7 +4,6 @@ import { RequestExt, SessionJwtPayload } from '../interfaces';
 import { BadRequest, ErrorHandler } from '../utils';
 import { requireUserIdAndHouseId } from '../utils/required-ids';
 
-/** Gestiona peticiones y respuestas vinculadas a Sensores. */
 export class SensorController {
   constructor (private sensorService: SensorService) {}
 

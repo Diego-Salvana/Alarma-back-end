@@ -2,6 +2,7 @@ import { NextFunction, Response } from 'express';
 import { RequestExt, VerificationJwtPayload } from '../interfaces';
 import { ErrorHandler, JwtHandler, Unauthorized } from '../utils';
 
+/** Middleware que chequea el token de verificación de usuario. */
 export function checkVerificationJwt (req: RequestExt, res: Response, next: NextFunction) {
   try {
     const token = req.body.token;

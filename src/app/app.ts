@@ -29,8 +29,8 @@ export class App {
       webSocketAccess,
       mosquittoAccess
     );
+    
     const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
-
     mosquittoAccess.setDispatcher(mosquittoEventDispatcher);
 
     // Prueba de conexión al email

@@ -1,8 +1,8 @@
-import { IUserDataAccess, LoginResponse, ProfileResponse, Purpose, RegisterDB, Role, UpdateUserDTO, Register, User } from '../interfaces';
-import { encrypt, JwtHandler, Unauthorized, verifyPass, UserDto } from '../utils';
 import { EmailService } from './email';
+import { UserDto } from '../dtos';
+import { IUserDataAccess, LoginResponse, ProfileResponse, Purpose, RegisterDB, Role, UpdateUserDTO, Register, User } from '../interfaces';
+import { encrypt, JwtHandler, Unauthorized, verifyPass } from '../utils';
 
-/** Servicio que administra operaciones con la base de datos y la lógica de negocio de Usuarios. */
 export class UserService {
   private userDTO = new UserDto();
   private userPrefix = process.env.USER_PREFIX;
@@ -39,7 +39,6 @@ export class UserService {
 
     if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
 
-    // TODO: modificar obtención de rol al cambiar schemas de la BD.
     const role: Role = user.mosquittoPass === '1' ? 'admin' : 'user';
     if (role !== 'admin' || !user.habilitado) throw new Unauthorized('Usuario no autorizado');
 

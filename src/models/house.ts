@@ -3,7 +3,6 @@ import { House, State } from '../interfaces';
 import { AlreadyExists, NotFound } from '../utils';
 import { UserModel } from '.';
 
-/** Provee acceso a la base de datos para operaciones con Casas. */
 export class HouseDataAccess {
   private userModel = UserModel;
   private withoutHistory =

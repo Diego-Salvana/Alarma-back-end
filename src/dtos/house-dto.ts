@@ -1,7 +1,6 @@
 import { House, HouseResponse } from '../interfaces';
-import { JwtHandler } from '.';
+import { JwtHandler } from '../utils';
 
-/** Clase que contiene métodos para transformar datos de Casas en objetos DTO. */
 export class HouseDto {
   /** Transforma datos de una Casa en un objeto HouseResponse. */
   houseResponse (house: House, newToken = false, userId?: string, verified = false): HouseResponse {
