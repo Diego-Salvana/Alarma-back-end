@@ -303,7 +303,7 @@ Cuando contribuyas al proyecto:
 
 ## 📄 Licencia
 
-ISC
+Este proyecto está bajo la licencia ISC.
 
 ## 👨‍💻 Autor
 
