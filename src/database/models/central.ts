@@ -1,5 +1,5 @@
-import { House, ControlPanelEventLog } from '../interfaces';
-import { NotFound } from '../utils';
+import { House, ControlPanelEventLog } from '../../interfaces';
+import { NotFound } from '../../utils';
 import { UserModel } from '.';
 
 export class CentralDataAccess {

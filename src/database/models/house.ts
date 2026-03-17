@@ -1,6 +1,6 @@
 import { merge } from 'lodash';
-import { House, State } from '../interfaces';
-import { AlreadyExists, NotFound } from '../utils';
+import { House, State } from '../../interfaces';
+import { AlreadyExists, NotFound } from '../../utils';
 import { UserModel } from '.';
 
 export class HouseDataAccess {

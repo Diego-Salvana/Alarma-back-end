@@ -1,5 +1,5 @@
 import { CreateSensorDTO, DeviceResponse, SensorSystemInfoDTO } from '../interfaces';
-import { SensorDataAccess } from '../models';
+import { SensorDataAccess } from '../database/models';
 
 export class SensorService {
   constructor (private sensorDataAccess: SensorDataAccess) {}

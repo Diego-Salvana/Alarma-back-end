@@ -4,7 +4,7 @@ import { CustomError } from './custom-errors';
 export class ErrorHandler {
   /** Genera una respuesta de error HTTP personalizada. */
   static generateResponse (res: Response, err: any, defaultMessage?: string) {
-    console.log('Error en Handle: ', err);
+    console.log('ErrorHandler: ', err);
 
     if (err instanceof CustomError) {
       res.status(err.statusCode).json({

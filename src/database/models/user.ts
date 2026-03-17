@@ -1,6 +1,6 @@
 import { UserModel } from '.';
-import { IUserDataAccess, User } from '../interfaces';
-import { AlreadyExists, NotFound, Unauthorized } from '../utils';
+import { IUserDataAccess, User } from '../../interfaces';
+import { AlreadyExists, NotFound, Unauthorized } from '../../utils';
 
 export class UserDataAccess implements IUserDataAccess {
   private userModel = UserModel;

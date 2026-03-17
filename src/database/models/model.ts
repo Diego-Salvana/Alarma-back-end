@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { User } from '../interfaces';
+import { User } from '../../interfaces';
 
 // Historial Dispositivo Schema
 const HistorialSchema = new Schema(

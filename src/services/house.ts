@@ -1,5 +1,5 @@
 import { House, State, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, CreateHouseInfo, SensorArmConfig, Warning } from '../interfaces';
-import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
+import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/models';
 import { AlreadyExists, WarningFactory } from '../utils';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';

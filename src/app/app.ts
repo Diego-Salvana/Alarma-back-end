@@ -4,7 +4,7 @@ import cors from 'cors';
 import { createAdminRouter, createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
-import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../models';
+import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/models';
 import { CentralService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 

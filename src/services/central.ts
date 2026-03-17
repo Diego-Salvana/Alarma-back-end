@@ -1,5 +1,5 @@
 import { EventLogWithName, CentralCodeDTO } from '../interfaces';
-import { CentralDataAccess, UserDataAccess } from '../models';
+import { CentralDataAccess, UserDataAccess } from '../database/models';
 import { NotFound, Unauthorized, verifyPass } from '../utils';
 
 export class CentralService {

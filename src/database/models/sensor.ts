@@ -1,5 +1,5 @@
-import { CreateSensor, Device, EventLog, State } from '../interfaces';
-import { AlreadyExists, NotFound } from '../utils';
+import { CreateSensor, Device, EventLog, State } from '../../interfaces';
+import { AlreadyExists, NotFound } from '../../utils';
 import { UserModel } from '.';
 
 export class SensorDataAccess {

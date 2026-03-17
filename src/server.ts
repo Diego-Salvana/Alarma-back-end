@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { MongoDB } from './database/mongo-db';
+import { MongoDB } from './database/access/mongo-db';
 import { App } from './app/app';
 
 function bootstrap () {
