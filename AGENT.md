@@ -62,20 +62,23 @@ The backend follows a layered architecture that separates HTTP handling, busines
 ### Project Structure
 
 The main source code is located inside the `src` directory.
-
-src/
-app/
-controllers/
-routes/
-services/
-database/
-models/
-interfaces/
-middleware/
-mqtt/
+```
+src/   
+app/  
+controllers/  
+routes/  
+services/  
+database/  
+  access/  
+  models/  
+interfaces/  
+dtos/  
+middleware/  
+mqtt/  
 websocket/
 utils/
 server.ts
+```
 
 ### Layer Responsibilities
 

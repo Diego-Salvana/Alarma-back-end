@@ -1,8 +1,8 @@
-# 🚨 Alarma - Backend API
+# Alarma - Backend API
 
 Un backend robusto y escalable para un **sistema de alarma domótico**, construido con **TypeScript**, **Express**, **MongoDB** y comunicación en **tiempo real** mediante **WebSockets** y **MQTT**.
 
-## 📋 Descripción General
+## Descripción General
 
 **Alarma-back-end** es la API central que permite a los usuarios gestionar sistemas de alarma instalados en sus casas. El sistema integra sensores de seguridad, unidades de control central y notificaciones en tiempo real para proporcionar una experiencia completa de monitoreo y control del hogar.
 
@@ -17,7 +17,7 @@ El sistema está organizado alrededor de cuatro entidades fundamentales:
 
 Cada usuario puede tener múltiples casas, y cada casa contiene una unidad central y múltiples sensores.
 
-## ✨ Características Principales
+## Características Principales
 
 - ✅ **Gestión de usuarios** con verificación por email y recuperación de contraseña
 - ✅ **Control de alarmas** (armado/desarmado con exclusión opcional de sensores)
@@ -29,7 +29,7 @@ Cada usuario puede tener múltiples casas, y cada casa contiene una unidad centr
 - ✅ **Validación robusta** con Zod en todas las peticiones
 - ✅ **Manejo centralizado de errores** con respuestas estandarizadas
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 ### Runtime
 - **Node.js** + **TypeScript**
@@ -55,7 +55,7 @@ Cada usuario puede tener múltiples casas, y cada casa contiene una unidad centr
 ### Email
 - **Nodemailer** - Verificación de cuenta y recuperación de contraseña
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 El backend sigue una **arquitectura en capas** que separa el manejo HTTP, la lógica de negocio y el acceso a datos.
 
@@ -96,7 +96,7 @@ Dispositivo → MQTT Handler → MosquittoEventDispatcher → Services → DataA
 Services → WebSocketService → Clientes Conectados
 ```
 
-## 🔐 Autenticación
+## Autenticación
 
 Todos los endpoints protegidos requieren un **JWT Bearer Token** en la cabecera `Authorization`:
 
@@ -106,7 +106,7 @@ Authorization: Bearer <token>
 
 Los tokens JWT se generan durante el login y se validan mediante middleware en endpoints protegidos.
 
-## 📡 Endpoints Principales
+## Endpoints Principales
 
 ### Sensores
 - **GET** `/api/sensors/:sensorNumber` - Obtener sensor específico
@@ -128,7 +128,7 @@ El servicio procesa eventos MQTT de dispositivos físicos:
 - Registra fechas de activación en el historial del sensor
 - Notifica a clientes conectados mediante WebSockets
 
-## 📊 Respuestas de la API
+## Respuestas de la API
 
 ### Estructura Estándar de Respuestas
 
@@ -162,7 +162,7 @@ El API utiliza Data Transfer Objects para la comunicación:
 - `SensorResponse` - Información de sensor
 - `AddressResponse` - Dirección
 
-## 🚀 Instalación y Setup
+## Instalación y Setup
 
 ### Requisitos Previos
 - Node.js 18+
@@ -184,7 +184,7 @@ cp .env.example .env
 # Editar .env con tus configuraciones
 ```
 
-## 📝 Scripts Disponibles
+## Scripts Disponibles
 
 ```bash
 # Desarrollo con nodemon
@@ -197,7 +197,7 @@ npm run build
 npm start
 ```
 
-## 🎯 Convenciones de Código
+## Convenciones de Código
 
 ### Async/Await
 Todo código asincrónico debe usar `async/await`. No usar callbacks ni `.then()`.
@@ -226,7 +226,7 @@ Siempre retornar en formato `ApiResponse<T>`:
   - ✅ `HouseService.update()`
   - ❌ `createUser()` - Redundante
 
-## 🏛️ Patrones Arquitectónicos
+## Patrones Arquitectónicos
 
 ### Separación de Responsabilidades
 
@@ -243,7 +243,7 @@ Siempre retornar en formato `ApiResponse<T>`:
 - ❌ No enviar eventos WebSocket directamente desde controllers
 - ❌ No modificar contratos de DTOs sin justificación explícita
 
-## 📚 Skills y Documentación
+## Skills y Documentación
 
 Consulta la carpeta `/skills` para información detallada sobre:
 - `error-handling-and-validation.md` - Validación y manejo de errores
@@ -251,7 +251,7 @@ Consulta la carpeta `/skills` para información detallada sobre:
 - `mqtt-event-dispatcher-usage.md` - Integración MQTT
 - `real-time-and-device-communication.md` - WebSockets y comunicación
 
-## 🔧 Desarrollo
+## Desarrollo
 
 ### Estructura de un Nuevo Feature
 
@@ -281,7 +281,7 @@ ResourceDto.toResponse(data)
 ApiResponse { message, data }
 ```
 
-## 📖 Recursos Adicionales
+## Recursos Adicionales
 
 - [AGENT.md](./AGENT.md) - Guía completa de arquitectura y convenciones
 - [Documentación de Express](https://expressjs.com/)
@@ -290,7 +290,7 @@ ApiResponse { message, data }
 - [MQTT Specification](https://mqtt.org/)
 - [Documentación de Mosquitto Broker](https://mosquitto.org/)
 
-## 🤝 Contribución
+## Contribución
 
 Cuando contribuyas al proyecto:
 
@@ -301,13 +301,15 @@ Cuando contribuyas al proyecto:
 5. Retorna DTOs, nunca modelos de base de datos
 6. Mantén los contratos de DTO estables
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto está bajo la licencia ISC.
 
-## 👨‍💻 Autor
+## Autor
 
-Diego Salvañá
+**Diego Salvañá**
+
+*Desarrollador Full Stack*
 
 ---
 
