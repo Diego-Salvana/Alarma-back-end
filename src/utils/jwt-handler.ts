@@ -1,4 +1,4 @@
-import { JwtPayload, sign, verify, decode } from 'jsonwebtoken';
+import { JwtPayload, sign, verify, decode, type SignOptions } from 'jsonwebtoken';
 import { SessionJwtPayload, Purpose, VerificationJwtPayload, AdminJwtPayload, Role } from '../interfaces';
 
 export class JwtHandler {
@@ -16,7 +16,7 @@ export class JwtHandler {
   }
 
   /* Utilizado para verificación de correo y restablecimiento de contraseña */
-  static generateUsernameToken (username: string, purpose: Purpose, expiresIn = '90 days'): string {
+  static generateUsernameToken (username: string, purpose: Purpose, expiresIn: SignOptions['expiresIn'] = '90 days'): string {
     const payload: VerificationJwtPayload = { username, purpose };
 
     return sign(payload, this.USER_JWT, { expiresIn });

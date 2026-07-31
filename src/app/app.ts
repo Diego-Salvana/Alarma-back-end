@@ -37,12 +37,12 @@ export class App {
     emailService.checkConnection();
 
     const app = express();
+    const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
+      .split(',').map(origin => origin.trim());
 
     app.use(express.json());
     app.disable('x-powered-by');
-    app.use(cors({
-      origin: ['http://localhost:4200', 'https://alarmstech.vercel.app']
-    }));
+    app.use(cors({ origin: corsOrigins }));
 
     app.use('/api-alarma/users', createUsersRouter(userService));
     app.use('/api-alarma/houses', createHousesRouter(houseService));

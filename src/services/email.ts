@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 export class EmailService {
-  private host = 'http://localhost:4200';
+  private host = process.env.CLIENT_URL ?? 'http://localhost:4200';
   private transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {

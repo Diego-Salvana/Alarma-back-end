@@ -5,8 +5,11 @@ export class WebSocketAccess {
   private io!: Server;
 
   connect (serverApp: any) {
+    const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
+      .split(',').map(origin => origin.trim());
+
     this.io = new Server(serverApp, {
-      cors: { origin: ['http://localhost:4200', 'https://alarmstech.vercel.app'] },
+      cors: { origin: corsOrigins },
       path: '/api-alarma/socket'
     });
 
