@@ -1,3 +1,7 @@
+---
+name: mqtt-event-dispatcher-usage
+description: Ensures all MQTT or device-originated events are routed through MosquittoEventDispatcher before reaching services. Use when working with MQTT message handlers, dispatcher methods, or device event flows.
+---
 # Skill: MQTT Event Dispatcher Usage
 
 ## Purpose

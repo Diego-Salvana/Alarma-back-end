@@ -1,3 +1,7 @@
+---
+name: real-time-and-device-communication
+description: Ensures correct coordination between HTTP requests, MQTT device communication, and WebSocket notifications. Use when publishing MQTT commands, emitting WebSocket events, or implementing real-time device flows.
+---
 # Skill: Real-Time and Device Communication
 
 ## Purpose

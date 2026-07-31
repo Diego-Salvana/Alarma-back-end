@@ -236,11 +236,11 @@ Siempre retornar en formato `ApiResponse<T>`:
 
 ## Skills y Documentación
 
-Consulta la carpeta `/skills` para información detallada sobre:
-- `error-handling-and-validation.md` - Validación y manejo de errores
-- `layered-architecture-enforcement.md` - Arquitectura en capas
-- `mqtt-event-dispatcher-usage.md` - Integración MQTT
-- `real-time-and-device-communication.md` - WebSockets y comunicación
+Consulta la carpeta `.opencode/skills` para información detallada sobre:
+- `error-handling-and-validation` - Validación y manejo de errores
+- `layered-architecture-enforcement` - Arquitectura en capas
+- `mqtt-event-dispatcher-usage` - Integración MQTT
+- `real-time-and-device-communication` - WebSockets y comunicación
 
 ## Desarrollo
 

@@ -1,3 +1,7 @@
+---
+name: error-handling-and-validation
+description: Enforces consistent error handling and Zod-based validation across the API. Use when adding routes, validation middleware, controllers, or services, and when generating or handling error responses with ErrorHandler.generateResponse().
+---
 # Skill: Error Handling and Validation Discipline
 
 ## Purpose

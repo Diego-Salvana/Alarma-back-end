@@ -1,3 +1,7 @@
+---
+name: layered-architecture-enforcement
+description: Ensures new features and modifications follow the project's layered architecture (Controller -> Service -> DataAccess -> Database). Use when adding endpoints, controllers, services, or data access classes, or when touching Mongoose models and database access.
+---
 # Skill: Layered Architecture Enforcement
 
 ## Purpose
