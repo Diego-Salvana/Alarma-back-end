@@ -1,4 +1,4 @@
-# Alarma - Backend API
+# Alarma IoT - Backend API
 
 Un backend robusto y escalable para un **sistema de alarma domótico**, construido con **TypeScript**, **Express**, **MongoDB** y comunicación en **tiempo real** mediante **WebSockets** y **MQTT**.
 
@@ -199,9 +199,6 @@ npm start
 
 ## Convenciones de Código
 
-### Async/Await
-Todo código asincrónico debe usar `async/await`. No usar callbacks ni `.then()`.
-
 ### Manejo de Errores
 Utilizar el error handler centralizado:
 ```typescript
@@ -220,12 +217,6 @@ Siempre retornar en formato `ApiResponse<T>`:
 }
 ```
 
-### Nomenclatura
-- **Métodos de Service**: Usar nombres concisos (contexto proporcionado por la clase)
-  - ✅ `UserService.create()`
-  - ✅ `HouseService.update()`
-  - ❌ `createUser()` - Redundante
-
 ## Patrones Arquitectónicos
 
 ### Separación de Responsabilidades
@@ -236,7 +227,7 @@ Siempre retornar en formato `ApiResponse<T>`:
 - **DTOs**: Transforman objetos de dominio a respuestas API
 - **Middleware**: Validación y autenticación
 
-### No hacer (Restricciones)
+### Restricciones
 
 - ❌ No acceder a la base de datos fuera de clases DataAccess
 - ❌ No agregar lógica de negocio en controllers
@@ -290,20 +281,11 @@ ApiResponse { message, data }
 - [MQTT Specification](https://mqtt.org/)
 - [Documentación de Mosquitto Broker](https://mosquitto.org/)
 
-## Contribución
-
-Cuando contribuyas al proyecto:
-
-1. Respeta la arquitectura en capas establecida
-2. Sigue las convenciones de código del proyecto
-3. Usa async/await en lugar de promesas
-4. Valida todas las peticiones entrada con Zod
-5. Retorna DTOs, nunca modelos de base de datos
-6. Mantén los contratos de DTO estables
-
 ## Licencia
 
-Este proyecto está bajo la licencia ISC.
+El código fuente puede consultarse y revisarse, pero no puede reutilizarse, modificarse, redistribuirse ni utilizarse con fines comerciales sin autorización expresa del autor.
+
+Para más información, consultá el archivo `LICENSE`.
 
 ## Autor
 
