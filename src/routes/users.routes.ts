@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { UserService } from '../services';
 import { UserController } from '../controllers';
-import { checkVerificationJwt, checkUserJwt, validateBody } from '../middleware';
+import { blockDemoUser, checkVerificationJwt, checkUserJwt, validateBody } from '../middleware';
 import { loginSchema, registerSchema, updateUserSchema } from '../utils/zod-validators';
 
 export const createUsersRouter = (userService: UserService) => {
@@ -30,7 +30,7 @@ export const createUsersRouter = (userService: UserService) => {
     checkVerificationJwt, userController.resetPassword.bind(userController)
   );
   usersRouter.patch('/',
-    validateBody(updateUserSchema), checkUserJwt, userController.update.bind(userController)
+    checkUserJwt, blockDemoUser, validateBody(updateUserSchema), userController.update.bind(userController)
   );
 
   return usersRouter;

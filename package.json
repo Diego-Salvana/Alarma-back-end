@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon ./src/server.ts",
     "start": "node ./dist/server.js",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "npm run build && node --test tests/demo-user.test.js"
   },
   "keywords": [],
   "author": "Diego S",

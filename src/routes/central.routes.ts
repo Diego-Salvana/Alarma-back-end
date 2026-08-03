@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CentralService } from '../services';
 import { CentralController } from '../controllers';
-import { checkUserJwt, validateBody } from '../middleware';
+import { blockDemoUser, checkUserJwt, validateBody } from '../middleware';
 import { centralCodeSchema } from '../utils/zod-validators';
 
 export const createCentralRouter = (centralService: CentralService) => {
@@ -12,8 +12,9 @@ export const createCentralRouter = (centralService: CentralService) => {
     checkUserJwt, centralController.getHistory.bind(centralController)
   );
   centralRouter.patch('/code/:houseId',
-    validateBody(centralCodeSchema),
     checkUserJwt,
+    blockDemoUser,
+    validateBody(centralCodeSchema),
     centralController.updateCode.bind(centralController)
   );
 

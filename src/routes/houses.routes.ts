@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { HouseService } from '../services';
 import { HouseController } from '../controllers';
-import { checkUserJwt, validateBody } from '../middleware';
+import { blockDemoUser, checkUserJwt, validateBody } from '../middleware';
 import { armConfigurationSchema, triggeredSchema, updateHouseSchema } from '../utils/zod-validators';
 
 export const createHousesRouter = (houseService: HouseService) => {
@@ -24,7 +24,7 @@ export const createHousesRouter = (houseService: HouseService) => {
     checkUserJwt, houseController.disarmAlarm.bind(houseController)
   );
   housesRouter.patch('/name-dir/:id',
-    validateBody(updateHouseSchema), checkUserJwt, houseController.update.bind(houseController)
+    checkUserJwt, blockDemoUser, validateBody(updateHouseSchema), houseController.update.bind(houseController)
   );
   housesRouter.post('/lights',
     checkUserJwt, houseController.setLights.bind(houseController)

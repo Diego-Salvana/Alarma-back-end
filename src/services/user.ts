@@ -1,7 +1,7 @@
 import { EmailService } from './email';
 import { UserDto } from '../dtos';
 import { IUserDataAccess, LoginResponse, ProfileResponse, Purpose, RegisterDB, Role, UpdateUserDTO, Register, User } from '../interfaces';
-import { encrypt, JwtHandler, Unauthorized, verifyPass } from '../utils';
+import { encrypt, Forbidden, isDemoUser, JwtHandler, Unauthorized, verifyPass } from '../utils';
 
 export class UserService {
   private userDTO = new UserDto();
@@ -75,6 +75,12 @@ export class UserService {
   async verifyEmail (username: string, purpose: Purpose): Promise<string> {
     if (purpose !== Purpose.EMAIL_VERIFICATION) throw new Unauthorized('Tipo de token no válido');
 
+    const email = username.split(this.userPrefix ?? '-')[1];
+    const userToVerify = await this.userDataAccess.getOne(email);
+    if (isDemoUser(userToVerify._id)) {
+      throw new Forbidden('Esta acción no está disponible para el usuario de demostración.');
+    }
+
     const user = await this.userDataAccess.updateEmailVerification(username);
     const id = user._id;
     const sessionToken = JwtHandler.generateUserIdToken(id, user.habilitado);
@@ -85,6 +91,9 @@ export class UserService {
   /** Solicita restablecimiento de contraseña y envía un email con un token. */
   async forgotPassword (email: string): Promise<void> {
     const user = await this.userDataAccess.getOne(email);
+    if (isDemoUser(user._id)) {
+      throw new Forbidden('Esta acción no está disponible para el usuario de demostración.');
+    }
     const token = JwtHandler.generateUsernameToken(user.nombreUsuario, Purpose.PASSWORD_RESET);
     
     await this.emailService.sendResetPassEmail(email, token);
@@ -96,6 +105,9 @@ export class UserService {
 
     const email = username.split(this.userPrefix ?? '-')[1];
     const user = await this.userDataAccess.getOne(email);
+    if (isDemoUser(user._id)) {
+      throw new Forbidden('Esta acción no está disponible para el usuario de demostración.');
+    }
     const userId = user._id;
     const verified = user.habilitado;
     const firstHouseId = user.casas[0]?._id;
