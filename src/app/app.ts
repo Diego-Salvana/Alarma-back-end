@@ -5,8 +5,9 @@ import { createAdminRouter, createCentralRouter, createHousesRouter, createUsers
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/models';
-import { CentralService, EmailService, HouseService, SensorService, UserService } from '../services';
+import { CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
+import { startDemoResetJob } from '../jobs/demo-reset.job';
 
 export class App {
   static create () {
@@ -33,12 +34,16 @@ export class App {
     const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
     mosquittoAccess.setDispatcher(mosquittoEventDispatcher);
 
+    const demoResetService = new DemoResetService(userDataAccess, houseDataAccess);
+    startDemoResetJob(demoResetService);
+
     // Prueba de conexión al email
     emailService.checkConnection();
 
     const app = express();
     const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
-      .split(',').map(origin => origin.trim());
+      .split(',')
+      .map(origin => origin.trim());
 
     app.use(express.json());
     app.disable('x-powered-by');
@@ -50,7 +55,7 @@ export class App {
     app.use('/api-alarma/central', createCentralRouter(centralService));
     app.use('/api-alarma/admin', createAdminRouter(userService, houseService, sensorService));
 
-    app.use((req, res) => {
+    app.use((_, res) => {
       res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });
     });
 
