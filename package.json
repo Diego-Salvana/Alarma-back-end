@@ -6,7 +6,7 @@
     "dev": "nodemon ./src/server.ts",
     "start": "node ./dist/server.js",
     "build": "tsc",
-    "test": "npm run build && node --test tests/demo-user.test.js"
+    "test": "npm run build && node --test"
   },
   "keywords": [],
   "author": "Diego S",
@@ -21,6 +21,7 @@
     "lodash": "^4.18.1",
     "mongoose": "8.24.2",
     "mqtt": "^5.15.2",
+    "node-cron": "^4.6.0",
     "nodemailer": "^9.0.3",
     "socket.io": "4.8.3",
     "zod": "^3.23.8"
