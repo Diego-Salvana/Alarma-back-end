@@ -5,8 +5,7 @@ export class WebSocketAccess {
   private io!: Server;
 
   connect (serverApp: any) {
-    const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
-      .split(',').map(origin => origin.trim());
+    const corsOrigins = process.env.CORS_ORIGINS?.split(',') ?? [];
 
     this.io = new Server(serverApp, {
       cors: { origin: corsOrigins },

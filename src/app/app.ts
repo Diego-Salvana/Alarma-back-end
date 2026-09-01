@@ -41,9 +41,7 @@ export class App {
     emailService.checkConnection();
 
     const app = express();
-    const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
-      .split(',')
-      .map(origin => origin.trim());
+    const corsOrigins = process.env.CORS_ORIGINS?.split(',') ?? [];
 
     app.use(express.json());
     app.disable('x-powered-by');
