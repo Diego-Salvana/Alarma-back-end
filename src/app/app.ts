@@ -8,6 +8,7 @@ import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } 
 import { CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 import { startDemoResetJob } from '../jobs/demo-reset.job';
+import { errorHandler } from '../middlewares/errorHandler';
 
 export class App {
   static create () {
@@ -53,8 +54,10 @@ export class App {
     app.use('/api-alarma/central', createCentralRouter(centralService));
     app.use('/api-alarma/admin', createAdminRouter(userService, houseService, sensorService));
 
+    app.use(errorHandler);
+
     app.use((_, res) => {
-      res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });
+      res.status(404).send({ name: 'NotFound', message: 'Route Not Found' });
     });
 
     return { app, webSocketAccess, mosquittoAccess };

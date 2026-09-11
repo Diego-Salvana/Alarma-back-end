@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { SensorService } from '../services';
 import { SensorController } from '../controllers';
-import { blockDemoUser, checkUserJwt, validateBody } from '../middleware';
+import { blockDemoUser, checkUserJwt, validateBody } from '../middlewares';
 import { sensorNameSchema } from '../utils/zod-validators';
 
 export const createSensorsRouter = (sensorService: SensorService) => {

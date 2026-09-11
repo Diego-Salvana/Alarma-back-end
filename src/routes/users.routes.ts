@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { UserService } from '../services';
 import { UserController } from '../controllers';
-import { blockDemoUser, checkVerificationJwt, checkUserJwt, validateBody } from '../middleware';
+import { blockDemoUser, checkVerificationJwt, checkUserJwt, validateBody } from '../middlewares';
 import { loginSchema, registerSchema, updateUserSchema } from '../utils/zod-validators';
 
 export const createUsersRouter = (userService: UserService) => {

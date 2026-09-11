@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { HouseService } from '../services';
 import { HouseController } from '../controllers';
-import { blockDemoUser, checkUserJwt, validateBody } from '../middleware';
+import { blockDemoUser, checkUserJwt, validateBody } from '../middlewares';
 import { armConfigurationSchema, triggeredSchema, updateHouseSchema } from '../utils/zod-validators';
 
 export const createHousesRouter = (houseService: HouseService) => {

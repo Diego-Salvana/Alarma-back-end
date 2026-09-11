@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { HouseService, SensorService, UserService } from '../services';
 import { AdminController } from '../controllers/admin.controller';
-import { checkAdminJwt, validateBody } from '../middleware';
+import { checkAdminJwt, validateBody } from '../middlewares';
 import { createHouseSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, sensorSystemInfoSchema, userSystemInfoSchema } from '../utils/zod-validators';
 
 export function createAdminRouter (

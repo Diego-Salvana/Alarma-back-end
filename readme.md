@@ -109,11 +109,8 @@ Los tokens JWT se generan durante el login y se validan mediante middleware en e
 ## Endpoints Principales
 
 ### Sensores
-- **GET** `/api/sensors/:sensorNumber` - Obtener sensor específico
-- **POST** `/api/sensors/` - Crear nuevo sensor
-- **PATCH** `/api/sensors/sensor-name` - Actualizar nombre del sensor
-- **PATCH** `/api/sensors/:houseId/info/:sensorNumber` - Actualizar info del sensor
-- **DELETE** `/api/sensors/:houseId/:sensorNumber` - Eliminar sensor
+- **GET** `/api-alarma/sensors/:sensorNumber` - Obtener sensor específico
+- **PATCH** `/api-alarma/sensors/sensor-name` - Actualizar nombre del sensor
 
 *Todos los endpoints de sensores están protegidos por JWT*
 
