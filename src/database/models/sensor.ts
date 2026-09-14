@@ -1,5 +1,5 @@
 import { CreateSensor, Device, EventLog, State } from '../../interfaces';
-import { AlreadyExists, NotFound } from '../../utils';
+import { ConflictError, NotFoundError } from '../../errors';
 import { UserModel } from '.';
 
 export class SensorDataAccess {
@@ -18,13 +18,13 @@ export class SensorDataAccess {
       )
       .select(`${this.noSensorsHistory} ${this.noCentralHistory}`);
 
-    if (user === null) throw new NotFound('Usuario o casa no encontrados');
+    if (user === null) throw new NotFoundError('User or house not found');
 
     const house = user.casas.find(h => h._id.toString() === houseId);
-    if (!house) throw new NotFound('Casa no encontrada');
+    if (!house) throw new NotFoundError('House not found');
     
     const sensorExists = house.sensores.some(s => s.numeroSensor === sensor.numeroSensor);
-    if (sensorExists) throw new AlreadyExists('El número de sensor ya existe');
+    if (sensorExists) throw new ConflictError('Sensor number already exists');
 
     const newSensor: Device = { ...sensor, estado: State.ON, historial: [] };
 
@@ -52,12 +52,12 @@ export class SensorDataAccess {
       .select(this.noCentralHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Sensor o usuario no encontrados');
+    if (user === null) throw new NotFoundError('Sensor or user not found');
 
     const house = user.casas.find(h => h._id.toString() === houseId);
     const sensor = house?.sensores.find(s => s.numeroSensor === sensorNumber);
 
-    if (!sensor) throw new NotFound('Sensor no encontrado');
+    if (!sensor) throw new NotFoundError('Sensor not found');
 
     return sensor;
   }
@@ -86,12 +86,12 @@ export class SensorDataAccess {
       .select(this.noCentralHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Usuario o sensor no encontrados');
+    if (user === null) throw new NotFoundError('User or sensor not found');
 
     const house = user.casas.find(h => h._id.toString() === houseId);
     const sensor = house?.sensores.find(s => s.numeroSensor === sensorNumber);
     
-    if (!sensor) throw new NotFound('Sensor no encontrado');
+    if (!sensor) throw new NotFoundError('Sensor not found');
 
     return sensor;
   }
@@ -134,12 +134,12 @@ export class SensorDataAccess {
       .select(this.noCentralHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Sensor no encontrado');
+    if (user === null) throw new NotFoundError('Sensor not found');
 
     const house = user.casas.find(h => h._id.toString() === houseId);
     const sensor = house?.sensores.find(s => s.numeroSensor === sensorNumber);
 
-    if (!sensor) throw new NotFound('Sensor no encontrado');
+    if (!sensor) throw new NotFoundError('Sensor not found');
 
     return sensor;
   }
@@ -157,7 +157,7 @@ export class SensorDataAccess {
       }
     );
 
-    if (user === null) throw new NotFound('Sensor o usuario no encontrados');
+    if (user === null) throw new NotFoundError('Sensor or user not found');
   }
 
   /** Agrega una fecha de activación a un Sensor de una Casa del Usuario. */
@@ -189,6 +189,6 @@ export class SensorDataAccess {
       }
     );
 
-    if (result.matchedCount === 0) throw new NotFound('Sensor o usuario no encontrados');
+    if (result.matchedCount === 0) throw new NotFoundError('Sensor or user not found');
   }
 }

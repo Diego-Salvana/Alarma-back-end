@@ -140,11 +140,9 @@ Do not use:
 
 Errors must be handled using the centralized error handler.
 
-Controllers should use:
+Controllers should throw AppError subclasses (e.g. NotFoundError, UnauthorizedError)
 
-ErrorHandler.generateResponse()
-
-to generate standardized HTTP error responses.
+and let the centralized errorHandler middleware generate the HTTP response.
 
 ### API Responses
 
@@ -233,17 +231,17 @@ The API uses standardized response objects to ensure consistency across all endp
 
 ### Response Wrapper
 
-All successful HTTP responses should follow the `ApiResponse<T>` structure.
+All successful HTTP responses with body should follow the `ApiResponse<T = null>` structure, built via the `sendSuccess<T>(res, statusCode, message, data: T)` helper (`src/utils/response-helper.ts`), with the 4th argument always required.
 
 Example:
 ```ts
 {
   message: string,
-  data?: T
+  data: T
 }
 ```
 
-Where `T` represents a response DTO.
+Where `T` represents a response DTO. When an endpoint has no useful payload, it uses `T = null` and sends `data: null` explicitly. `DELETE` endpoints respond `204 No Content` without body as the controlled exception.
 
 Example:
 ```ts
@@ -329,7 +327,7 @@ NOT → create HouseManagementService
 Agents must respect the project's coding patterns.
 
 - Required patterns: Use async/await
-- Handle errors with ErrorHandler.generateResponse
+- Throw AppError subclasses (e.g. NotFoundError, UnauthorizedError) and let the centralized errorHandler middleware handle them
 - Use DTO classes to map domain entities to API responses
 
 ### Do Not Introduce Unnecessary Abstractions
@@ -344,7 +342,7 @@ The project favors simple and explicit code.
 
 ### Maintain API Response Structure
 
-All HTTP responses must follow the `ApiResponse<T>` structure.
+All HTTP responses with body must follow the `ApiResponse<T = null>` structure via `sendSuccess<T>(res, statusCode, message, data: T)`, with the 4th argument always required.
 
 Example:
 

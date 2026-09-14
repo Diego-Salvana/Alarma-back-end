@@ -1,109 +1,76 @@
 import { Response } from 'express';
+
 import { HouseService } from '../services';
 import { State, RequestExt, SessionJwtPayload, ArmConfigurationDTO } from '../interfaces';
-import { ErrorHandler, requireUserIdAndHouseId } from '../utils';
+import { requireUserIdAndHouseId, sendSuccess } from '../utils';
 
 export class HouseController {
   constructor (private houseService: HouseService) {}
 
   async getAll ({ user }: RequestExt, res: Response) {
-    try {
-      const { sub } = user as SessionJwtPayload;
-      const responseHouse = await this.houseService.getAll(sub);
+    const { sub } = user as SessionJwtPayload;
+    const responseHouse = await this.houseService.getAll(sub);
 
-      res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
-    }
+    sendSuccess(res, 200, 'Houses retrieved successfully', responseHouse);
   }
 
   async getOne ({ params, user, headers }: RequestExt, res: Response) {
-    try {
-      const { sub, verified } = user as SessionJwtPayload;
-      const houseId = params.id;
-      const tokenRequired = headers['set-house'] === 'true';
-      const responseHouse = await this.houseService.getOne(sub, houseId, verified, tokenRequired);
+    const { sub, verified } = user as SessionJwtPayload;
+    const houseId = params.id;
+    const tokenRequired = headers['set-house'] === 'true';
+    const responseHouse = await this.houseService.getOne(sub, houseId, verified, tokenRequired);
 
-      res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
-    }
+    sendSuccess(res, 200, 'House retrieved successfully', responseHouse);
   }
 
   async getCurrent ({ user }: RequestExt, res: Response) {
-    try {
-      const payload = user as SessionJwtPayload;
-      const { sub, hid } = requireUserIdAndHouseId(payload);
-      const { verified } = payload;
-      const responseHouse = await this.houseService.getOne(sub, hid, verified, false);
+    const payload = user as SessionJwtPayload;
+    const { sub, hid } = requireUserIdAndHouseId(payload);
+    const { verified } = payload;
+    const responseHouse = await this.houseService.getOne(sub, hid, verified, false);
 
-      res.status(200).json({ message: 'Satisfactory request', data: responseHouse });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener la casa');
-    }
+    sendSuccess(res, 200, 'House retrieved successfully', responseHouse);
   }
 
   async update ({ params, body, user }: RequestExt, res: Response) {
-    try {
-      const { sub } = user as SessionJwtPayload;
-      const houseId = params.id;
-      const responseHouse = await this.houseService.update(sub, houseId, body);
+    const { sub } = user as SessionJwtPayload;
+    const houseId = params.id;
+    const responseHouse = await this.houseService.update(sub, houseId, body);
 
-      res.status(200).json({ message: 'Updated successfully', data: responseHouse });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar casa');
-    }
+    sendSuccess(res, 200, 'House updated successfully', responseHouse);
   }
 
   async armAlarm ({ body, user }: RequestExt, res: Response) {
-    try {
-      const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
-      const { sensors } = body as ArmConfigurationDTO;
-      
-      // Responde inmediatamente que la solicitud fue aceptada para su procesamiento.
-      res.status(202).json({ message: 'Activation in process', status: 'pending' });
-      
-      // Inicia el proceso de activación de la alarma en segundo plano.
-      void this.houseService.setAlarmState(sub, hid, State.ON, sensors);
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al activar la alarma');
-    }
+    const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
+    const { sensors } = body as ArmConfigurationDTO;
+
+    sendSuccess(res, 202, 'Alarm arming initiated', { status: 'pending' });
+
+    void this.houseService.setAlarmState(sub, hid, State.ON, sensors);
   }
 
   async disarmAlarm ({ user }: RequestExt, res: Response) {
-    try {
-      const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
+    const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
 
-      res.status(202).json({ message: 'Deactivation in process', status: 'pending' });
+    sendSuccess(res, 202, 'Alarm disarming initiated', { status: 'pending' });
 
-      void this.houseService.setAlarmState(sub, hid, State.OFF);
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
-    }
+    void this.houseService.setAlarmState(sub, hid, State.OFF);
   }
 
   async setLights ({ body, user }: RequestExt, res: Response) {
-    try {
-      const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
+    const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
 
-      res.status(202).json({ message: 'Set lights state in process', status: 'pending' });
+    sendSuccess(res, 202, 'Lights state update initiated', { status: 'pending' });
 
-      void this.houseService.setLightsState(sub, hid, body);
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al desactivar la alarma');
-    }
+    void this.houseService.setLightsState(sub, hid, body);
   }
 
   async triggerAlarm ({ body, user }: RequestExt, res: Response) {
-    try {
-      const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
-      const { sonando, numeroSensor } = body;
+    const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
+    const { sonando, numeroSensor } = body;
 
-      res.status(202).json({ message: 'Trigger in process', status: 'pending' });
+    sendSuccess(res, 202, 'Alarm trigger initiated', { status: 'pending' });
 
-      void this.houseService.setTriggeredState(sub, hid, sonando, numeroSensor);
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al disparar la alarma');
-    }
+    void this.houseService.setTriggeredState(sub, hid, sonando, numeroSensor);
   }
 }

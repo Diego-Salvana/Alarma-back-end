@@ -1,8 +1,8 @@
 export abstract class AppError extends Error {
   constructor (
-    public readonly statusCode: number,
+    public statusCode: number,
     message: string,
-    public readonly name: string
+    public name: string
   ) {
     super(message);
   }

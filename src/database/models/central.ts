@@ -1,5 +1,5 @@
 import { House, ControlPanelEventLog } from '../../interfaces';
-import { NotFound } from '../../utils';
+import { NotFoundError } from '../../errors';
 import { UserModel } from '.';
 
 export class CentralDataAccess {
@@ -12,22 +12,22 @@ export class CentralDataAccess {
       .select(this.noSensorsHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Usuario o casa no encontrados');
+    if (user === null) throw new NotFoundError('User or house not found');
 
     const house = user.casas.find(h => h._id.toString() === houseId);
-    if (!house) throw new NotFound('Casa no encontrada');
+    if (!house) throw new NotFoundError('House not found');
 
     return house;
   }
 
-  /** Actualiza el código de la central de una casa en la BD y devuelve la central actualizada. */
+  /** Actualiza el código de la central de una casa en la BD. */
   async updateCode (userId: string, houseId: string, newCode: number): Promise<void> {
     const result = await this.userModel.updateOne(
       { _id: userId, 'casas._id': houseId },
       { $set: { 'casas.$.central.codigo': newCode } }
     );
 
-    if (result.matchedCount === 0) throw new NotFound('Usuario o casa no encontrados');
+    if (result.matchedCount === 0) throw new NotFoundError('User or house not found');
   }
 
   /** Actualiza el estado de la sirena en una Casa en la BD. */
@@ -36,8 +36,8 @@ export class CentralDataAccess {
       { nombreUsuario: username, 'casas.nombreCasa': houseName },
       { $set: { 'casas.$.central.sonando': ringing } }
     );
-  
-    if (result.matchedCount === 0) throw new NotFound('Usuario o casa no encontrados');
+   
+    if (result.matchedCount === 0) throw new NotFoundError('User or house not found');
   }
 
   /** Actualiza el historial de una central en una casa específica. */
@@ -51,6 +51,6 @@ export class CentralDataAccess {
       }
     );
       
-    if (result.matchedCount === 0) throw new NotFound('Usuario o casa no encontrados');
+    if (result.matchedCount === 0) throw new NotFoundError('User or house not found');
   }
 }

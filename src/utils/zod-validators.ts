@@ -44,8 +44,8 @@ export const sensorSystemInfoSchema = DeviceSchema
 export const centralCodeSchema = UserSchema
   .pick({ contrasena: true })
   .extend({
-    codigoActual: CentralSchema.shape.codigo.describe('Código actual de la central'),
-    nuevoCodigo: CentralSchema.shape.codigo.describe('Nuevo código para la central')
+    codigoActual: CentralSchema.shape.codigo.describe('Current central code'),
+    nuevoCodigo: CentralSchema.shape.codigo.describe('New central code')
   })
   .strict();
 
@@ -64,7 +64,7 @@ export const armConfigurationSchema = ArmConfigurationSchema
   .strict()
   .refine(
     ({ sensors }) => sensors.some(sensor => sensor.estado === State.ON),
-    { message: 'Al menos un sensor debe estar encendido' }
+    { message: 'At least one sensor must be turned on' }
   );
 
 export const triggeredSchema = TriggeredSchema.partial({ numeroSensor: true }).strict();

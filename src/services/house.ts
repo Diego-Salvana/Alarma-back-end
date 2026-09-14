@@ -1,6 +1,7 @@
 import { House, State, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, CreateHouseInfo, SensorArmConfig, Warning } from '../interfaces';
 import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/models';
-import { AlreadyExists, WarningFactory } from '../utils';
+import { WarningFactory } from '../utils';
+import { ConflictError } from '../errors';
 import { MosquittoAccess } from '../mqtt';
 import { WebSocketAccess } from '../websocket/websocket-access';
 import { HouseDto } from '../dtos';
@@ -17,7 +18,6 @@ export class HouseService {
     private mosquittoAccess: MosquittoAccess
   ) {}
 
-  /** Crea una nueva casa para el usuario. */
   async create (userId: string, houseData: CreateHouseInfo): Promise<void> {
     const house: Omit<House, '_id'> = {
       ...houseData,
@@ -29,16 +29,18 @@ export class HouseService {
     await this.houseDataAccess.create(userId, house);
   }
 
-  /** Obtiene todas las casas del usuario. */
   async getAll (userId: string): Promise<HouseResponse[]> {
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
 
     return this.houseDTO.housesListResponse(allUserHouses);
   }
 
-  /** Obtiene una casa específica del usuario. */
-  async getOne (userId: string, houseId: string, verified: boolean, tokenRequired: boolean):
-  Promise<HouseResponse> {
+  async getOne (
+    userId: string,
+    houseId: string,
+    verified: boolean,
+    tokenRequired: boolean
+  ): Promise<HouseResponse> {
     const house = await this.houseDataAccess.getOne(userId, houseId);
 
     return this.houseDTO.houseResponse(house, tokenRequired, userId, verified);
@@ -48,16 +50,15 @@ export class HouseService {
     * Actualiza una casa del usuario
     * verificando que no exista otra con el mismo nombre o dirección.
   */
-  async update (userId: string, houseId: string, houseInfo: Partial<House>):
-  Promise<HouseResponse> {
+  async update (userId: string, houseId: string, houseInfo: Partial<House>): Promise<HouseResponse> {
     const allUserHouses = await this.houseDataAccess.getAllByUserId(userId);
     const otherHouses = allUserHouses.filter(house => house._id.toString() !== houseId);
-    const nameExists = otherHouses.some(
-      h => h.nombre.trim().toLowerCase() === houseInfo.nombre?.trim().toLowerCase()
+    const nameExists = otherHouses.some(h =>
+      h.nombre.trim().toLowerCase() === houseInfo.nombre?.trim().toLowerCase()
     );
 
     if (nameExists) {
-      throw new AlreadyExists(`Ya existe una casa con el nombre: ${houseInfo.nombre ?? ''}`);
+      throw new ConflictError(`House with name ${houseInfo.nombre ?? ''} already exists`);
     }
 
     if (houseInfo.direccion) {
@@ -69,9 +70,7 @@ export class HouseService {
       );
 
       if (addressExists) {
-        throw new AlreadyExists(
-          `Ya existe otra casa con la dirección: ${calle} ${numero}, ${ciudad}`
-        );
+        throw new ConflictError(`House with address ${calle} ${numero}, ${ciudad} already exists`);
       }
     }
 
@@ -80,21 +79,27 @@ export class HouseService {
     return this.houseDTO.houseResponse(updatedHouse);
   }
 
-  async updateInfoByAdmin (userId: string, houseId: string, houseInfo: Partial<House>):
-  Promise<HouseResponse> {
+  async updateInfoByAdmin (
+    userId: string,
+    houseId: string,
+    houseInfo: Partial<House>
+  ): Promise<HouseResponse> {
     const updatedHouse = await this.houseDataAccess.updateSystemInfo(userId, houseId, houseInfo);
 
     return this.houseDTO.houseResponse(updatedHouse);
   }
 
-  /** Borra una casa del usuario. */
   async delete (userId: string, houseId: string): Promise<void> {
     await this.houseDataAccess.delete(userId, houseId);
   }
 
   /** Publica a Mosquitto mensaje de Encendido o Apagado de alarma según los parámetros. */
-  async setAlarmState (userId: string, houseId: string, state: State, sensors?: SensorArmConfig[]):
-  Promise<void> {
+  async setAlarmState (
+    userId: string,
+    houseId: string,
+    state: State,
+    sensors?: SensorArmConfig[]
+  ): Promise<void> {
     let username = '';
     let houseName = '';
     

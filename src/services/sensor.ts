@@ -4,8 +4,11 @@ import { SensorDataAccess } from '../database/models';
 export class SensorService {
   constructor (private sensorDataAccess: SensorDataAccess) {}
 
-  async create (userId: string, houseId: string, sensor: CreateSensorDTO):
-  Promise<Partial<DeviceResponse>> {
+  async create (
+    userId: string,
+    houseId: string,
+    sensor: CreateSensorDTO
+  ): Promise<Partial<DeviceResponse>> {
     return await this.sensorDataAccess.create(userId, houseId, sensor);
   }
 
@@ -13,8 +16,12 @@ export class SensorService {
     return await this.sensorDataAccess.getOne(userId, houseId, sensorNumber);
   }
 
-  async updateName (userId: string, houseId: string, sensorNumber: number, name: string):
-  Promise<DeviceResponse> {
+  async updateName (
+    userId: string,
+    houseId: string,
+    sensorNumber: number,
+    name: string
+  ): Promise<DeviceResponse> {
     return await this.sensorDataAccess.updateName(userId, houseId, sensorNumber, name);
   }
 

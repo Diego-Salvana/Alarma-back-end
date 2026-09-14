@@ -1,6 +1,6 @@
 import { UserModel } from '.';
 import { IUserDataAccess, User } from '../../interfaces';
-import { AlreadyExists, NotFound, Unauthorized } from '../../utils';
+import { ConflictError, NotFoundError, UnauthorizedError } from '../../errors';
 
 export class UserDataAccess implements IUserDataAccess {
   private userModel = UserModel;
@@ -12,7 +12,7 @@ export class UserDataAccess implements IUserDataAccess {
     try {
       await this.userModel.create(userBody);
     } catch (err: any) {
-      if (err.code === 11000) throw new AlreadyExists('Ya existe un usuario con esos datos');
+      if (err.code === 11000) throw new ConflictError('User with this data already exists');
       throw err;
     }
   }
@@ -24,7 +24,7 @@ export class UserDataAccess implements IUserDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Usuario no encontrado');
+    if (user === null) throw new NotFoundError('User not found');
 
     return user;
   }
@@ -36,7 +36,7 @@ export class UserDataAccess implements IUserDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Usuario no encontrado');
+    if (user === null) throw new NotFoundError('User not found');
 
     return user;
   }
@@ -63,11 +63,11 @@ export class UserDataAccess implements IUserDataAccess {
         .select(this.withoutHistory)
         .lean();
     } catch (err: any) {
-      if (err.code === 11000) throw new AlreadyExists('El email ya está en uso');
+      if (err.code === 11000) throw new ConflictError('Email already in use');
       throw err;
     }
 
-    if (updatedUser === null) throw new NotFound('Usuario no encontrado');
+    if (updatedUser === null) throw new NotFoundError('User not found');
 
     return updatedUser;
   }
@@ -85,7 +85,7 @@ export class UserDataAccess implements IUserDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (updatedUser === null) throw new NotFound('Usuario no encontrado');
+    if (updatedUser === null) throw new NotFoundError('User not found');
 
     return updatedUser;
   }
@@ -103,7 +103,7 @@ export class UserDataAccess implements IUserDataAccess {
     );
 
     if (result.modifiedCount === 0) {
-      throw new Unauthorized('La contraseña o el usuario no coinciden');
+      throw new UnauthorizedError('Password or user does not match');
     }
   }
 
@@ -122,7 +122,7 @@ export class UserDataAccess implements IUserDataAccess {
     );
 
     if (!user) {
-      throw new Unauthorized('El usuario no coincide para verificar el email');
+      throw new UnauthorizedError('User does not match for email verification');
     }
 
     return user;
@@ -132,6 +132,6 @@ export class UserDataAccess implements IUserDataAccess {
   async delete (id: string): Promise<void> {
     const deletedUser = await this.userModel.findByIdAndDelete(id);
 
-    if (deletedUser === null) throw new NotFound('Usuario no encontrado');
+    if (deletedUser === null) throw new NotFoundError('User not found');
   }
 }

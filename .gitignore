@@ -1,5 +1,4 @@
 /node_modules
 .env
 /dist
-/src/utils/email.html
 /extras

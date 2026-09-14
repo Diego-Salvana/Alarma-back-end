@@ -1,7 +1,8 @@
 import { EmailService } from './email';
 import { UserDto } from '../dtos';
 import { IUserDataAccess, LoginResponse, ProfileResponse, Purpose, RegisterDB, Role, UpdateUserDTO, Register, User } from '../interfaces';
-import { encrypt, Forbidden, isDemoUser, JwtHandler, Unauthorized, verifyPass } from '../utils';
+import { encrypt, isDemoUser, JwtHandler, verifyPass } from '../utils';
+import { UnauthorizedError, ForbiddenError } from '../errors';
 
 export class UserService {
   private userDTO = new UserDto();
@@ -9,7 +10,6 @@ export class UserService {
 
   constructor (private userDataAccess: IUserDataAccess, private emailService: EmailService) {}
 
-  /** Crea un nuevo usuario y envía un correo de verificación. */
   async create (userInfo: Register): Promise<void> {
     const passwordHash = await encrypt(userInfo.contrasena);
     const userData = { ...userInfo, contrasena: passwordHash };
@@ -37,10 +37,10 @@ export class UserService {
     const hashedPassword = user.contrasena;
     const passwordIsCorrect = await verifyPass(contrasena, hashedPassword);
 
-    if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
+    if (!passwordIsCorrect) throw new UnauthorizedError('Invalid credentials');
 
     const role: Role = user.mosquittoPass === '1' ? 'admin' : 'user';
-    if (role !== 'admin' || !user.habilitado) throw new Unauthorized('Usuario no autorizado');
+    if (role !== 'admin' || !user.habilitado) throw new UnauthorizedError('Unauthorized');
 
     const adminToken = JwtHandler.generateAdminToken(user._id);
     const responseUser = this.userDTO.loginResponse(user, adminToken);
@@ -54,7 +54,7 @@ export class UserService {
     const hashedPassword = user.contrasena;
     const passwordIsCorrect = await verifyPass(contrasena, hashedPassword);
 
-    if (!passwordIsCorrect) throw new Unauthorized('Usuario o contraseña no válidos');
+    if (!passwordIsCorrect) throw new UnauthorizedError('Invalid credentials');
 
     const houseId = user.casas[0]?._id;
     const sessionToken = JwtHandler.generateUserIdToken(user._id, user.habilitado, houseId);
@@ -73,12 +73,12 @@ export class UserService {
 
   /** Verifica el correo del usuario y devuelve un token de sesión. */
   async verifyEmail (username: string, purpose: Purpose): Promise<string> {
-    if (purpose !== Purpose.EMAIL_VERIFICATION) throw new Unauthorized('Tipo de token no válido');
+    if (purpose !== Purpose.EMAIL_VERIFICATION) throw new UnauthorizedError('Invalid token type');
 
     const email = username.split(this.userPrefix ?? '-')[1];
     const userToVerify = await this.userDataAccess.getOne(email);
     if (isDemoUser(userToVerify._id)) {
-      throw new Forbidden('Esta acción no está disponible para el usuario de demostración.');
+      throw new ForbiddenError('Action not available for demo user');
     }
 
     const user = await this.userDataAccess.updateEmailVerification(username);
@@ -92,7 +92,7 @@ export class UserService {
   async forgotPassword (email: string): Promise<void> {
     const user = await this.userDataAccess.getOne(email);
     if (isDemoUser(user._id)) {
-      throw new Forbidden('Esta acción no está disponible para el usuario de demostración.');
+      throw new ForbiddenError('Action not available for demo user');
     }
     const token = JwtHandler.generateUsernameToken(user.nombreUsuario, Purpose.PASSWORD_RESET);
     
@@ -101,12 +101,12 @@ export class UserService {
 
   /** Restablece la contraseña del usuario. */
   async resetPassword (username: string, purpose: Purpose, password: string): Promise<string> {
-    if (purpose !== Purpose.PASSWORD_RESET) throw new Unauthorized('Tipo de token no válido');
+    if (purpose !== Purpose.PASSWORD_RESET) throw new UnauthorizedError('Invalid token type');
 
     const email = username.split(this.userPrefix ?? '-')[1];
     const user = await this.userDataAccess.getOne(email);
     if (isDemoUser(user._id)) {
-      throw new Forbidden('Esta acción no está disponible para el usuario de demostración.');
+      throw new ForbiddenError('Action not available for demo user');
     }
     const userId = user._id;
     const verified = user.habilitado;
@@ -147,7 +147,7 @@ export class UserService {
       const hashedPassword = user.contrasena;
       const passwordIsCorrect = await verifyPass(contrasenaActual, hashedPassword);
 
-      if (!passwordIsCorrect) throw new Unauthorized('Contraseña actual incorrecta');
+      if (!passwordIsCorrect) throw new UnauthorizedError('Current password is incorrect');
 
       const newHash = await encrypt(nuevaContrasena);
       await this.userDataAccess.updatePassword(id, hashedPassword, newHash);

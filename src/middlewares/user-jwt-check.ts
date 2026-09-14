@@ -1,23 +1,18 @@
 import { NextFunction, Response } from 'express';
 import { RequestExt, SessionJwtPayload } from '../interfaces';
-import { ErrorHandler, JwtHandler, Unauthorized } from '../utils';
+import { JwtHandler } from '../utils';
+import { UnauthorizedError } from '../errors';
 
 /** Middleware que verifica el token de sesión de usuario. */
 export function checkUserJwt (req: RequestExt, res: Response, next: NextFunction) {
-  try {
-    const token = req.headers.authorization?.split(' ').pop();
-    if (!token) throw new Unauthorized('Token no proporcionado');
+  const token = req.headers.authorization?.split(' ').pop();
+  if (!token) throw new UnauthorizedError('Token not provided');
 
-    const sessionPayload = JwtHandler.verifyToken<SessionJwtPayload>(token);
-    if (!sessionPayload.sub) throw new Unauthorized('Falta información para encontrar usuario');
-    if (!sessionPayload.verified) throw new Unauthorized('Usuario no verificado');
+  const sessionPayload = JwtHandler.verifyToken<SessionJwtPayload>(token);
+  if (!sessionPayload.sub) throw new UnauthorizedError('Missing user ID in token');
+  if (!sessionPayload.verified) throw new UnauthorizedError('User not verified');
 
-    req.user = sessionPayload;
+  req.user = sessionPayload;
 
-    next();
-  } catch (err: any) {
-    err.name === 'JsonWebTokenError'
-      ? res.status(401).send({ errorType: err.name, message: err.message })
-      : ErrorHandler.generateResponse(res, err, 'Ocurrió un error al verificar token');
-  }
+  next();
 };

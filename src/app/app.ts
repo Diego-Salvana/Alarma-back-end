@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+
 import { createAdminRouter, createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
@@ -8,7 +9,7 @@ import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } 
 import { CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 import { startDemoResetJob } from '../jobs/demo-reset.job';
-import { errorHandler } from '../middlewares/errorHandler';
+import { errorHandler } from '../middlewares/error-handler';
 
 export class App {
   static create () {
@@ -57,7 +58,7 @@ export class App {
     app.use(errorHandler);
 
     app.use((_, res) => {
-      res.status(404).send({ name: 'NotFound', message: 'Route Not Found' });
+      res.status(404).send({ name: 'NotFound', message: 'Route Not Found', statusCode: 404 });
     });
 
     return { app, webSocketAccess, mosquittoAccess };

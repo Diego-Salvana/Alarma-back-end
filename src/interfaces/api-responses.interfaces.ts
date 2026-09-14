@@ -1,8 +1,8 @@
 import { State, DeviceType, EventLog } from './domain.interfaces';
 
-export interface ApiResponse<T> {
+export interface ApiResponse<T = null> {
   message: string;
-  data?: T;
+  data: T;
 }
 
 export interface LoginResponse {

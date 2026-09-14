@@ -1,9 +1,9 @@
-import { BadRequest } from './custom-errors';
 import { SessionJwtPayload } from '../interfaces';
+import { ValidationError } from '../errors';
 
-export function requireUserIdAndHouseId (userPayload: SessionJwtPayload) {
+export function requireUserIdAndHouseId (userPayload: SessionJwtPayload): { sub: string; hid: string } {
   const { sub, hid } = userPayload;
-  if (!hid) throw new BadRequest('Falta información para encontrar casa');
+  if (!hid) throw new ValidationError('Missing house ID');
 
   return { sub, hid };
 }

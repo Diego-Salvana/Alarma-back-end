@@ -1,19 +1,16 @@
 import { NextFunction, Response } from 'express';
 import { RequestExt, SessionJwtPayload } from '../interfaces';
-import { ErrorHandler, Forbidden, Unauthorized, isDemoUser } from '../utils';
+import { isDemoUser } from '../utils';
+import { ForbiddenError, UnauthorizedError } from '../errors';
 
 /** Impide que el usuario de demostración modifique información permanente. */
 export function blockDemoUser (req: RequestExt, res: Response, next: NextFunction) {
-  try {
-    const { sub } = req.user as SessionJwtPayload;
-    if (!sub) throw new Unauthorized('Falta información para encontrar usuario');
+  const { sub } = req.user as SessionJwtPayload;
+  if (!sub) throw new UnauthorizedError('Missing user ID');
 
-    if (isDemoUser(sub)) {
-      throw new Forbidden('Esta acción no está disponible para el usuario de demostración.');
-    }
-
-    next();
-  } catch (err: any) {
-    ErrorHandler.generateResponse(res, err, 'Ocurrió un error al bloquear usuario de demostración');
+  if (isDemoUser(sub)) {
+    throw new ForbiddenError('Action not available for demo user');
   }
+
+  next();
 };

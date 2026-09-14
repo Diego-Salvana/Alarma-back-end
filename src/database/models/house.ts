@@ -1,6 +1,6 @@
 import { merge } from 'lodash';
 import { House, State } from '../../interfaces';
-import { AlreadyExists, NotFound } from '../../utils';
+import { ConflictError, NotFoundError } from '../../errors';
 import { UserModel } from '.';
 
 export class HouseDataAccess {
@@ -25,13 +25,11 @@ export class HouseDataAccess {
       .lean();
 
     if (user === null) {
-      throw new AlreadyExists(
-        `La casa ${houseData.nombreCasa} ya existe o el usuario no fue encontrado`
-      );
+      throw new ConflictError(`House ${houseData.nombreCasa} already exists or user not found`);
     }
 
     const updatedHouse = user.casas.find(h => h.nombreCasa === houseData.nombreCasa);
-    if (!updatedHouse) throw new NotFound('Casa no encontrada');
+    if (!updatedHouse) throw new NotFoundError('House not found');
 
     return updatedHouse;
   }
@@ -43,7 +41,7 @@ export class HouseDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Casas no encontradas');
+    if (user === null) throw new NotFoundError('Houses not found');
 
     const houses = user.casas;
 
@@ -57,10 +55,10 @@ export class HouseDataAccess {
       .select(withHistory ? '' : this.withoutHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Casa no encontrada');
-      
+if (user === null) throw new NotFoundError('House not found');
+       
     const house = user.casas.find(house => house._id.toString() === houseId);
-    if (!house) throw new NotFound('Casa no encontrada');
+    if (!house) throw new NotFoundError('House not found');
       
     return house;
   }
@@ -72,24 +70,24 @@ export class HouseDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Casa no encontrada');
-      
+if (user === null) throw new NotFoundError('House not found');
+       
     const house = user.casas.find(house => house.nombreCasa === houseName);
-    if (!house) throw new NotFound('Casa no encontrada');
+    if (!house) throw new NotFoundError('House not found');
     
     return house;
   }
 
-  /** Actualiza una casa específica del usuario. */
+/** Actualiza una casa específica del usuario. */
   async updateHouseInfo (userId: string, houseId: string, houseBody: Partial<House>): Promise<House> {
     const house = await this.getOne(userId, houseId, true);
-    if (house === null) throw new NotFound('Casa no encontrada');
+    if (house === null) throw new NotFoundError('House not found');
 
     const updateBody: Partial<House> = {
       ...(houseBody.nombre && { nombre: houseBody.nombre }),
       ...(houseBody.direccion && { direccion: houseBody.direccion })
     };
-      
+       
     const updatedHouseData = merge({}, house, updateBody);
 
     const user = await this.userModel
@@ -101,17 +99,17 @@ export class HouseDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Usuario o casa no encontrados durante la actualización');
+    if (user === null) throw new NotFoundError('User or house not found during update');
     
     const responseHouse = user.casas.find(house => house._id.toString() === houseId);
-    if (!responseHouse) throw new NotFound('Casa no encontrada después de la actualización');
+    if (!responseHouse) throw new NotFoundError('House not found after update');
     
     return responseHouse;
   }
 
   async updateSystemInfo (userId: string, houseId: string, houseBody: Partial<House>): Promise<House> {
     const house = await this.getOne(userId, houseId, true);
-    if (house === null) throw new NotFound('Casa no encontrada');
+    if (house === null) throw new NotFoundError('House not found');
 
     const updateBody: Partial<House> = {
       nombreCasa: houseBody.nombreCasa ?? house.nombreCasa,
@@ -138,10 +136,10 @@ export class HouseDataAccess {
       .select(this.withoutHistory)
       .lean();
 
-    if (user === null) throw new NotFound('Usuario o casa no encontrados durante la actualización');
+    if (user === null) throw new NotFoundError('User or house not found during update');
     
     const responseHouse = user.casas.find(house => house._id.toString() === houseId);
-    if (!responseHouse) throw new NotFound('Casa no encontrada después de la actualización');
+    if (!responseHouse) throw new NotFoundError('House not found after update');
     
     return responseHouse;
   }
@@ -153,7 +151,7 @@ export class HouseDataAccess {
       { $pull: { casas: { _id: houseId } } }
     );
 
-    if (result.matchedCount === 0) throw new NotFound('Casa no encontrada');
+    if (result.matchedCount === 0) throw new NotFoundError('House not found');
   }
 
   /** Actualiza el ``estado`` de la Alarma y sus Sensores en una Casa en la BD. */
@@ -163,10 +161,10 @@ export class HouseDataAccess {
       .findOne({ nombreUsuario: username, 'casas.nombreCasa': houseName })
       .select(this.withoutHistory);
 
-    if (user === null) throw new NotFound('Usuario no encontrado');
+    if (user === null) throw new NotFoundError('User not found');
 
     const house = user.casas.find(h => h.nombreCasa === houseName);
-    if (!house) throw new NotFound('Casa no encontrada');
+    if (!house) throw new NotFoundError('House not found');
 
     if (exclusionArray) {
       house.sensores.forEach(sensor => {

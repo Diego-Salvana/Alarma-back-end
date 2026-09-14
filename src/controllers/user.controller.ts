@@ -1,109 +1,78 @@
 import { Request, Response } from 'express';
+
 import { UserService } from '../services';
 import { RequestExt, SessionJwtPayload, VerificationJwtPayload } from '../interfaces';
-import { BadRequest, ErrorHandler } from '../utils';
+import { ValidationError } from '../errors';
+import { sendSuccess } from '../utils';
 
 export class UserController {
   constructor (private userService: UserService) {}
 
   async create ({ body }: Request, res: Response) {
-    try {
-      await this.userService.create(body);
+    await this.userService.create(body);
 
-      res.status(201).send();
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear usuario');
-    }
+    sendSuccess(res, 201, 'User created successfully', null);
   }
 
   async login ({ body }: Request, res: Response) {
-    try {
-      const { email, contrasena } = body;
-      if (!email || !contrasena) throw new BadRequest('Falta información para iniciar sesión');
+    const { email, contrasena } = body;
 
-      const responseUser = await this.userService.login(email, contrasena);
+    if (!email || !contrasena) throw new ValidationError('Missing login credentials');
 
-      res.status(200).json({ message: 'Inicio de sesión exitoso', data: responseUser });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al iniciar sesión');
-    }
+    const responseUser = await this.userService.login(email, contrasena);
+
+    sendSuccess(res, 200, 'Login successful', responseUser);
   }
 
   async sendVerificationEmail ({ body }: Request, res: Response) {
-    try {
-      const { email } = body;
-      if (!email) throw new BadRequest('Falta información para enviar correo de verificación');
+    const { email } = body;
 
-      await this.userService.sendVerificationEmail(email);
+    if (!email) throw new ValidationError('Email is required');
 
-      res.status(204).send();
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al enviar correo de verificación');
-    }
+    await this.userService.sendVerificationEmail(email);
+
+    sendSuccess(res, 200, 'Verification email sent', null);
   }
 
   async verifyEmail ({ verificationToken }: RequestExt, res: Response) {
-    try {
-      const { username, purpose } = verificationToken as VerificationJwtPayload;
-      const sessionToken = await this.userService.verifyEmail(username, purpose);
+    const { username, purpose } = verificationToken as VerificationJwtPayload;
+    const sessionToken = await this.userService.verifyEmail(username, purpose);
 
-      res.status(200).json({ message: 'Verificación exitosa', data: { token: sessionToken } });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al verificar correo');
-    }
+    sendSuccess(res, 200, 'Verification successful', { token: sessionToken });
   }
 
   async forgotPassword ({ body }: Request, res: Response) {
-    try {
-      const { email } = body;
-      if (!email) throw new BadRequest('Falta información para restablecer contraseña');
+    const { email } = body;
 
-      await this.userService.forgotPassword(email);
+    if (!email) throw new ValidationError('Email is required');
 
-      res.status(204).send();
-    } catch (err: any) {
-      ErrorHandler.generateResponse(
-        res, err, 'Ocurrió un error al solicitar restablecimiento de contraseña'
-      );
-    }
+    await this.userService.forgotPassword(email);
+
+    sendSuccess(res, 200, 'Password reset email sent', null);
   }
 
   async resetPassword ({ body, verificationToken }: RequestExt, res: Response) {
-    try {
-      const { username, purpose } = verificationToken as VerificationJwtPayload;
-      const { password } = body;
+    const { username, purpose } = verificationToken as VerificationJwtPayload;
+    const { password } = body;
 
-      if (!password) throw new BadRequest('Falta información para restablecer contraseña');
+    if (!password) throw new ValidationError('New password is required');
 
-      const sessionToken = await this.userService.resetPassword(username, purpose, password);
+    const sessionToken = await this.userService.resetPassword(username, purpose, password);
 
-      res.status(200).json({ message: 'Contraseña restablecida', data: { token: sessionToken } });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al restablecer contraseña');
-    }
+    sendSuccess(res, 200, 'Password reset successful', { token: sessionToken });
   }
 
   async getById ({ user }: RequestExt, res: Response) {
     const { sub } = user as SessionJwtPayload;
+    const responseUser = await this.userService.getById(sub);
 
-    try {
-      const responseUser = await this.userService.getById(sub);
-
-      res.status(200).json({ message: 'Get by id successfully', data: responseUser });
-    } catch (e) {
-      ErrorHandler.generateResponse(res, e, 'Ocurrió un error al obtener usuario');
-    }
+    sendSuccess(res, 200, 'User retrieved successfully', responseUser);
   }
 
   async update ({ body, user }: RequestExt, res: Response) {
     const { sub } = user as SessionJwtPayload;
+    const responseUser = await this.userService.update(sub, body);
 
-    try {
-      const responseUser = await this.userService.update(sub, body);
-      
-      res.status(200).json({ message: 'Updated successfully', data: responseUser });
-    } catch (err: any) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al actualizar usuario');
-    }
+    sendSuccess(res, 200, 'User updated successfully', responseUser);
   }
 }

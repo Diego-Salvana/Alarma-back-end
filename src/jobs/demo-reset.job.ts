@@ -1,8 +1,8 @@
-import cron from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
 
 import { DemoResetService } from '../services';
 
-export function startDemoResetJob (demoResetService: DemoResetService) {
+export function startDemoResetJob (demoResetService: DemoResetService): ScheduledTask {
   return cron.schedule(
     '0 3 * * *',
     async () => {

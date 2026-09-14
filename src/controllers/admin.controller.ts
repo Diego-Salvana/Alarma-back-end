@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
+
 import { HouseService, SensorService, UserService } from '../services';
-import { BadRequest, ErrorHandler } from '../utils';
+import { ValidationError } from '../errors';
+import { sendSuccess } from '../utils';
 
 export class AdminController {
   constructor (
@@ -10,131 +12,87 @@ export class AdminController {
   ) {}
 
   async login ({ body }: Request, res: Response) {
-    try {
-      const { email, contrasena } = body;
-      const responseUser = await this.userService.adminLogin(email, contrasena);
+    const { email, contrasena } = body;
+    const responseUser = await this.userService.adminLogin(email, contrasena);
 
-      res.status(200).json({ message: 'Inicio de sesión exitoso', data: responseUser });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al iniciar sesión');
-    }
+    sendSuccess(res, 200, 'Login successful', responseUser);
   }
 
-  async getAllUsers (req: Request, res: Response) {
-    try {
-      const users = await this.userService.getAllUsers();
+  async getAllUsers (_req: Request, res: Response) {
+    const users = await this.userService.getAllUsers();
 
-      res.status(200).json({ message: 'Usuarios obtenidos exitosamente', data: users });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener los usuarios');
-    }
+    sendSuccess(res, 200, 'Users retrieved successfully', users);
   }
 
   async getUser ({ params }: Request, res: Response) {
-    try {
-      const { userId } = params;
-      const user = await this.userService.getById(userId);
+    const { userId } = params;
+    const user = await this.userService.getById(userId);
 
-      res.status(200).json({ message: 'Usuario obtenido exitosamente', data: user });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al obtener el usuario');
-    }
+    sendSuccess(res, 200, 'User retrieved successfully', user);
   }
 
   async modifyUser ({ params, body }: Request, res: Response) {
-    try {
-      const { userId } = params;
-      const user = await this.userService.updateInfoByAdmin(userId, body);
+    const { userId } = params;
+    const user = await this.userService.updateInfoByAdmin(userId, body);
 
-      res.status(200).json({ message: 'Usuario modificado exitosamente', data: user });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al modificar el usuario');
-    }
+    sendSuccess(res, 200, 'User updated successfully', user);
   }
 
   async deleteUser ({ params }: Request, res: Response) {
-    try {
-      const { userId } = params;
-      await this.userService.delete(userId);
+    const { userId } = params;
+    await this.userService.delete(userId);
 
-      res.status(204).send();
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al eliminar el usuario');
-    }
+    res.status(204).send();
   }
 
   async createHouse ({ params, body }: Request, res: Response) {
-    try {
-      const { userId } = params;
-      const house = await this.houseService.create(userId, body);
+    const { userId } = params;
+    await this.houseService.create(userId, body);
 
-      res.status(201).json({ message: 'Casa creada exitosamente', data: house });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear la casa');
-    }
+    sendSuccess(res, 201, 'House created successfully', null);
   }
-  
-  async modifyHouse ({ params, body }: Request, res: Response) {
-    try {
-      const { userId, houseId } = params;
-      const house = await this.houseService.updateInfoByAdmin(userId, houseId, body);
 
-      res.status(200).json({ message: 'Casa modificada exitosamente', data: house });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al modificar la casa');
-    }
+  async modifyHouse ({ params, body }: Request, res: Response) {
+    const { userId, houseId } = params;
+    const house = await this.houseService.updateInfoByAdmin(userId, houseId, body);
+
+    sendSuccess(res, 200, 'House updated successfully', house);
   }
 
   async deleteHouse ({ params }: Request, res: Response) {
-    try {
-      const { userId, houseId } = params;
-      
-      await this.houseService.delete(userId, houseId);
+    const { userId, houseId } = params;
 
-      res.status(204).send();
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al eliminar la casa');
-    }
+    await this.houseService.delete(userId, houseId);
+
+    res.status(204).send();
   }
 
   async createSensor ({ params, body }: Request, res: Response) {
-    try {
-      const { userId, houseId } = params;
-      const newSensor = await this.sensorService.create(userId, houseId, body);
+    const { userId, houseId } = params;
+    const newSensor = await this.sensorService.create(userId, houseId, body);
 
-      res.status(201).json({ message: 'Sensor agregado', data: newSensor });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear el sensor');
-    }
+    sendSuccess(res, 201, 'Sensor added', newSensor);
   }
 
   async updateSensor ({ params, body }: Request, res: Response) {
-    try {
-      const { userId, houseId, sensorNumber } = params;
-      const sensorId = parseInt(sensorNumber);
-      
-      if (isNaN(sensorId)) throw new BadRequest('El número de sensor no es válido');
+    const { userId, houseId, sensorNumber } = params;
+    const sensorId = parseInt(sensorNumber);
 
-      const updatedSensor = await this.sensorService.updateInfo(userId, houseId, sensorId, body);
+    if (isNaN(sensorId)) throw new ValidationError('Invalid sensor number');
 
-      res.status(200).json({ message: 'Sensor modificado', data: updatedSensor });
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear el sensor');
-    }
+    const updatedSensor = await this.sensorService.updateInfo(userId, houseId, sensorId, body);
+
+    sendSuccess(res, 200, 'Sensor updated successfully', updatedSensor);
   }
 
   async deleteSensor ({ params }: Request, res: Response) {
-    try {
-      const { userId, houseId, sensorNumber } = params;
-      const sensorId = parseInt(sensorNumber);
-      
-      if (isNaN(sensorId)) throw new BadRequest('El número de sensor no es válido');
+    const { userId, houseId, sensorNumber } = params;
+    const sensorId = parseInt(sensorNumber);
 
-      await this.sensorService.delete(userId, houseId, sensorId);
+    if (isNaN(sensorId)) throw new ValidationError('Invalid sensor number');
 
-      res.status(204).send();
-    } catch (err) {
-      ErrorHandler.generateResponse(res, err, 'Ocurrió un error al crear el sensor');
-    }
+    await this.sensorService.delete(userId, houseId, sensorId);
+
+    res.status(204).send();
   }
 }

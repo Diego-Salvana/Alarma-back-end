@@ -1,6 +1,7 @@
 import { EventLogWithName, CentralCodeDTO } from '../interfaces';
 import { CentralDataAccess, UserDataAccess } from '../database/models';
-import { NotFound, Unauthorized, verifyPass } from '../utils';
+import { verifyPass } from '../utils';
+import { NotFoundError, UnauthorizedError } from '../errors';
 
 export class CentralService {
   constructor (
@@ -31,13 +32,13 @@ export class CentralService {
     const { contrasena, codigoActual, nuevoCodigo } = codeBody;
 
     const passwordIsCorrect = await verifyPass(contrasena, user.contrasena);
-    if (!passwordIsCorrect) throw new Unauthorized('Contraseña de usuario incorrecta.');
+    if (!passwordIsCorrect) throw new UnauthorizedError('Incorrect user password');
 
     const house = user.casas.find(h => h._id.toString() === houseId);
     const centralCode = house?.central.codigo;
 
-    if (!centralCode) throw new NotFound('Código de alarma no encontrados para validación.');
-    if (centralCode !== codigoActual) throw new Unauthorized('Código actual de alarma incorrecto.');
+    if (!centralCode) throw new NotFoundError('Alarm code not found for validation');
+    if (centralCode !== codigoActual) throw new UnauthorizedError('Current alarm code is incorrect');
     
     await this.centralDataAccess.updateCode(userId, houseId, nuevoCodigo);
   }

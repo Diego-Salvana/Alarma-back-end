@@ -1,29 +1,29 @@
 import { z } from 'zod';
 import { DeviceType, State } from '../interfaces';
 
-// Tipo de Estado
-export const StateSchema = z.nativeEnum(State, { message: 'El estado debe ser "On"/"Off"' });
+// State Type
+export const StateSchema = z.nativeEnum(State, { message: 'The state must be "On"/"Off"' });
 
-// Tipo Dispositivo
+// Device Type
 export const DeviceTypeSchema = z.nativeEnum(
   DeviceType,
-  { message: 'El tipo de sensor debe ser "Movimiento"/"Ventana"/"Humo"/"Camara"' }
+  { message: 'The sensor type must be "Motion"/"Window"/"Smoke"/"Camera"' }
 );
 
-// Dirección
+// Address
 export const AddressSchema = z.object({
   calle: z
     .string()
     .trim()
-    .min(1, { message: 'La calle es requerida' }),
+    .min(1, { message: 'The street is required' }),
   numero: z
     .string()
     .trim()
-    .min(1, { message: 'El número es requerido' }),
+    .min(1, { message: 'The number is required' }),
   ciudad: z
     .string()
     .trim()
-    .min(1, { message: 'La ciudad es requerida' })
+    .min(1, { message: 'The city is required' })
 });
 
 // Central
@@ -33,8 +33,8 @@ export const CentralSchema = z.object({
   codigo: z
     .number()
     .int()
-    .min(100000, { message: 'Mínimo 6 dígitos' })
-    .max(999999, { message: 'Máximo 6 dígitos' }),
+    .min(100000, { message: 'Minimum 6 digits' })
+    .max(999999, { message: 'Maximum 6 digits' }),
   alarmaEncendida: StateSchema,
   sonando: z.boolean()
 });
@@ -42,43 +42,43 @@ export const CentralSchema = z.object({
 // Dispositivo
 export const DeviceSchema = z.object({
   dispositivoId: z.string().trim().min(1),
-  numeroSensor: z.number().int().positive({ message: 'El número de sensor debe ser positivo.' }),
+  numeroSensor: z.number().int().positive({ message: 'The sensor number must be positive.' }),
   nombre: z.string().trim().min(1),
   tipo: DeviceTypeSchema,
   estado: StateSchema
 });
 
-// Casa
+// House
 export const HouseSchema = z.object({
-  nombre: z.string().trim().min(1, { message: 'El nombre de la casa es requerido.' }),
-  nombreCasa: z.string().trim().min(1, { message: 'El nombre de la casa es requerido.' }),
+  nombre: z.string().trim().min(1, { message: 'The house name is required.' }),
+  nombreCasa: z.string().trim().min(1, { message: 'The house name is required.' }),
   direccion: AddressSchema,
   central: CentralSchema,
   sensores: z.array(DeviceSchema),
   camaras: z.array(DeviceSchema)
 });
 
-// Usuario
+// User
 export const UserSchema = z.object({
-  nombre: z.string().trim().min(1, { message: 'El nombre es requerido.' }),
-  apellido: z.string().trim().min(1, { message: 'El apellido es requerido.' }),
-  nombreUsuario: z.string().trim().min(1, { message: 'El nombre de usuario es requerido.' }),
-  email: z.string().trim().email({ message: 'Formato de correo no válido.' }),
+  nombre: z.string().trim().min(1, { message: 'The first name is required.' }),
+  apellido: z.string().trim().min(1, { message: 'The last name is required.' }),
+  nombreUsuario: z.string().trim().min(1, { message: 'The username is required.' }),
+  email: z.string().trim().email({ message: 'Invalid email format.' }),
   contrasena: z
     .string()
     .trim()
-    .min(6, { message: 'La contraseña debe tener al menos 6 caracteres.' }),
+    .min(6, { message: 'The password must be at least 6 characters long.' }),
   mosquittoPass: z.string().trim().min(1),
-  telefono: z.string().trim().min(1, { message: 'El teléfono es requerido.' }),
+  telefono: z.string().trim().min(1, { message: 'The phone number is required.' }),
   habilitado: z.boolean().default(false),
   casas: z.array(HouseSchema)
 });
 
 // -------------------
-/* Schemas Acciones */
+/* Action Schemas */
 // -------------------
 
-// Configuración de armado de alarma
+// Arm configuration
 export const ArmConfigurationSchema = z.object({
   sensors: z.object({
     numeroSensor: DeviceSchema.shape.numeroSensor,
@@ -86,7 +86,7 @@ export const ArmConfigurationSchema = z.object({
   }).strict().array()
 });
 
-// Disparo de alarma
+// Alarm triggered
 export const TriggeredSchema = z.object({
   sonando: CentralSchema.shape.sonando,
   numeroSensor: DeviceSchema.shape.numeroSensor
