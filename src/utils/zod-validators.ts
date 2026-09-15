@@ -1,70 +1,70 @@
 import { State } from '../interfaces';
-import { CentralSchema, DeviceSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema, AddressSchema } from './zod-schemas';
+import { ControlPanelSchema, SensorSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema, AddressSchema } from './zod-schemas';
 
-export const loginSchema = UserSchema.pick({ email: true, contrasena: true }).strict();
+export const loginSchema = UserSchema.pick({ email: true, password: true }).strict();
 export const registerSchema = UserSchema.pick({
-  nombre: true,
-  apellido: true,
+  firstName: true,
+  lastName: true,
   email: true,
-  contrasena: true,
-  telefono: true
+  password: true,
+  phone: true
 }).strict();
 
 export const updateUserSchema = registerSchema
-  .pick({ nombre: true, apellido: true, telefono: true })
+  .pick({ firstName: true, lastName: true, phone: true })
   .extend({
-    contrasenaActual: UserSchema.shape.contrasena,
-    nuevaContrasena: UserSchema.shape.contrasena
+    currentPassword: UserSchema.shape.password,
+    newPassword: UserSchema.shape.password
   })
   .partial()
   .strict();
 
 export const userSystemInfoSchema = UserSchema
-  .pick({ nombreUsuario: true, mosquittoPass: true, habilitado: true })
+  .pick({ username: true, enabled: true })
   .partial()
   .strict();
 
 export const createHouseSchema = HouseSchema
-  .partial({ sensores: true, camaras: true })
-  .omit({ nombreCasa: true })
+  .partial({ sensors: true, cameras: true, houseName: true })
+  .omit({ houseName: true })
   .strict();
-  
+
 export const updateHouseSchema = HouseSchema
-  .pick({ nombre: true, direccion: true })
+  .pick({ name: true, address: true })
   .deepPartial()
   .strict();
 
-export const createSensorSchema = DeviceSchema.omit({ estado: true }).strict();
-export const sensorNameSchema = DeviceSchema.pick({ nombre: true, numeroSensor: true }).strict();
-export const sensorSystemInfoSchema = DeviceSchema
-  .pick({ dispositivoId: true, numeroSensor: true, tipo: true })
+export const createSensorSchema = SensorSchema.omit({ state: true }).strict();
+export const sensorNameSchema = SensorSchema.pick({ name: true, number: true }).strict();
+export const sensorSystemInfoSchema = SensorSchema
+  .pick({ model: true, number: true, type: true })
   .partial()
   .strict();
 
 export const centralCodeSchema = UserSchema
-  .pick({ contrasena: true })
+  .pick({ password: true })
   .extend({
-    codigoActual: CentralSchema.shape.codigo.describe('Current central code'),
-    nuevoCodigo: CentralSchema.shape.codigo.describe('New central code')
+    currentCode: ControlPanelSchema.shape.alarmCode.describe('Current central code'),
+    newCode: ControlPanelSchema.shape.alarmCode.describe('New central code')
   })
   .strict();
 
-export const centralSystemInfoSchema = CentralSchema
-  .pick({ centralId: true, nombre: true })
+export const centralSystemInfoSchema = ControlPanelSchema
+  .pick({ model: true })
   .partial()
   .strict();
 
 export const houseSystemInfoSchema = HouseSchema
-  .pick({ nombreCasa: true })
-  .extend({ central: centralSystemInfoSchema, direccion: AddressSchema.partial() })
+  .pick({ houseName: true })
+  .extend({ controlPanel: centralSystemInfoSchema, address: AddressSchema.partial() })
   .partial()
   .strict();
 
 export const armConfigurationSchema = ArmConfigurationSchema
   .strict()
   .refine(
-    ({ sensors }) => sensors.some(sensor => sensor.estado === State.ON),
+    ({ sensors }) => sensors.some(sensor => sensor.state === State.ON),
     { message: 'At least one sensor must be turned on' }
   );
 
-export const triggeredSchema = TriggeredSchema.partial({ numeroSensor: true }).strict();
+export const triggeredSchema = TriggeredSchema.partial({ number: true }).strict();

@@ -21,8 +21,8 @@ export class SensorController {
 
   async updateName ({ user, body }: RequestExt, res: Response) {
     const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
-    const { numeroSensor, nombre } = body;
-    const responseSensor = await this.sensorService.updateName(sub, hid, numeroSensor, nombre);
+    const { number, name } = body;
+    const responseSensor = await this.sensorService.updateName(sub, hid, number, name);
 
     sendSuccess(res, 200, 'Sensor updated successfully', responseSensor);
   }

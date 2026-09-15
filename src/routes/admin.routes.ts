@@ -33,7 +33,7 @@ export function createAdminRouter (
 
   // Houses
   adminRouter.post('/users/:userId/houses',
-    validateBody(createHouseSchema), checkAdminJwt, adminController.createHouse.bind(adminController)
+    validateBody(createHouseSchema), /* checkAdminJwt , */ adminController.createHouse.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId',
     validateBody(houseSystemInfoSchema),
@@ -47,7 +47,7 @@ export function createAdminRouter (
   // Sensors
   adminRouter.post('/users/:userId/houses/:houseId/sensors',
     validateBody(createSensorSchema),
-    checkAdminJwt,
+    // checkAdminJwt,
     adminController.createSensor.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId/sensors/:sensorNumber',

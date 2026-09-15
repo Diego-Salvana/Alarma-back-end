@@ -5,7 +5,7 @@ import cors from 'cors';
 import { createAdminRouter, createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
-import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/models';
+import { CentralDataAccess, EventDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/access';
 import { CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 import { startDemoResetJob } from '../jobs/demo-reset.job';
@@ -17,18 +17,19 @@ export class App {
     const houseDataAccess = new HouseDataAccess();
     const centralDataAccess = new CentralDataAccess();
     const sensorDataAccess = new SensorDataAccess();
+    const eventDataAccess = new EventDataAccess();
     const mosquittoAccess = new MosquittoAccess();
     const webSocketAccess = new WebSocketAccess();
 
     const emailService = new EmailService();
-    const userService = new UserService(userDataAccess, emailService);
-    const centralService = new CentralService(userDataAccess, centralDataAccess);
+    const userService = new UserService(userDataAccess, emailService, houseDataAccess);
+    const centralService = new CentralService(userDataAccess, centralDataAccess, houseDataAccess, eventDataAccess);
     const sensorService = new SensorService(sensorDataAccess);
     const houseService = new HouseService(
       userDataAccess,
       houseDataAccess,
       centralDataAccess,
-      sensorDataAccess,
+      eventDataAccess,
       webSocketAccess,
       mosquittoAccess
     );

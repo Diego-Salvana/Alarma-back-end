@@ -1,5 +1,5 @@
 import { CreateSensorDTO, DeviceResponse, SensorSystemInfoDTO } from '../interfaces';
-import { SensorDataAccess } from '../database/models';
+import { SensorDataAccess } from '../database/access';
 
 export class SensorService {
   constructor (private sensorDataAccess: SensorDataAccess) {}
@@ -13,7 +13,9 @@ export class SensorService {
   }
 
   async getOne (userId: string, houseId: string, sensorNumber: number): Promise<DeviceResponse> {
-    return await this.sensorDataAccess.getOne(userId, houseId, sensorNumber);
+    const sensor = await this.sensorDataAccess.getOne(userId, houseId, sensorNumber);
+
+    return { model: sensor.model, number: sensor.number, name: sensor.name, type: sensor.type, state: sensor.state };
   }
 
   async updateName (
@@ -22,13 +24,17 @@ export class SensorService {
     sensorNumber: number,
     name: string
   ): Promise<DeviceResponse> {
-    return await this.sensorDataAccess.updateName(userId, houseId, sensorNumber, name);
+    const sensor = await this.sensorDataAccess.updateName(userId, houseId, sensorNumber, name);
+
+    return { model: sensor.model, number: sensor.number, name: sensor.name, type: sensor.type, state: sensor.state };
   }
 
   async updateInfo (
     userId: string, houseId: string, sensorNumber: number, sensorInfo: SensorSystemInfoDTO
   ): Promise<DeviceResponse> {
-    return await this.sensorDataAccess.updateInfo(userId, houseId, sensorNumber, sensorInfo);
+    const sensor = await this.sensorDataAccess.updateInfo(userId, houseId, sensorNumber, sensorInfo);
+
+    return { model: sensor.model, number: sensor.number, name: sensor.name, type: sensor.type, state: sensor.state };
   }
 
   async delete (userId: string, houseId: string, sensorNumber: number): Promise<void> {

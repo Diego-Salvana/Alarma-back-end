@@ -12,66 +12,70 @@ export const DeviceTypeSchema = z.nativeEnum(
 
 // Address
 export const AddressSchema = z.object({
-  calle: z
+  street: z
     .string()
     .trim()
     .min(1, { message: 'The street is required' }),
-  numero: z
+  number: z
     .string()
     .trim()
     .min(1, { message: 'The number is required' }),
-  ciudad: z
+  city: z
     .string()
     .trim()
-    .min(1, { message: 'The city is required' })
+    .min(1, { message: 'The city is required' }),
+  country: z
+    .string()
+    .trim()
+    .min(1, { message: 'The country is required' })
 });
 
-// Central
-export const CentralSchema = z.object({
-  centralId: z.string().trim().min(1),
-  nombre: z.string().trim().min(1),
-  codigo: z
-    .number()
-    .int()
-    .min(100000, { message: 'Minimum 6 digits' })
-    .max(999999, { message: 'Maximum 6 digits' }),
-  alarmaEncendida: StateSchema,
-  sonando: z.boolean()
+// ControlPanel
+export const ControlPanelSchema = z.object({
+  model: z.string().trim().min(1),
+  alarmCode: z.string().trim().min(1),
+  alarmState: StateSchema,
+  ringing: z.boolean()
 });
 
-// Dispositivo
-export const DeviceSchema = z.object({
-  dispositivoId: z.string().trim().min(1),
-  numeroSensor: z.number().int().positive({ message: 'The sensor number must be positive.' }),
-  nombre: z.string().trim().min(1),
-  tipo: DeviceTypeSchema,
-  estado: StateSchema
+// Sensor
+export const SensorSchema = z.object({
+  model: z.string().trim().min(1),
+  number: z.number().int().positive({ message: 'The sensor number must be positive.' }),
+  name: z.string().trim().min(1),
+  type: DeviceTypeSchema,
+  state: StateSchema
+});
+
+// Camera
+export const CameraSchema = z.object({
+  model: z.string().trim().min(1),
+  number: z.number().int().positive({ message: 'The camera number must be positive.' }),
+  name: z.string().trim().min(1)
 });
 
 // House
 export const HouseSchema = z.object({
-  nombre: z.string().trim().min(1, { message: 'The house name is required.' }),
-  nombreCasa: z.string().trim().min(1, { message: 'The house name is required.' }),
-  direccion: AddressSchema,
-  central: CentralSchema,
-  sensores: z.array(DeviceSchema),
-  camaras: z.array(DeviceSchema)
+  name: z.string().trim().min(1, { message: 'The house name is required.' }),
+  houseName: z.string().trim().min(1, { message: 'The house identifier is required.' }),
+  address: AddressSchema,
+  controlPanel: ControlPanelSchema,
+  sensors: z.array(SensorSchema),
+  cameras: z.array(CameraSchema)
 });
 
 // User
 export const UserSchema = z.object({
-  nombre: z.string().trim().min(1, { message: 'The first name is required.' }),
-  apellido: z.string().trim().min(1, { message: 'The last name is required.' }),
-  nombreUsuario: z.string().trim().min(1, { message: 'The username is required.' }),
+  firstName: z.string().trim().min(1, { message: 'The first name is required.' }),
+  lastName: z.string().trim().min(1, { message: 'The last name is required.' }),
+  username: z.string().trim().min(1, { message: 'The username is required.' }),
   email: z.string().trim().email({ message: 'Invalid email format.' }),
-  contrasena: z
+  password: z
     .string()
     .trim()
     .min(6, { message: 'The password must be at least 6 characters long.' }),
-  mosquittoPass: z.string().trim().min(1),
-  telefono: z.string().trim().min(1, { message: 'The phone number is required.' }),
-  habilitado: z.boolean().default(false),
-  casas: z.array(HouseSchema)
+  phone: z.string().trim().min(1, { message: 'The phone number is required.' }),
+  enabled: z.boolean().default(false)
 });
 
 // -------------------
@@ -81,13 +85,13 @@ export const UserSchema = z.object({
 // Arm configuration
 export const ArmConfigurationSchema = z.object({
   sensors: z.object({
-    numeroSensor: DeviceSchema.shape.numeroSensor,
-    estado: DeviceSchema.shape.estado
+    number: SensorSchema.shape.number,
+    state: SensorSchema.shape.state
   }).strict().array()
 });
 
 // Alarm triggered
 export const TriggeredSchema = z.object({
-  sonando: CentralSchema.shape.sonando,
-  numeroSensor: DeviceSchema.shape.numeroSensor
+  ringing: ControlPanelSchema.shape.ringing,
+  number: SensorSchema.shape.number
 });

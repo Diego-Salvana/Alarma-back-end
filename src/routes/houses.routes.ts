@@ -24,7 +24,10 @@ export const createHousesRouter = (houseService: HouseService) => {
     checkUserJwt, houseController.disarmAlarm.bind(houseController)
   );
   housesRouter.patch('/name-dir/:id',
-    checkUserJwt, blockDemoUser, validateBody(updateHouseSchema), houseController.update.bind(houseController)
+    checkUserJwt,
+    blockDemoUser,
+    validateBody(updateHouseSchema),
+    houseController.update.bind(houseController)
   );
   housesRouter.post('/lights',
     checkUserJwt, houseController.setLights.bind(houseController)

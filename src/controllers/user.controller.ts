@@ -15,11 +15,11 @@ export class UserController {
   }
 
   async login ({ body }: Request, res: Response) {
-    const { email, contrasena } = body;
+    const { email, password } = body;
 
-    if (!email || !contrasena) throw new ValidationError('Missing login credentials');
+    if (!email || !password) throw new ValidationError('Missing login credentials');
 
-    const responseUser = await this.userService.login(email, contrasena);
+    const responseUser = await this.userService.login(email, password);
 
     sendSuccess(res, 200, 'Login successful', responseUser);
   }

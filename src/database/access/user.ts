@@ -1,13 +1,10 @@
-import { UserModel } from '.';
+import { LeanUser, UserModel } from '../models/user.model';
 import { IUserDataAccess, User } from '../../interfaces';
 import { ConflictError, NotFoundError, UnauthorizedError } from '../../errors';
 
 export class UserDataAccess implements IUserDataAccess {
   private userModel = UserModel;
-  private withoutHistory =
-    '-casas.sensores.historial -casas.camaras.historial -casas.central.historial';
 
-  /** Crea un nuevo usuario en la base de datos. */
   async create (userBody: Partial<User>): Promise<void> {
     try {
       await this.userModel.create(userBody);
@@ -17,51 +14,49 @@ export class UserDataAccess implements IUserDataAccess {
     }
   }
 
-  /** Obtiene un usuario por su email. */
   async getOne (email: string): Promise<User> {
     const user = await this.userModel
       .findOne({ email })
-      .select(this.withoutHistory)
-      .lean();
+      .select('+password')
+      .lean<LeanUser>();
 
     if (user === null) throw new NotFoundError('User not found');
 
-    return user;
+    return this.toDomain(user);
   }
 
-  /** Obtiene un usuario por su id. */
+  /** Obtiene un usuario por su id (incluye password para verificación). */
   async getById (id: string): Promise<User> {
     const user = await this.userModel
       .findById(id)
-      .select(this.withoutHistory)
-      .lean();
+      .select('+password')
+      .lean<LeanUser>();
 
     if (user === null) throw new NotFoundError('User not found');
 
-    return user;
+    return this.toDomain(user);
   }
 
-  /** Obtiene todos los usuarios. */
   async getAll (): Promise<User[]> {
-    return await this.userModel.find().select(this.withoutHistory).lean();
+    const users = await this.userModel.find().lean<LeanUser[]>();
+
+    return users.map(user => this.toDomain(user));
   }
 
-  /** Actualiza un usuario por su id. */
   async updateInfo (id: string, updateBody: Partial<User>): Promise<User> {
     const newInfo = {
-      ...(updateBody.nombre && { nombre: updateBody.nombre }),
-      ...(updateBody.apellido && { apellido: updateBody.apellido }),
+      ...(updateBody.firstName && { firstName: updateBody.firstName }),
+      ...(updateBody.lastName && { lastName: updateBody.lastName }),
       ...(updateBody.email && { email: updateBody.email }),
-      ...(updateBody.telefono && { telefono: updateBody.telefono })
+      ...(updateBody.phone && { phone: updateBody.phone })
     };
 
-    let updatedUser: User | null = null;
+    let updatedUser: LeanUser | null = null;
 
     try {
       updatedUser = await this.userModel
         .findByIdAndUpdate(id, newInfo, { new: true })
-        .select(this.withoutHistory)
-        .lean();
+        .lean<LeanUser>();
     } catch (err: any) {
       if (err.code === 11000) throw new ConflictError('Email already in use');
       throw err;
@@ -69,36 +64,33 @@ export class UserDataAccess implements IUserDataAccess {
 
     if (updatedUser === null) throw new NotFoundError('User not found');
 
-    return updatedUser;
+    return this.toDomain(updatedUser);
   }
 
-  /** Actualiza información de sistema para el usuario. */
+  /** Actualiza información de sistema para el usuario por un Administrador. */
   async updateSystemData (id: string, updateBody: Partial<User>): Promise<User> {
     const newInfo = {
-      ...(updateBody.nombreUsuario && { nombreUsuario: updateBody.nombreUsuario }),
-      ...(updateBody.mosquittoPass && { mosquittoPass: updateBody.mosquittoPass }),
-      ...(updateBody.habilitado !== undefined && { habilitado: updateBody.habilitado })
+      ...(updateBody.username && { username: updateBody.username }),
+      ...(updateBody.enabled !== undefined && { enabled: updateBody.enabled })
     };
 
     const updatedUser = await this.userModel
       .findByIdAndUpdate(id, newInfo, { new: true })
-      .select(this.withoutHistory)
-      .lean();
+      .lean<LeanUser>();
 
     if (updatedUser === null) throw new NotFoundError('User not found');
 
-    return updatedUser;
+    return this.toDomain(updatedUser);
   }
 
-  /** Actualiza la contraseña de un usuario por su id. */
   async updatePassword (id: string, oldHash: string, newHash: string): Promise<void> {
     const result = await this.userModel.updateOne(
       {
         _id: id,
-        contrasena: oldHash
+        password: oldHash
       },
       {
-        $set: { contrasena: newHash }
+        $set: { password: newHash }
       }
     );
 
@@ -107,31 +99,42 @@ export class UserDataAccess implements IUserDataAccess {
     }
   }
 
-  /** Actualiza la verificación de un usuario por su nombre de usuario. */
-  async updateEmailVerification (username: string): Promise<User> {
+  async emailVerification (username: string): Promise<User> {
     const user = await this.userModel.findOneAndUpdate(
       {
-        nombreUsuario: username
+        username
       },
       {
-        $set: { habilitado: true }
+        $set: { enabled: true }
       },
       {
         new: true
       }
-    );
+    ).lean<LeanUser>();
 
-    if (!user) {
+    if (user === null) {
       throw new UnauthorizedError('User does not match for email verification');
     }
 
-    return user;
+    return this.toDomain(user);
   }
 
-  /** Elimina un usuario por su id. */
   async delete (id: string): Promise<void> {
     const deletedUser = await this.userModel.findByIdAndDelete(id);
 
     if (deletedUser === null) throw new NotFoundError('User not found');
+  }
+
+  private toDomain (doc: LeanUser): User {
+    return {
+      _id: doc._id.toString(),
+      firstName: doc.firstName,
+      lastName: doc.lastName,
+      username: doc.username,
+      email: doc.email,
+      password: doc.password,
+      phone: doc.phone,
+      enabled: doc.enabled
+    };
   }
 }

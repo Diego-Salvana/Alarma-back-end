@@ -2,14 +2,14 @@ import { House, HouseResponse, LoginResponse, ProfileResponse, User } from '../i
 
 export class UserDto {
   /** Transforma un usuario en una respuesta de autenticación con token y casas. */
-  loginResponse (user: User, token: string): LoginResponse {
-    const casasResponse: HouseResponse[] = this.housesMap(user.casas);
+  loginResponse (user: User, token: string, houses: House[] = []): LoginResponse {
+    const housesResponse: HouseResponse[] = this.housesMap(houses);
 
     const responseUser: LoginResponse = {
-      nombre: user.nombre,
+      firstName: user.firstName,
       email: user.email,
-      habilitado: user.habilitado,
-      casas: casasResponse,
+      enabled: user.enabled,
+      houses: housesResponse,
       token
     };
 
@@ -17,32 +17,32 @@ export class UserDto {
   }
 
   /** Transforma un usuario en una respuesta de perfil con casas. */
-  profileResponse (user: User): ProfileResponse {
-    const casasResponse: HouseResponse[] = this.housesMap(user.casas);
+  profileResponse (user: User, houses: House[] = []): ProfileResponse {
+    const housesResponse: HouseResponse[] = this.housesMap(houses);
 
     const userProfile: ProfileResponse = {
       _id: user._id,
-      nombre: user.nombre,
-      apellido: user.apellido,
-      nombreUsuario: user.nombreUsuario,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
       email: user.email,
-      telefono: user.telefono,
-      habilitado: user.habilitado,
-      casas: casasResponse
+      phone: user.phone,
+      enabled: user.enabled,
+      houses: housesResponse
     };
 
     return userProfile;
   };
 
-  /** Transforma un arreglo de `Casa` a un arreglo de `HouseResponse`. */
+  /** Transforma un arreglo de casas a un arreglo de HouseResponse. */
   private housesMap (houses: House[]): HouseResponse[] {
-    return houses.map(casa => ({
-      _id: casa._id,
-      nombre: casa.nombre,
-      nombreCasa: casa.nombreCasa,
-      direccion: casa.direccion,
-      alarmaEncendida: casa.central.alarmaEncendida,
-      sonando: casa.central.sonando
+    return houses.map(house => ({
+      _id: house._id,
+      name: house.name,
+      houseName: house.houseName,
+      address: house.address,
+      alarmState: house.controlPanel.alarmState,
+      ringing: house.controlPanel.ringing
     }));
   }
 }

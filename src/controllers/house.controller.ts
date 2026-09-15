@@ -67,10 +67,10 @@ export class HouseController {
 
   async triggerAlarm ({ body, user }: RequestExt, res: Response) {
     const { sub, hid } = requireUserIdAndHouseId(user as SessionJwtPayload);
-    const { sonando, numeroSensor } = body;
+    const { ringing, number } = body;
 
     sendSuccess(res, 202, 'Alarm trigger initiated', { status: 'pending' });
 
-    void this.houseService.setTriggeredState(sub, hid, sonando, numeroSensor);
+    void this.houseService.setTriggeredState(sub, hid, ringing, number);
   }
 }

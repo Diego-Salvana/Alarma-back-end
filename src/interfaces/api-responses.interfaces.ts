@@ -1,4 +1,4 @@
-import { State, DeviceType, EventLog } from './domain.interfaces';
+import { State, DeviceType } from './domain.interfaces';
 
 export interface ApiResponse<T = null> {
   message: string;
@@ -6,46 +6,53 @@ export interface ApiResponse<T = null> {
 }
 
 export interface LoginResponse {
-  nombre: string;
+  firstName: string;
   email: string;
-  habilitado: boolean;
+  enabled: boolean;
   token: string;
-  casas: HouseResponse[];
+  houses: HouseResponse[];
 }
 
 export interface HouseResponse {
   _id: string;
-  nombre: string;
-  nombreCasa: string;
-  direccion: AddressResponse;
-  alarmaEncendida: State;
-  sonando?: boolean;
-  sensores?: DeviceResponse[];
+  name: string;
+  houseName: string;
+  address: AddressResponse;
+  alarmState: State;
+  ringing?: boolean;
+  sensors?: DeviceResponse[];
+  cameras?: CameraResponse[];
   token?: string;
 }
 
 export interface ProfileResponse {
   _id: string;
-  nombre: string;
-  apellido: string;
-  nombreUsuario: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
-  telefono: string;
-  habilitado: boolean;
-  casas: HouseResponse[];
+  phone: string;
+  enabled: boolean;
+  houses: HouseResponse[];
 }
 
 export interface DeviceResponse {
-  dispositivoId: string;
-  numeroSensor: number;
-  nombre: string;
-  tipo: DeviceType;
-  estado: State;
-  historial: EventLog[];
+  model: string;
+  number: number;
+  name: string;
+  type: DeviceType;
+  state: State;
+}
+
+export interface CameraResponse {
+  model: string;
+  number: number;
+  name: string;
 }
 
 export interface AddressResponse {
-  calle: string;
-  numero: string;
-  ciudad: string;
+  street: string;
+  number: string;
+  city: string;
+  country: string;
 }

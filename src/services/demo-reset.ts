@@ -1,4 +1,4 @@
-import { HouseDataAccess, UserDataAccess } from '../database/models';
+import { HouseDataAccess, UserDataAccess } from '../database/access';
 import { User } from '../interfaces';
 
 export class DemoResetService {
@@ -13,9 +13,9 @@ export class DemoResetService {
     if (!this.userId) {
       throw new Error('[DemoResetService] DEMO_USER_ID no encontrado en variables de entorno');
     }
-  
+
     let user: User | undefined;
-    
+
     try {
       user = await this.userDataAccess.getById(this.userId);
     } catch (error) {
@@ -27,8 +27,9 @@ export class DemoResetService {
       throw new Error('[DemoResetService] Usuario no encontrado');
     }
 
-    const username = user.nombreUsuario;
-    const houseNames = user.casas.map(casa => casa.nombreCasa);
+    const username = user.username;
+    const houses = await this.houseDataAccess.getAllByUserId(this.userId);
+    const houseNames = houses.map(house => house.houseName);
 
     const results = await Promise.allSettled(
       houseNames.map(houseName => this.houseDataAccess.updateAlarmState(username, houseName))

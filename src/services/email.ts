@@ -13,9 +13,9 @@ export class EmailService {
   checkConnection () {
     this.transporter.verify(err => {
       if (err) {
-        console.log('Fallo en la conexión al email', err);
+        console.log('Email connection failure', err);
       } else {
-        console.log('Transporter listo para enviar correos');
+        console.log('Transporter ready to send emails');
       }
     });
   }

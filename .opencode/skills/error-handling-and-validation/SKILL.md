@@ -173,7 +173,7 @@ All errors exposed by the API use this structure:
 - **Throw** the appropriate `AppError` subclass (`BadRequestError`, `NotFoundError`, `ConflictError`, etc.)
 - Do **NOT** construct HTTP responses
 
-### Data Access (`src/database/models/`)
+### Data Access (`src/database/access/`)
 
 - Access the database via Mongoose
 - Transform infrastructure errors into `AppError` subclasses
