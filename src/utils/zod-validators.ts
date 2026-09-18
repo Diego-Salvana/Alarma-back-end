@@ -1,4 +1,5 @@
 import { State } from '../interfaces';
+import { z } from 'zod';
 import { ControlPanelSchema, SensorSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema, AddressSchema } from './zod-schemas';
 
 export const loginSchema = UserSchema.pick({ email: true, password: true }).strict();
@@ -68,3 +69,14 @@ export const armConfigurationSchema = ArmConfigurationSchema
   );
 
 export const triggeredSchema = TriggeredSchema.partial({ number: true }).strict();
+
+// Admins (PostgreSQL domain)
+export const createAdminSchema = z.object({
+  firstName: UserSchema.shape.firstName,
+  lastName: UserSchema.shape.lastName,
+  email: UserSchema.shape.email,
+  password: UserSchema.shape.password,
+  role: z.enum(['admin', 'superadmin'])
+}).strict();
+
+export const updateAdminSchema = createAdminSchema.partial().strict();

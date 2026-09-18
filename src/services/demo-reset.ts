@@ -1,4 +1,4 @@
-import { HouseDataAccess, UserDataAccess } from '../database/access';
+import { HouseDataAccess, UserDataAccess } from '../database/access/mongodb';
 import { User } from '../interfaces';
 
 export class DemoResetService {

@@ -1,6 +1,6 @@
 import { sign, verify, type SignOptions } from 'jsonwebtoken';
 
-import { SessionJwtPayload, Purpose, VerificationJwtPayload, AdminJwtPayload, Role } from '../interfaces';
+import { SessionJwtPayload, Purpose, VerificationJwtPayload, AdminJwtPayload, Role, AdminRole } from '../interfaces';
 
 export class JwtHandler {
   private static USER_JWT = process.env.USER_JWT_SECRET as string;
@@ -27,8 +27,8 @@ export class JwtHandler {
     return sign(payload, this.USER_JWT, { expiresIn });
   }
 
-  static generateAdminToken (userId: string): string {
-    const payload: AdminJwtPayload = { sub: userId, role: 'admin' };
+  static generateAdminToken (adminId: string, role: AdminRole = 'admin'): string {
+    const payload: AdminJwtPayload = { sub: adminId, role };
 
     return sign(payload, this.ADMIN_JWT, { expiresIn: '1d' });
   }

@@ -1,5 +1,5 @@
 import { ControlPanelEventType, EventLogWithName, CentralCodeDTO } from '../interfaces';
-import { CentralDataAccess, EventDataAccess, HouseDataAccess, UserDataAccess } from '../database/access';
+import { CentralDataAccess, EventDataAccess, HouseDataAccess, UserDataAccess } from '../database/access/mongodb';
 import { verifyPass } from '../utils';
 import { NotFoundError, UnauthorizedError } from '../errors';
 

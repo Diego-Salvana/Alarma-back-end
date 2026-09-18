@@ -1,5 +1,5 @@
 import { House, State, HouseResponse, Lights, HouseAction, AlarmArming, WarningType, TriggeredAlarm, CreateHouseInfo, SensorArmConfig, Warning, ControlPanelEventType } from '../interfaces';
-import { CentralDataAccess, EventDataAccess, HouseDataAccess, UserDataAccess } from '../database/access';
+import { CentralDataAccess, EventDataAccess, HouseDataAccess, UserDataAccess } from '../database/access/mongodb';
 import { WarningFactory } from '../utils';
 import { ConflictError } from '../errors';
 import { MosquittoAccess } from '../mqtt';

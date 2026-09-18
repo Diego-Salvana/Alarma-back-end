@@ -1,6 +1,6 @@
-import { CreateSensor, Sensor, State } from '../../interfaces';
-import { ConflictError, NotFoundError } from '../../errors';
-import { HouseModel, LeanHouse } from '../models/house.model';
+import { CreateSensor, Sensor, State } from '../../../interfaces';
+import { ConflictError, NotFoundError } from '../../../errors';
+import { HouseModel, LeanHouse } from '../../models/mongodb/house.model';
 
 export class SensorDataAccess {
   private houseModel = HouseModel;

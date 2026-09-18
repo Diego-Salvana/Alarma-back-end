@@ -1,4 +1,4 @@
-import { armConfigurationSchema, centralCodeSchema, centralSystemInfoSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, registerSchema, sensorNameSchema, sensorSystemInfoSchema, updateUserSchema, userSystemInfoSchema } from '../utils/zod-validators';
+import { armConfigurationSchema, centralCodeSchema, centralSystemInfoSchema, createAdminSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, registerSchema, sensorNameSchema, sensorSystemInfoSchema, updateAdminSchema, updateUserSchema, userSystemInfoSchema } from '../utils/zod-validators';
 import { z } from 'zod';
 
 // -------------------
@@ -34,3 +34,10 @@ export type SensorNameDTO = z.infer<typeof sensorNameSchema>;
 export type SensorSystemInfoDTO = z.infer<typeof sensorSystemInfoSchema>;
 
 export type CreateSensorDTO = z.infer<typeof createSensorSchema>;
+
+// -------------------
+/* Admins */
+// -------------------
+export type CreateAdminDTO = z.infer<typeof createAdminSchema>;
+
+export type UpdateAdminDTO = z.infer<typeof updateAdminSchema>;

@@ -1,6 +1,6 @@
-import { LeanUser, UserModel } from '../models/user.model';
-import { IUserDataAccess, User } from '../../interfaces';
-import { ConflictError, NotFoundError, UnauthorizedError } from '../../errors';
+import { LeanUser, UserModel } from '../../models/mongodb/user.model';
+import { IUserDataAccess, User } from '../../../interfaces';
+import { ConflictError, NotFoundError, UnauthorizedError } from '../../../errors';
 
 export class UserDataAccess implements IUserDataAccess {
   private userModel = UserModel;

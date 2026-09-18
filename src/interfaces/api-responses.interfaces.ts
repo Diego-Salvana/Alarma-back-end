@@ -1,4 +1,4 @@
-import { State, DeviceType } from './domain.interfaces';
+import { AdminRole, AuditAction, AuditEntityType, State, DeviceType } from './domain.interfaces';
 
 export interface ApiResponse<T = null> {
   message: string;
@@ -55,4 +55,30 @@ export interface AddressResponse {
   number: string;
   city: string;
   country: string;
+}
+
+export interface AdminResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: AdminRole;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AdminLoginResponse {
+  admin: AdminResponse;
+  token: string;
+}
+
+export interface AuditLogResponse {
+  id: string;
+  adminId: string | null;
+  action: AuditAction;
+  entityType: AuditEntityType;
+  entityId: string | null;
+  details: Record<string, unknown> | null;
+  createdAt: Date;
 }

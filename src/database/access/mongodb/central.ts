@@ -1,5 +1,5 @@
-import { NotFoundError } from '../../errors';
-import { HouseModel } from '../models/house.model';
+import { NotFoundError } from '../../../errors';
+import { HouseModel } from '../../models/mongodb';
 
 export class CentralDataAccess {
   private houseModel = HouseModel;

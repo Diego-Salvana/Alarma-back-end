@@ -6,6 +6,8 @@
     "dev": "nodemon ./src/server.ts",
     "start": "node ./dist/server.js",
     "build": "tsc",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "test": "npm run build && node --test"
   },
   "keywords": [],
@@ -16,6 +18,7 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
+    "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "lodash": "^4.18.1",
@@ -23,6 +26,7 @@
     "mqtt": "^5.15.2",
     "node-cron": "^4.6.0",
     "nodemailer": "^9.0.3",
+    "pg": "^8.23.0",
     "socket.io": "4.8.3",
     "zod": "^3.23.8"
   },
@@ -37,7 +41,10 @@
     "@types/mqtt": "^2.5.0",
     "@types/node": "^24.13.3",
     "@types/nodemailer": "^8.0.1",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.10",
     "ts-standard": "^12.0.2",
+    "tsx": "^4.23.13",
     "typescript": "^5.6.3"
   },
   "overrides": {

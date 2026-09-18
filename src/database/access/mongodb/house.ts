@@ -1,10 +1,10 @@
 import { merge } from 'lodash';
 import { Types } from 'mongoose';
 
-import { House, State } from '../../interfaces';
-import { ConflictError, NotFoundError } from '../../errors';
-import { HouseModel, LeanHouse } from '../models/house.model';
-import { LeanUser } from '../models/user.model';
+import { House, State } from '../../../interfaces';
+import { ConflictError, NotFoundError } from '../../../errors';
+import { HouseModel, LeanHouse } from '../../models/mongodb/house.model';
+import { LeanUser } from '../../models/mongodb/user.model';
 
 type PopulatedHouse = Omit<LeanHouse, 'userId'> & { userId: LeanUser | Types.ObjectId | string };
 

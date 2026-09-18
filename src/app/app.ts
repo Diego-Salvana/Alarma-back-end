@@ -5,8 +5,9 @@ import cors from 'cors';
 import { createAdminRouter, createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
-import { CentralDataAccess, EventDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/access';
-import { CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
+import { CentralDataAccess, EventDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/access/mongodb';
+import { AdminDataAccess, AuditDataAccess } from '../database/access/postgres';
+import { AdminService, AuditService, CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 import { startDemoResetJob } from '../jobs/demo-reset.job';
 import { errorHandler } from '../middlewares/error-handler';
@@ -18,6 +19,8 @@ export class App {
     const centralDataAccess = new CentralDataAccess();
     const sensorDataAccess = new SensorDataAccess();
     const eventDataAccess = new EventDataAccess();
+    const adminDataAccess = new AdminDataAccess();
+    const auditDataAccess = new AuditDataAccess();
     const mosquittoAccess = new MosquittoAccess();
     const webSocketAccess = new WebSocketAccess();
 
@@ -33,6 +36,8 @@ export class App {
       webSocketAccess,
       mosquittoAccess
     );
+    const auditService = new AuditService(auditDataAccess);
+    const adminService = new AdminService(adminDataAccess, auditService, userService, houseService, sensorService);
     
     const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
     mosquittoAccess.setDispatcher(mosquittoEventDispatcher);
@@ -54,7 +59,7 @@ export class App {
     app.use('/api-alarma/houses', createHousesRouter(houseService));
     app.use('/api-alarma/sensors', createSensorsRouter(sensorService));
     app.use('/api-alarma/central', createCentralRouter(centralService));
-    app.use('/api-alarma/admin', createAdminRouter(userService, houseService, sensorService));
+    app.use('/api-alarma/admin', createAdminRouter(adminService, auditService));
 
     app.use(errorHandler);
 

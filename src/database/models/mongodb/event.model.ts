@@ -1,6 +1,6 @@
 import mongoose, { HydratedDocument, Schema, Types } from 'mongoose';
 
-import { ControlPanelEventType } from '../../interfaces';
+import { ControlPanelEventType } from '../../../interfaces';
 
 export interface EventPersistence {
   houseId: Types.ObjectId;

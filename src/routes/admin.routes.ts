@@ -1,18 +1,49 @@
 import { Router } from 'express';
-import { HouseService, SensorService, UserService } from '../services';
+import { AdminService, AuditService } from '../services';
 import { AdminController } from '../controllers/admin.controller';
-import { checkAdminJwt, validateBody } from '../middlewares';
-import { createHouseSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, sensorSystemInfoSchema, userSystemInfoSchema } from '../utils/zod-validators';
+import { checkAdminJwt, requireSuperadmin, validateBody } from '../middlewares';
+import { createAdminSchema, createHouseSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, sensorSystemInfoSchema, updateAdminSchema, userSystemInfoSchema } from '../utils/zod-validators';
 
 export function createAdminRouter (
-  userService: UserService, houseService: HouseService, sensorService: SensorService
+  adminService: AdminService, auditService: AuditService
 ): Router {
   const adminRouter = Router();
-  const adminController = new AdminController(userService, houseService, sensorService);
+  const adminController = new AdminController(adminService, auditService);
 
   // Login
   adminRouter.post('/login',
     validateBody(loginSchema), adminController.login.bind(adminController)
+  );
+
+  // Identidad
+  adminRouter.get('/me',
+    checkAdminJwt, adminController.getMe.bind(adminController)
+  );
+
+  // Admins (solo superadmin)
+  adminRouter.get('/admins',
+    checkAdminJwt, requireSuperadmin, adminController.getAllAdmins.bind(adminController)
+  );
+  adminRouter.post('/admins',
+    validateBody(createAdminSchema),
+    checkAdminJwt, requireSuperadmin,
+    adminController.createAdmin.bind(adminController)
+  );
+  adminRouter.get('/admins/:adminId',
+    checkAdminJwt, requireSuperadmin, adminController.getAdmin.bind(adminController)
+  );
+  adminRouter.patch('/admins/:adminId',
+    validateBody(updateAdminSchema),
+    checkAdminJwt, requireSuperadmin,
+    adminController.updateAdmin.bind(adminController)
+  );
+  adminRouter.delete('/admins/:adminId',
+    checkAdminJwt, requireSuperadmin, adminController.deactivateAdmin.bind(adminController)
+  );
+
+  // Auditoría (lectura para ambos roles)
+  adminRouter.get('/audit-logs',
+    checkAdminJwt, adminController.getAuditLogs.bind(adminController)
   );
 
   // Users
@@ -33,7 +64,7 @@ export function createAdminRouter (
 
   // Houses
   adminRouter.post('/users/:userId/houses',
-    validateBody(createHouseSchema), /* checkAdminJwt , */ adminController.createHouse.bind(adminController)
+    validateBody(createHouseSchema), checkAdminJwt, adminController.createHouse.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId',
     validateBody(houseSystemInfoSchema),
@@ -47,7 +78,7 @@ export function createAdminRouter (
   // Sensors
   adminRouter.post('/users/:userId/houses/:houseId/sensors',
     validateBody(createSensorSchema),
-    // checkAdminJwt,
+    checkAdminJwt,
     adminController.createSensor.bind(adminController)
   );
   adminRouter.patch('/users/:userId/houses/:houseId/sensors/:sensorNumber',

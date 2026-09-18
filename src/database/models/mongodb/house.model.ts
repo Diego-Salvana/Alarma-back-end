@@ -1,6 +1,6 @@
 import mongoose, { HydratedDocument, Schema, Types } from 'mongoose';
 
-import { Address, Camera, ControlPanel, Sensor } from '../../interfaces';
+import { Address, Camera, ControlPanel, Sensor } from '../../../interfaces';
 
 export interface HousePersistence {
   userId: Types.ObjectId;

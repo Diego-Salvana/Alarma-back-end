@@ -99,6 +99,57 @@ export interface User {
 }
 
 // -------------------
+// Admins (PostgreSQL domain)
+// -------------------
+export type AdminRole = 'admin' | 'superadmin';
+
+export interface Admin {
+  id: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: AdminRole;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateAdmin {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: AdminRole;
+}
+
+export type AuditAction =
+  | 'ADMIN_LOGIN'
+  | 'CREATE_ADMIN'
+  | 'UPDATE_ADMIN'
+  | 'DEACTIVATE_ADMIN'
+  | 'UPDATE_USER'
+  | 'DELETE_USER'
+  | 'CREATE_HOUSE'
+  | 'UPDATE_HOUSE'
+  | 'DELETE_HOUSE'
+  | 'CREATE_SENSOR'
+  | 'UPDATE_SENSOR'
+  | 'DELETE_SENSOR';
+
+export type AuditEntityType = 'admin' | 'user' | 'house' | 'sensor' | 'auth';
+
+export interface AuditLogEntry {
+  id: string;
+  adminId: string | null;
+  action: AuditAction;
+  entityType: AuditEntityType;
+  entityId: string | null;
+  details: Record<string, unknown> | null;
+  createdAt: Date;
+}
+
+// -------------------
 // Events (standalone collection)
 // -------------------
 export type EventSource = 'ControlPanel' | 'Sensor';

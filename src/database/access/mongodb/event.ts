@@ -1,5 +1,5 @@
-import { EventControlPanelModel, EventSensorModel, EventModel, LeanEvent } from '../models/event.model';
-import { ControlPanelEventType, HouseEvent } from '../../interfaces';
+import { EventControlPanelModel, EventSensorModel, EventModel, LeanEvent } from '../../models/mongodb/event.model';
+import { ControlPanelEventType, HouseEvent } from '../../../interfaces';
 
 export class EventDataAccess {
   private eventModel = EventModel;
