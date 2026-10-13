@@ -3,7 +3,7 @@ import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './src/database/access/postgres/schema.ts',
+  schema: './src/database/models/postgres/schema.ts',
   out: './drizzle',
   dbCredentials: {
     // Migraciones y seed usan la conexión directa (puerto 5432).

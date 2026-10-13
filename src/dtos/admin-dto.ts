@@ -34,8 +34,10 @@ export class AdminDto {
   /** Quita secretos de un snapshot before/after para auditoría. */
   sanitizeForAudit (value: unknown): unknown {
     if (Array.isArray(value)) return value.map(item => this.sanitizeForAudit(item));
+
     if (value !== null && typeof value === 'object') {
-      const entries = Object.entries(value as Record<string, unknown>)
+      const entries = Object
+        .entries(value as Record<string, unknown>)
         .filter(([key]) => key.toLowerCase() !== 'password')
         .map(([key, val]): [string, unknown] => [key, this.sanitizeForAudit(val)]);
 

@@ -26,7 +26,12 @@ export class App {
 
     const emailService = new EmailService();
     const userService = new UserService(userDataAccess, emailService, houseDataAccess);
-    const centralService = new CentralService(userDataAccess, centralDataAccess, houseDataAccess, eventDataAccess);
+    const centralService = new CentralService(
+      userDataAccess,
+      centralDataAccess,
+      houseDataAccess,
+      eventDataAccess
+    );
     const sensorService = new SensorService(sensorDataAccess);
     const houseService = new HouseService(
       userDataAccess,
@@ -37,7 +42,13 @@ export class App {
       mosquittoAccess
     );
     const auditService = new AuditService(auditDataAccess);
-    const adminService = new AdminService(adminDataAccess, auditService, userService, houseService, sensorService);
+    const adminService = new AdminService(
+      adminDataAccess,
+      auditService,
+      userService,
+      houseService,
+      sensorService
+    );
     
     const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
     mosquittoAccess.setDispatcher(mosquittoEventDispatcher);

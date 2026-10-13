@@ -11,7 +11,7 @@ let dbInstance: NodePgDatabase<typeof schema> | null = null;
 export function getPostgresDb (): NodePgDatabase<typeof schema> {
   if (dbInstance) return dbInstance;
 
-  const connectionString = process.env.SUPA_DATABASE_URL ?? '';
+  const connectionString = process.env.SUPA_DATABASE_URL;
 
   if (!connectionString) throw new Error('SUPA_DATABASE_URL not configured');
 
@@ -32,6 +32,6 @@ export async function connectPostgres (): Promise<void> {
     await db.execute('select 1');
     console.log('Connected to PostgreSQL 🐘');
   } catch {
-    console.log('Failed to connect to PostgreSQL (continuing with MongoDB only)');
+    console.error('Failed to connect to PostgreSQL');
   }
 }

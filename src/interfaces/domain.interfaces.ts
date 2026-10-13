@@ -130,6 +130,7 @@ export type AuditAction =
   | 'DEACTIVATE_ADMIN'
   | 'UPDATE_USER'
   | 'DELETE_USER'
+  | 'DEACTIVATE_USER'
   | 'CREATE_HOUSE'
   | 'UPDATE_HOUSE'
   | 'DELETE_HOUSE'

@@ -1,9 +1,5 @@
 import { AdminDto } from '../dtos';
-import {
-  AdminLoginResponse, AdminResponse, CreateAdmin, CreateHouseInfo, CreateSensorDTO,
-  HouseResponse, HouseSystemInfoDTO, IAdminDataAccess, ProfileResponse,
-  SensorSystemInfoDTO, UserSystemInfoDTO, DeviceResponse
-} from '../interfaces';
+import { AdminLoginResponse, AdminResponse, CreateAdmin, CreateHouseInfo, CreateSensorDTO, HouseResponse, HouseSystemInfoDTO, IAdminDataAccess, ProfileResponse, SensorSystemInfoDTO, UserSystemInfoDTO, DeviceResponse } from '../interfaces';
 import { encrypt, JwtHandler, verifyPass } from '../utils';
 import { ForbiddenError, NotFoundError, UnauthorizedError } from '../errors';
 import { AuditService } from './audit';
@@ -24,6 +20,7 @@ export class AdminService {
 
   async login (email: string, password: string): Promise<AdminLoginResponse> {
     let admin;
+
     try {
       admin = await this.adminDataAccess.getByEmailWithPassword(email);
     } catch (err) {
@@ -34,6 +31,7 @@ export class AdminService {
     }
 
     const passwordIsCorrect = await verifyPass(password, admin.password);
+    
     if (!passwordIsCorrect) throw new UnauthorizedError('Invalid credentials');
     if (!admin.isActive) throw new ForbiddenError('Admin account is deactivated');
 
@@ -56,10 +54,7 @@ export class AdminService {
     return admins.map(admin => this.adminDto.toResponse(admin));
   }
 
-  async create (
-    actorId: string,
-    body: CreateAdmin
-  ): Promise<AdminResponse> {
+  async create (actorId: string, body: CreateAdmin): Promise<AdminResponse> {
     const passwordHash = await encrypt(body.password);
     const created = await this.adminDataAccess.create({ ...body, password: passwordHash });
 

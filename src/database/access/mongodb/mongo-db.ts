@@ -1,12 +1,17 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
 
-export class MongoDB {
-  private static readonly connectionString = process.env.MONGO_URI ?? '';
+export async function connectMongo (): Promise<void> {
+  if (mongoose.connection.readyState !== 0) return;
 
-  static connect () {
-    mongoose.connect(this.connectionString)
-      .then(() => console.log('Connected to MongoDB 📖'))
-      .catch(() => console.log('Failed to connect to MongoDB'));
+  const connectionString = process.env.MONGO_URI;
+  
+  if (!connectionString) throw new Error('MONGO_URI not configured');
+
+  try {
+    await mongoose.connect(connectionString);
+    console.log('Connected to MongoDB 📖');
+  } catch {
+    console.error('Failed to connect to MongoDB');
   }
 }

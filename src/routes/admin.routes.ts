@@ -2,11 +2,11 @@ import { Router } from 'express';
 import { AdminService, AuditService } from '../services';
 import { AdminController } from '../controllers/admin.controller';
 import { checkAdminJwt, requireSuperadmin, validateBody } from '../middlewares';
-import { createAdminSchema, createHouseSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, sensorSystemInfoSchema, updateAdminSchema, userSystemInfoSchema } from '../utils/zod-validators';
+import {
+  createAdminSchema, createHouseSchema, createSensorSchema, houseSystemInfoSchema, loginSchema, sensorSystemInfoSchema, updateAdminSchema, userSystemInfoSchema
+} from '../utils/zod-validators';
 
-export function createAdminRouter (
-  adminService: AdminService, auditService: AuditService
-): Router {
+export function createAdminRouter (adminService: AdminService, auditService: AuditService): Router {
   const adminRouter = Router();
   const adminController = new AdminController(adminService, auditService);
 
