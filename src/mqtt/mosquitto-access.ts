@@ -1,5 +1,7 @@
+import fs from 'node:fs';
 import mqtt from 'mqtt';
 import { capitalize } from 'lodash';
+
 import { extractSensors } from './utils';
 import { MosquittoEventDispatcher } from './mosquitto-event-dispatcher';
 import { State, MQTTtopicHandler, HouseAction, WarningType } from '../interfaces';
@@ -12,9 +14,11 @@ export class MosquittoAccess {
   private client = mqtt.connect(
     this.url,
     {
-      
+      clientId: `alarmstech_api_${Math.random().toString(16).slice(2, 8)}`,
       username: process.env.MQTT_USERNAME,
-      password: process.env.MQTT_PASS
+      password: process.env.MQTT_PASS,
+      ca: fs.readFileSync(process.env.MQTT_CA_PATH ?? ''),
+      reconnectPeriod: 5000
     }
   );
 
@@ -41,14 +45,16 @@ export class MosquittoAccess {
   /** Conecta al servidor MQTT y suscribe a los tópicos. */
   connect () {
     this.client.on('connect', () => {
-      this.client.subscribe(`${this.baseTopic}/#`, (err) => {
-        if (!err) {
-          console.log(`Suscrito a ${this.baseTopic}/#`);
-        } else {
-          console.error('Error al suscribirse:', err);
-        }
+      console.log('Conectado a MQTT');
+
+      this.client.subscribe(`${this.baseTopic}/#`, { qos: 1 }, (error) => {
+        if (!error) console.log(`Suscrito a ${this.baseTopic}/#`);
+        else console.error('Error al suscribirse a MQTT:', error);
       });
     });
+
+    this.client.on('error', (error) => console.error('Error en MQTT:', error.message));
+    this.client.on('reconnect', () => console.log('Reconectando a MQTT...'));
 
     // Manejo de mensajes recibidos.
     this.client.on('message', async (topic, message) => {
