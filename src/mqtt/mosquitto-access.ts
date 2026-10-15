@@ -10,7 +10,12 @@ export class MosquittoAccess {
   private url = process.env.MQTT_URL ?? '';
   private baseTopic = process.env.MQTT_BASE_TOPIC ?? '';
   private client = mqtt.connect(
-    this.url, { username: process.env.MQTT_USERNAME, password: process.env.MQTT_PASS }
+    this.url,
+    {
+      
+      username: process.env.MQTT_USERNAME,
+      password: process.env.MQTT_PASS
+    }
   );
 
   private topicHandlers: MQTTtopicHandler[] = [

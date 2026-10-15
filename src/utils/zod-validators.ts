@@ -1,6 +1,6 @@
 import { State } from '../interfaces';
 import { z } from 'zod';
-import { ControlPanelSchema, SensorSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema, AddressSchema } from './zod-schemas';
+import { ControlPanelSchema, SensorSchema, UserSchema, ArmConfigurationSchema, TriggeredSchema, HouseSchema, AddressSchema, StateSchema } from './zod-schemas';
 
 export const loginSchema = UserSchema.pick({ email: true, password: true }).strict();
 export const registerSchema = UserSchema.pick({
@@ -69,6 +69,23 @@ export const armConfigurationSchema = ArmConfigurationSchema
   );
 
 export const triggeredSchema = TriggeredSchema.partial({ number: true }).strict();
+
+export const verificationEmailSchema = z.object({
+  email: UserSchema.shape.email
+}).strict();
+
+export const forgotPasswordSchema = z.object({
+  email: UserSchema.shape.email
+}).strict();
+
+export const resetPasswordSchema = z.object({
+  password: UserSchema.shape.password
+}).strict();
+
+export const lightsSchema = z.object({
+  sector: z.string().trim().min(1, { message: 'The sector is required.' }),
+  state: StateSchema
+}).strict();
 
 // Admins (PostgreSQL domain)
 export const createAdminSchema = z.object({

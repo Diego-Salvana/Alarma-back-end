@@ -197,9 +197,10 @@ npm start
 ## Convenciones de Código
 
 ### Manejo de Errores
-Utilizar el error handler centralizado:
+Utilizar el middleware centralizado `errorHandler` (último middleware en `src/app/app.ts`).
+Los controllers/services lanzan subclases de `AppError` y el middleware genera la respuesta:
 ```typescript
-ErrorHandler.generateResponse(response, error, message)
+throw new NotFoundError('House not found');
 ```
 
 ### Validación
