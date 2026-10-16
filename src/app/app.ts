@@ -7,10 +7,11 @@ import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
 import { CentralDataAccess, EventDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/access/mongodb';
 import { AdminDataAccess, AuditDataAccess } from '../database/access/postgres';
-import { AdminService, AuditService, CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
+import { AdminService, AuditService, CentralService, DemoResetService, DisabledEmailService, NodemailerService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 import { startDemoResetJob } from '../jobs/demo-reset.job';
 import { errorHandler } from '../middlewares/error-handler';
+import { EmailSender } from '../interfaces';
 
 export class App {
   static create () {
@@ -24,7 +25,11 @@ export class App {
     const mosquittoAccess = new MosquittoAccess();
     const webSocketAccess = new WebSocketAccess();
 
-    const emailService = new EmailService();
+    const emailDisabled = process.env.DEMO_DISABLED_EMAIL === 'true';
+    const emailService: EmailSender = emailDisabled
+      ? new DisabledEmailService()
+      : new NodemailerService();
+    
     const userService = new UserService(userDataAccess, emailService, houseDataAccess);
     const centralService = new CentralService(
       userDataAccess,

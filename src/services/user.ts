@@ -1,7 +1,6 @@
-import { EmailService } from './email';
 import { UserDto } from '../dtos';
 import { HouseDataAccess } from '../database/access/mongodb';
-import { IUserDataAccess, LoginResponse, ProfileResponse, Purpose, RegisterDB, UpdateUserDTO, Register, User, House } from '../interfaces';
+import { IUserDataAccess, LoginResponse, ProfileResponse, Purpose, RegisterDB, UpdateUserDTO, Register, User, House, EmailSender } from '../interfaces';
 import { encrypt, isDemoUser, JwtHandler, verifyPass } from '../utils';
 import { UnauthorizedError, ForbiddenError } from '../errors';
 
@@ -11,7 +10,7 @@ export class UserService {
 
   constructor (
     private userDataAccess: IUserDataAccess,
-    private emailService: EmailService,
+    private emailService: EmailSender,
     private houseDataAccess: HouseDataAccess
   ) {}
 

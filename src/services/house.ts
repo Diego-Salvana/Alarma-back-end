@@ -184,7 +184,8 @@ export class HouseService {
 
         if (wasRinging) {
           this.webSocketAccess.emitSocketData<TriggeredAlarm>(
-            triggeredEvent, { house: info.house, ringing: false }
+            triggeredEvent,
+            { house: info.house, ringing: false }
           );
         }
       }

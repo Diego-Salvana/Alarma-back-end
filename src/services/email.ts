@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
 
-export class EmailService {
+import { EmailSender } from '../interfaces';
+
+export class NodemailerService implements EmailSender {
   private host = process.env.CLIENT_URL ?? 'http://localhost:4200';
   private transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -13,14 +15,14 @@ export class EmailService {
   checkConnection () {
     this.transporter.verify(err => {
       if (err) {
-        console.log('Email connection failure', err);
+        console.error('Email connection failure', err);
       } else {
         console.log('Transporter ready to send emails');
       }
     });
   }
 
-  async sendVerificationEmail (to: string, token: string) {
+  async sendVerificationEmail (to: string, token: string): Promise<void> {
     try {
       const info = await this.transporter.sendMail({
         from: 'AlarmsTech <alarms@alarms.com>',
@@ -37,7 +39,7 @@ export class EmailService {
     }
   }
 
-  async sendResetPassEmail (to: string, token: string) {
+  async sendResetPassEmail (to: string, token: string): Promise<void> {
     try {
       const info = await this.transporter.sendMail({
         from: 'AlarmsTech <alarms@alarms.com>',
@@ -54,7 +56,7 @@ export class EmailService {
     }
   }
 
-  private createVerificationEmailHtml (token: string) {
+  private createVerificationEmailHtml (token: string): string {
     const verifyEmailPath = 'auth/verify-email';
 
     return `

@@ -6,7 +6,6 @@ import { extractSensors } from './utils';
 import { MosquittoEventDispatcher } from './mosquitto-event-dispatcher';
 import { State, MQTTtopicHandler, HouseAction, WarningType } from '../interfaces';
 
-/** Clase que gestiona la conexión ``MQTT`` y maneja la subscripción y publicación a tópicos. */
 export class MosquittoAccess {
   private dispatcher!: MosquittoEventDispatcher;
   private url = process.env.MQTT_URL ?? '';
@@ -59,11 +58,11 @@ export class MosquittoAccess {
     // Manejo de mensajes recibidos.
     this.client.on('message', async (topic, message) => {
       const payload = message.toString().trim();
-      console.log({ topico: topic, mensaje: payload });
+      // console.log({ topico: topic, mensaje: payload });
 
       const topicHandler = this.topicHandlers.find(th => topic.startsWith(th.prefix));
       if (!topicHandler) {
-        console.log('No existe Handler para el tópico:', topic);
+        console.error('No existe Handler para el tópico:', topic);
         return;
       }
 
@@ -102,7 +101,7 @@ export class MosquittoAccess {
     const excludedSensors = extractSensors(sensors);
 
     if (state !== State.ON && state !== State.OFF) {
-      console.log(`Mensaje de activación incorrento: ${state}`);
+      console.error(`Mensaje de activación incorrento: ${state}`);
       this.dispatcher.onWarning(username, WarningType.DEVICE_STATE);
       return;
     }

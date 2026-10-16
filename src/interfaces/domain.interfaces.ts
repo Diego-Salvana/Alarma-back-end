@@ -98,6 +98,12 @@ export interface User {
   enabled: boolean;
 }
 
+export interface EmailSender {
+  checkConnection(): void;
+  sendVerificationEmail(to: string, token: string): Promise<void>;
+  sendResetPassEmail(to: string, token: string): Promise<void>;
+}
+
 // -------------------
 // Admins (PostgreSQL domain)
 // -------------------
