@@ -9,7 +9,6 @@ export interface EventPersistence {
 
 export interface ControlPanelEventPersistence extends EventPersistence {
   type: ControlPanelEventType;
-  sensorNumber?: number;
   userId?: Types.ObjectId;
 }
 
@@ -25,7 +24,6 @@ export interface LeanEvent {
   date: Date;
   source: 'ControlPanel' | 'Sensor';
   type?: string;
-  sensorNumber?: number;
   number?: number;
   userId?: Types.ObjectId | string;
 }
@@ -49,7 +47,6 @@ export const EventControlPanelModel = EventModel.discriminator(
   'ControlPanel',
   new Schema({
     type: { type: String, enum: Object.values(ControlPanelEventType), required: true },
-    sensorNumber: { type: Number, required: false },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: false }
   })
 );

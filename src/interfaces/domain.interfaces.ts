@@ -20,9 +20,10 @@ export enum HouseAction {
 }
 
 export enum ControlPanelEventType {
-  ALARM_TRIGGERED = 'ALARM_TRIGGERED',
   ARMED = 'ARMED',
-  DISARMED = 'DISARMED'
+  DISARMED = 'DISARMED',
+  SIREN_ON = 'SIREN_ON',
+  SIREN_OFF = 'SIREN_OFF'
 }
 
 // -------------------
@@ -32,14 +33,9 @@ export interface EventLog {
   date: Date;
 }
 
-export interface ControlPanelEventLog {
-  date: Date;
-  sensorNumber: number;
-}
-
 export interface EventLogWithName {
   date: Date;
-  type?: ControlPanelEventType | 'SENSOR';
+  type: ControlPanelEventType | 'SENSOR';
   deviceName?: string;
   sensorNumber?: number;
   userId?: string;
@@ -157,7 +153,7 @@ export interface AuditLogEntry {
 }
 
 // -------------------
-// Events (standalone collection)
+// Events
 // -------------------
 export type EventSource = 'ControlPanel' | 'Sensor';
 
@@ -171,7 +167,6 @@ export interface BaseEvent {
 export interface ControlPanelEvent extends BaseEvent {
   source: 'ControlPanel';
   type: ControlPanelEventType;
-  sensorNumber?: number;
   userId?: string;
 }
 

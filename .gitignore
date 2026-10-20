@@ -3,3 +3,4 @@
 /dist
 /extras
 src/mqtt/certs/
+emqxsl-ca.crt

@@ -163,6 +163,16 @@ export class HouseService {
       return;
     }
 
+    if (!ringing && sensorNumber === undefined) {
+      const house = await this.houseDataAccess.getOne(userId, houseId);
+
+      if (house.controlPanel.alarmState === State.ON) {
+        console.log('Apagado de sirena rechazado: la alarma está armada, solo se permite desarmar.');
+        this.sendWarningById(userId, WarningType.TRIGGER_ALARM);
+        return;
+      }
+    }
+
     const message = `${ringing.toString()}:${sensorNumber ?? ''}`;
 
     this.mosquittoAccess.publicMessage(HouseAction.TRIGGER_ALARM, message, username, houseName);
@@ -198,7 +208,10 @@ export class HouseService {
       const eventType = info.state === State.ON
         ? ControlPanelEventType.ARMED
         : ControlPanelEventType.DISARMED;
-      await this.eventDataAccess.addControlPanelEvent(house._id, eventType, { date: new Date() });
+      await this.eventDataAccess.addControlPanelEvent(house._id, eventType, {
+        date: new Date(),
+        userId: house.userId
+      });
     } catch (err: any) {
       console.log(`Error (method: "updateCentralState"): ${err.message as string}`);
     }
@@ -223,16 +236,23 @@ export class HouseService {
       await this.centralDataAccess.updateSirenState(username, info.house, info.ringing);
 
       const sensorNumber = info.sensorNumber;
-      if (sensorNumber) {
+
+      if (sensorNumber !== undefined) {
         const date = new Date(Date.now());
         const house = await this.houseDataAccess.getByHouseName(username, info.house);
         await this.eventDataAccess.addSensorEvent(house._id, sensorNumber, date);
-        await this.eventDataAccess.addControlPanelEvent(
-          house._id,
-          ControlPanelEventType.ALARM_TRIGGERED,
-          { sensorNumber, date }
-        );
+        return;
       }
+
+      const house = await this.houseDataAccess.getByHouseName(username, info.house);
+
+      if (!info.ringing && house.controlPanel.alarmState === State.ON) return;
+
+      const type = info.ringing ? ControlPanelEventType.SIREN_ON : ControlPanelEventType.SIREN_OFF;
+      await this.eventDataAccess.addControlPanelEvent(house._id, type, {
+        date: new Date(),
+        userId: house.userId
+      });
     } catch (err: any) {
       console.log(`Error (method: "updateCentralRinging"): ${err.message as string}`);
     }

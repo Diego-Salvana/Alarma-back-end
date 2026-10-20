@@ -9,13 +9,12 @@ export class EventDataAccess {
   async addControlPanelEvent (
     houseId: string,
     type: ControlPanelEventType,
-    opts?: { sensorNumber?: number; userId?: string; date?: Date }
+    opts?: { userId?: string; date?: Date }
   ): Promise<void> {
     await this.controlPanelModel.create({
       houseId,
       date: opts?.date ?? new Date(),
       type,
-      ...(opts?.sensorNumber !== undefined && { sensorNumber: opts.sensorNumber }),
       ...(opts?.userId !== undefined && { userId: opts.userId })
     });
   }
@@ -45,8 +44,7 @@ export class EventDataAccess {
       return {
         ...base,
         source: 'ControlPanel',
-        type: (doc.type ?? ControlPanelEventType.ALARM_TRIGGERED) as ControlPanelEventType,
-        ...(doc.sensorNumber !== undefined && { sensorNumber: doc.sensorNumber }),
+        type: (doc.type) as ControlPanelEventType,
         ...(doc.userId !== undefined && { userId: doc.userId.toString() })
       };
     }
