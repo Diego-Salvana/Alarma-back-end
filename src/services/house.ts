@@ -217,7 +217,7 @@ export class HouseService {
     }
   }
 
-  /** Publica información de iluminación a través de sockets para un usuario y casa específicos. */
+  /** Envía información de iluminación a través de sockets para un usuario y casa específicos. */
   sendLightsInfo (username: string, info: Lights) {
     const base = process.env.WS_LIGHTS ?? '';
     const socketEvent = `${base}/${username}/${info.house}`;
@@ -225,7 +225,7 @@ export class HouseService {
     this.webSocketAccess.emitSocketData<Lights>(socketEvent, info);
   }
 
-  /** Publica información de disparo a través de sockets y actualiza BD + Eventos. */
+  /** Envía información de disparo a través de sockets y actualiza BD + Eventos. */
   async sendTriggeredInfo (username: string, info: TriggeredAlarm): Promise<void> {
     const base = process.env.WS_TRIGGER_ALARM ?? '';
     const socketEvent = `${base}/${username}`;
