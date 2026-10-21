@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { DeviceType, State } from '../interfaces';
+import { SensorType, State } from '../interfaces';
 
 // State Type
 export const StateSchema = z.nativeEnum(State, { message: 'The state must be "On"/"Off"' });
 
-// Device Type
-export const DeviceTypeSchema = z.nativeEnum(
-  DeviceType,
-  { message: 'The sensor type must be "Motion"/"Window"/"Smoke"/"Camera"' }
+// Sensor Type
+export const SensorTypeSchema = z.nativeEnum(
+  SensorType,
+  { message: 'The sensor type must be "Movimiento"/"Ventana"/"Humo"' }
 );
 
 // Address
@@ -43,7 +43,7 @@ export const SensorSchema = z.object({
   model: z.string().trim().min(1),
   number: z.number().int().positive({ message: 'The sensor number must be positive.' }),
   name: z.string().trim().min(1),
-  type: DeviceTypeSchema,
+  type: SensorTypeSchema,
   state: StateSchema
 });
 

@@ -37,7 +37,7 @@ export class App {
       houseDataAccess,
       eventDataAccess
     );
-    const sensorService = new SensorService(sensorDataAccess);
+    const sensorService = new SensorService(sensorDataAccess, eventDataAccess);
     const houseService = new HouseService(
       userDataAccess,
       houseDataAccess,

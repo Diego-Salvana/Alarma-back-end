@@ -1,4 +1,4 @@
-import { AdminRole, AuditAction, AuditEntityType, State, DeviceType } from './domain.interfaces';
+import { AdminRole, AuditAction, AuditEntityType, State, SensorType } from './domain.interfaces';
 
 export interface ApiResponse<T = null> {
   message: string;
@@ -20,7 +20,7 @@ export interface HouseResponse {
   address: AddressResponse;
   alarmState: State;
   ringing?: boolean;
-  sensors?: DeviceResponse[];
+  sensors?: SensorResponse[];
   cameras?: CameraResponse[];
   token?: string;
 }
@@ -36,12 +36,17 @@ export interface ProfileResponse {
   houses: HouseResponse[];
 }
 
-export interface DeviceResponse {
+export interface SensorResponse {
   model: string;
   number: number;
   name: string;
-  type: DeviceType;
+  type: SensorType;
   state: State;
+  history?: SensorEventDateResponse[];
+}
+
+export interface SensorEventDateResponse {
+  date: Date;
 }
 
 export interface CameraResponse {

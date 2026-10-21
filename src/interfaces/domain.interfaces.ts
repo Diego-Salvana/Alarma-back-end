@@ -6,11 +6,10 @@ export enum State {
   OFF = 'Off'
 }
 
-export enum DeviceType {
+export enum SensorType {
   MOVEMENT = 'Movimiento',
   WINDOW = 'Ventana',
-  SMOKE = 'Humo',
-  CAMERA = 'Camara'
+  SMOKE = 'Humo'
 }
 
 export enum HouseAction {
@@ -62,7 +61,7 @@ export interface Sensor {
   model: string;
   number: number;
   name: string;
-  type: DeviceType;
+  type: SensorType;
   state: State;
 }
 

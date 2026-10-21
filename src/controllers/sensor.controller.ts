@@ -14,7 +14,7 @@ export class SensorController {
 
     if (isNaN(sensorNumber)) throw new ValidationError('Invalid sensor number');
 
-    const responseSensor = await this.sensorService.getOne(sub, hid, sensorNumber);
+    const responseSensor = await this.sensorService.getOne(sub, hid, sensorNumber, true);
 
     sendSuccess(res, 200, 'Sensor retrieved successfully', responseSensor);
   }

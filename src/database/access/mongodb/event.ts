@@ -33,6 +33,16 @@ export class EventDataAccess {
     return events.map(event => this.toDomain(event));
   }
 
+  async getByHouseAndSensor (houseId: string, sensorNumber: number, limit = 100): Promise<HouseEvent[]> {
+    const events = await this.eventModel
+      .find({ houseId, source: 'Sensor', number: sensorNumber })
+      .sort({ date: -1 })
+      .limit(limit)
+      .lean<LeanEvent[]>();
+
+    return events.map(event => this.toDomain(event));
+  }
+
   private toDomain (doc: LeanEvent): HouseEvent {
     const base = {
       _id: doc._id?.toString(),

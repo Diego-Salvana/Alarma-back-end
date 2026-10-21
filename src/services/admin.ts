@@ -1,5 +1,5 @@
 import { AdminDto } from '../dtos';
-import { AdminLoginResponse, AdminResponse, CreateAdmin, CreateHouseInfo, CreateSensorDTO, HouseResponse, HouseSystemInfoDTO, IAdminDataAccess, ProfileResponse, SensorSystemInfoDTO, UserSystemInfoDTO, DeviceResponse } from '../interfaces';
+import { AdminLoginResponse, AdminResponse, CreateAdmin, CreateHouseInfo, CreateSensorDTO, HouseResponse, HouseSystemInfoDTO, IAdminDataAccess, ProfileResponse, SensorSystemInfoDTO, UserSystemInfoDTO, SensorResponse } from '../interfaces';
 import { encrypt, JwtHandler, verifyPass } from '../utils';
 import { ForbiddenError, NotFoundError, UnauthorizedError } from '../errors';
 import { AuditService } from './audit';
@@ -174,7 +174,7 @@ export class AdminService {
 
   async createSensorAsAdmin (
     actorId: string, userId: string, houseId: string, body: CreateSensorDTO
-  ): Promise<Partial<DeviceResponse>> {
+  ): Promise<Partial<SensorResponse>> {
     const { sensors } = this.requireOperational();
     const created = await sensors.create(userId, houseId, body);
 
@@ -187,7 +187,7 @@ export class AdminService {
 
   async updateSensorAsAdmin (
     actorId: string, userId: string, houseId: string, sensorNumber: number, body: SensorSystemInfoDTO
-  ): Promise<DeviceResponse> {
+  ): Promise<SensorResponse> {
     const { sensors } = this.requireOperational();
     const before = await sensors.getOne(userId, houseId, sensorNumber);
     const after = await sensors.updateInfo(userId, houseId, sensorNumber, body);
