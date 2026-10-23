@@ -55,7 +55,6 @@ export class MosquittoAccess {
     this.client.on('error', (error) => console.error('Error en MQTT:', error.message));
     this.client.on('reconnect', () => console.log('Reconectando a MQTT...'));
 
-    // Manejo de mensajes recibidos.
     this.client.on('message', async (topic, message) => {
       const payload = message.toString().trim();
       // console.log({ topico: topic, mensaje: payload });
@@ -86,7 +85,6 @@ export class MosquittoAccess {
         break;
       default:
         console.log('Error: Tópico MQTT incorrecto.');
-        break;
     }
 
     if (!topic) return;
