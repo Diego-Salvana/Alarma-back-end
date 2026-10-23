@@ -1,5 +1,6 @@
 /node_modules
 .env
 /dist
-/src/utils/email.html
 /extras
+src/mqtt/certs/
+emqxsl-ca.crt

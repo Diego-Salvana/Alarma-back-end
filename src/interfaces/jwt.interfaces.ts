@@ -1,4 +1,5 @@
 import { JwtPayload } from 'jsonwebtoken';
+import { AdminRole } from './domain.interfaces';
 
 export enum Purpose {
   EMAIL_VERIFICATION = 1,
@@ -18,5 +19,5 @@ export interface VerificationJwtPayload extends JwtPayload {
 
 export interface AdminJwtPayload extends JwtPayload {
   sub: string;
-  role: 'admin';
+  role: AdminRole;
 }

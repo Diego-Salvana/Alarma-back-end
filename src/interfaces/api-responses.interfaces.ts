@@ -1,51 +1,89 @@
-import { State, DeviceType, EventLog } from './domain.interfaces';
+import { AdminRole, AuditAction, AuditEntityType, State, SensorType } from './domain.interfaces';
 
-export interface ApiResponse<T> {
+export interface ApiResponse<T = null> {
   message: string;
-  data?: T;
+  data: T;
 }
 
 export interface LoginResponse {
-  nombre: string;
+  firstName: string;
   email: string;
-  habilitado: boolean;
+  enabled: boolean;
   token: string;
-  casas: HouseResponse[];
+  houses: HouseResponse[];
 }
 
 export interface HouseResponse {
   _id: string;
-  nombre: string;
-  nombreCasa: string;
-  direccion: AddressResponse;
-  alarmaEncendida: State;
-  sonando?: boolean;
-  sensores?: DeviceResponse[];
+  name: string;
+  houseName: string;
+  address: AddressResponse;
+  alarmState: State;
+  ringing?: boolean;
+  sensors?: SensorResponse[];
+  cameras?: CameraResponse[];
   token?: string;
 }
 
 export interface ProfileResponse {
   _id: string;
-  nombre: string;
-  apellido: string;
-  nombreUsuario: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
-  telefono: string;
-  habilitado: boolean;
-  casas: HouseResponse[];
+  phone: string;
+  enabled: boolean;
+  houses: HouseResponse[];
 }
 
-export interface DeviceResponse {
-  dispositivoId: string;
-  numeroSensor: number;
-  nombre: string;
-  tipo: DeviceType;
-  estado: State;
-  historial: EventLog[];
+export interface SensorResponse {
+  model: string;
+  number: number;
+  name: string;
+  type: SensorType;
+  state: State;
+  history?: SensorEventDateResponse[];
+}
+
+export interface SensorEventDateResponse {
+  date: Date;
+}
+
+export interface CameraResponse {
+  model: string;
+  number: number;
+  name: string;
 }
 
 export interface AddressResponse {
-  calle: string;
-  numero: string;
-  ciudad: string;
+  street: string;
+  number: string;
+  city: string;
+  country: string;
+}
+
+export interface AdminResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: AdminRole;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AdminLoginResponse {
+  admin: AdminResponse;
+  token: string;
+}
+
+export interface AuditLogResponse {
+  id: string;
+  adminId: string | null;
+  action: AuditAction;
+  entityType: AuditEntityType;
+  entityId: string | null;
+  details: Record<string, unknown> | null;
+  createdAt: Date;
 }

@@ -1,16 +1,24 @@
+import fs from 'node:fs';
 import mqtt from 'mqtt';
 import { capitalize } from 'lodash';
+
 import { extractSensors } from './utils';
 import { MosquittoEventDispatcher } from './mosquitto-event-dispatcher';
 import { State, MQTTtopicHandler, HouseAction, WarningType } from '../interfaces';
 
-/** Clase que gestiona la conexión ``MQTT`` y maneja la subscripción y publicación a tópicos. */
 export class MosquittoAccess {
   private dispatcher!: MosquittoEventDispatcher;
   private url = process.env.MQTT_URL ?? '';
   private baseTopic = process.env.MQTT_BASE_TOPIC ?? '';
   private client = mqtt.connect(
-    this.url, { username: process.env.MQTT_USERNAME, password: process.env.MQTT_PASS }
+    this.url,
+    {
+      clientId: `alarmstech_api_${Math.random().toString(16).slice(2, 8)}`,
+      username: process.env.MQTT_USERNAME,
+      password: process.env.MQTT_PASS,
+      ca: fs.readFileSync(process.env.MQTT_CA_PATH ?? ''),
+      reconnectPeriod: 5000
+    }
   );
 
   private topicHandlers: MQTTtopicHandler[] = [
@@ -36,23 +44,24 @@ export class MosquittoAccess {
   /** Conecta al servidor MQTT y suscribe a los tópicos. */
   connect () {
     this.client.on('connect', () => {
-      this.client.subscribe(`${this.baseTopic}/#`, (err) => {
-        if (!err) {
-          console.log(`Suscrito a ${this.baseTopic}/#`);
-        } else {
-          console.error('Error al suscribirse:', err);
-        }
+      console.log('Conectado a MQTT');
+
+      this.client.subscribe(`${this.baseTopic}/#`, { qos: 1 }, (error) => {
+        if (!error) console.log(`Suscrito a ${this.baseTopic}/#`);
+        else console.error('Error al suscribirse a MQTT:', error);
       });
     });
 
-    // Manejo de mensajes recibidos.
+    this.client.on('error', (error) => console.error('Error en MQTT:', error.message));
+    this.client.on('reconnect', () => console.log('Reconectando a MQTT...'));
+
     this.client.on('message', async (topic, message) => {
       const payload = message.toString().trim();
-      console.log({ topico: topic, mensaje: payload });
+      // console.log({ topico: topic, mensaje: payload });
 
       const topicHandler = this.topicHandlers.find(th => topic.startsWith(th.prefix));
       if (!topicHandler) {
-        console.log('No existe Handler para el tópico:', topic);
+        console.error('No existe Handler para el tópico:', topic);
         return;
       }
 
@@ -76,7 +85,6 @@ export class MosquittoAccess {
         break;
       default:
         console.log('Error: Tópico MQTT incorrecto.');
-        break;
     }
 
     if (!topic) return;
@@ -91,7 +99,7 @@ export class MosquittoAccess {
     const excludedSensors = extractSensors(sensors);
 
     if (state !== State.ON && state !== State.OFF) {
-      console.log(`Mensaje de activación incorrento: ${state}`);
+      console.error(`Mensaje de activación incorrento: ${state}`);
       this.dispatcher.onWarning(username, WarningType.DEVICE_STATE);
       return;
     }

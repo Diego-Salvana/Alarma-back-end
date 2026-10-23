@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { UserService } from '../services';
 import { UserController } from '../controllers';
-import { blockDemoUser, checkVerificationJwt, checkUserJwt, validateBody } from '../middleware';
-import { loginSchema, registerSchema, updateUserSchema } from '../utils/zod-validators';
+import { blockDemoUser, blockEmailInDemo, checkVerificationJwt, checkUserJwt, validateBody } from '../middlewares';
+import { loginSchema, registerSchema, updateUserSchema, verificationEmailSchema, forgotPasswordSchema, resetPasswordSchema } from '../utils/zod-validators';
 
 export const createUsersRouter = (userService: UserService) => {
   const usersRouter = Router();
@@ -18,16 +18,16 @@ export const createUsersRouter = (userService: UserService) => {
     validateBody(loginSchema), userController.login.bind(userController)
   );
   usersRouter.post('/send-verification-email',
-    userController.sendVerificationEmail.bind(userController)
+    blockEmailInDemo, validateBody(verificationEmailSchema), userController.sendVerificationEmail.bind(userController)
   );
   usersRouter.post('/verify-email',
     checkVerificationJwt, userController.verifyEmail.bind(userController)
   );
   usersRouter.post('/forgot-password',
-    userController.forgotPassword.bind(userController)
+    blockEmailInDemo, validateBody(forgotPasswordSchema), userController.forgotPassword.bind(userController)
   );
   usersRouter.post('/reset-password',
-    checkVerificationJwt, userController.resetPassword.bind(userController)
+    validateBody(resetPasswordSchema), checkVerificationJwt, userController.resetPassword.bind(userController)
   );
   usersRouter.patch('/',
     checkUserJwt, blockDemoUser, validateBody(updateUserSchema), userController.update.bind(userController)

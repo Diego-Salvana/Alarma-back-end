@@ -1,19 +1,23 @@
 import { createServer } from 'node:http';
-import { MongoDB } from './database/access/mongo-db';
+import { connectPostgres } from './database/access/postgres';
 import { App } from './app/app';
+import { connectMongo } from './database/access/mongodb';
 
 function bootstrap () {
   const { app, webSocketAccess, mosquittoAccess } = App.create();
   const serverApp = createServer(app);
-  
-  MongoDB.connect();
+
+  void connectMongo();
+  void connectPostgres();
   webSocketAccess.connect(serverApp);
   mosquittoAccess.connect();
   
-  const PORT = process.env.PORT ?? 1234;
+  const PORT = process.env.PORT;
+  
+  if (!PORT) throw new Error('PORT not configured');
   
   serverApp.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto: ${PORT} 🚀`);
+    console.log(`Server is running on port: ${PORT} 🚀`);
   });
 }
 

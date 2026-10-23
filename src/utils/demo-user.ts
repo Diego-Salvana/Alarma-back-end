@@ -1,7 +1,7 @@
 const demoUserId = process.env.DEMO_USER_ID;
 
 if (!demoUserId) {
-  throw new Error('La variable de entorno DEMO_USER_ID es requerida');
+  throw new Error('The environment variable DEMO_USER_ID is required');
 }
 
 export function isDemoUser (userId: string): boolean {

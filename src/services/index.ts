@@ -4,3 +4,6 @@ export * from './sensor';
 export * from './central';
 export * from './email';
 export * from './demo-reset';
+export * from './admin';
+export * from './audit';
+export * from './disabled-email';

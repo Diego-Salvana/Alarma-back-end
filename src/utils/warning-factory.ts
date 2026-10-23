@@ -6,13 +6,13 @@ export class WarningFactory {
 
     switch (type) {
       case WarningType.DEVICE_STATE:
-        message = 'No se pudo confirmar el estado de la Alarma.';
+        message = 'Could not confirm the Alarm state.';
         break;
       case WarningType.LIGHTS_STATE:
-        message = 'No se pudo confirmar el estado de las Luces.';
+        message = 'Could not confirm the Lights state.';
         break;
       default:
-        message = 'No fue posible confirmar la acción emitida.';
+        message = 'Could not confirm the issued action.';
         break;
     }
 

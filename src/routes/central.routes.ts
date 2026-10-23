@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CentralService } from '../services';
 import { CentralController } from '../controllers';
-import { blockDemoUser, checkUserJwt, validateBody } from '../middleware';
+import { blockDemoUser, checkUserJwt, validateBody } from '../middlewares';
 import { centralCodeSchema } from '../utils/zod-validators';
 
 export const createCentralRouter = (centralService: CentralService) => {

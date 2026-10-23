@@ -1,44 +1,63 @@
-import { EventLogWithName, CentralCodeDTO } from '../interfaces';
-import { CentralDataAccess, UserDataAccess } from '../database/models';
-import { NotFound, Unauthorized, verifyPass } from '../utils';
+import { EventLogWithName, CentralCodeDTO, ControlPanelEventType } from '../interfaces';
+import { CentralDataAccess, EventDataAccess, HouseDataAccess, UserDataAccess } from '../database/access/mongodb';
+import { verifyPass } from '../utils';
+import { NotFoundError, UnauthorizedError } from '../errors';
 
 export class CentralService {
   constructor (
     private userDataAccess: UserDataAccess,
-    private centralDataAccess: CentralDataAccess
+    private centralDataAccess: CentralDataAccess,
+    private houseDataAccess: HouseDataAccess,
+    private eventDataAccess: EventDataAccess
   ) {}
 
-  /** Obtiene el historial de eventos de la Central y mapea los dispositivos a nombres descriptivos. */
   async getHistory (userId: string, houseId: string): Promise<EventLogWithName[]> {
-    const house = await this.centralDataAccess.getOne(userId, houseId);
+    const house = await this.houseDataAccess.getOne(userId, houseId);
+    const events = await this.eventDataAccess.getByHouse(houseId);
+    
+    return events
+      .filter(event => {
+        return event.source === 'Sensor' || (
+          event.type === ControlPanelEventType.SIREN_ON ||
+          event.type === ControlPanelEventType.SIREN_OFF
+        );
+      })
+      .map(event => {
+        if (event.source === 'ControlPanel') {
+          const historyWithName: EventLogWithName = {
+            date: event.date,
+            type: event.type,
+            ...(event.userId !== undefined && { userId: event.userId })
+          };
+  
+          return historyWithName;
+        }
 
-    return house.central.historial.map(history => {
-      const sensor = house.sensores.find(s => s.numeroSensor === history.numeroDispositivo);
-      const sensorName = sensor?.nombre ?? history.numeroDispositivo.toString();
-         
-      const historyWithName: EventLogWithName = {
-        fechaHora: history.fechaHora,
-        nombreDispositivo: sensorName
-      };
+        const sensor = house.sensors.find(s => s.number === event.number);
+        const historyWithName: EventLogWithName = {
+          date: event.date,
+          type: 'SENSOR',
+          sensorNumber: event.number,
+          deviceName: sensor?.name ?? String(event.number)
+        };
 
-      return historyWithName;
-    });
+        return historyWithName;
+      });
   }
 
-  /** Actualiza el código de la central para una casa del usuario tras validaciones de identidad y credenciales. */
   async updateCode (userId: string, houseId: string, codeBody: CentralCodeDTO): Promise<void> {
     const user = await this.userDataAccess.getById(userId);
-    const { contrasena, codigoActual, nuevoCodigo } = codeBody;
+    const { password, currentCode, newCode } = codeBody;
 
-    const passwordIsCorrect = await verifyPass(contrasena, user.contrasena);
-    if (!passwordIsCorrect) throw new Unauthorized('Contraseña de usuario incorrecta.');
+    const passwordIsCorrect = await verifyPass(password, user.password);
+    if (!passwordIsCorrect) throw new UnauthorizedError('Incorrect user password');
 
-    const house = user.casas.find(h => h._id.toString() === houseId);
-    const centralCode = house?.central.codigo;
+    const house = await this.houseDataAccess.getOne(userId, houseId);
+    const centralCode = house?.controlPanel.alarmCode;
 
-    if (!centralCode) throw new NotFound('Código de alarma no encontrados para validación.');
-    if (centralCode !== codigoActual) throw new Unauthorized('Código actual de alarma incorrecto.');
-    
-    await this.centralDataAccess.updateCode(userId, houseId, nuevoCodigo);
+    if (!centralCode) throw new NotFoundError('Alarm code not found for validation');
+    if (centralCode !== currentCode) throw new UnauthorizedError('Current alarm code is incorrect');
+
+    await this.centralDataAccess.updateCode(userId, houseId, newCode);
   }
 }

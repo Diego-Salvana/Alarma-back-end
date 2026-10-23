@@ -1,13 +1,17 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+
 import { createAdminRouter, createCentralRouter, createHousesRouter, createUsersRouter } from '../routes';
 import { createSensorsRouter } from '../routes/sensors.routes';
 import { MosquittoAccess, MosquittoEventDispatcher } from '../mqtt';
-import { CentralDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/models';
-import { CentralService, DemoResetService, EmailService, HouseService, SensorService, UserService } from '../services';
+import { CentralDataAccess, EventDataAccess, HouseDataAccess, SensorDataAccess, UserDataAccess } from '../database/access/mongodb';
+import { AdminDataAccess, AuditDataAccess } from '../database/access/postgres';
+import { AdminService, AuditService, CentralService, DemoResetService, DisabledEmailService, NodemailerService, HouseService, SensorService, UserService } from '../services';
 import { WebSocketAccess } from '../websocket/websocket-access';
 import { startDemoResetJob } from '../jobs/demo-reset.job';
+import { errorHandler } from '../middlewares/error-handler';
+import { EmailSender } from '../interfaces';
 
 export class App {
   static create () {
@@ -15,20 +19,40 @@ export class App {
     const houseDataAccess = new HouseDataAccess();
     const centralDataAccess = new CentralDataAccess();
     const sensorDataAccess = new SensorDataAccess();
+    const eventDataAccess = new EventDataAccess();
+    const adminDataAccess = new AdminDataAccess();
+    const auditDataAccess = new AuditDataAccess();
     const mosquittoAccess = new MosquittoAccess();
     const webSocketAccess = new WebSocketAccess();
 
-    const emailService = new EmailService();
-    const userService = new UserService(userDataAccess, emailService);
-    const centralService = new CentralService(userDataAccess, centralDataAccess);
-    const sensorService = new SensorService(sensorDataAccess);
+    const emailDisabled = process.env.DEMO_DISABLED_EMAIL === 'true';
+    const emailService: EmailSender = emailDisabled
+      ? new DisabledEmailService()
+      : new NodemailerService();
+    
+    const userService = new UserService(userDataAccess, emailService, houseDataAccess);
+    const centralService = new CentralService(
+      userDataAccess,
+      centralDataAccess,
+      houseDataAccess,
+      eventDataAccess
+    );
+    const sensorService = new SensorService(sensorDataAccess, eventDataAccess);
     const houseService = new HouseService(
       userDataAccess,
       houseDataAccess,
       centralDataAccess,
-      sensorDataAccess,
+      eventDataAccess,
       webSocketAccess,
       mosquittoAccess
+    );
+    const auditService = new AuditService(auditDataAccess);
+    const adminService = new AdminService(
+      adminDataAccess,
+      auditService,
+      userService,
+      houseService,
+      sensorService
     );
     
     const mosquittoEventDispatcher = new MosquittoEventDispatcher(houseService);
@@ -41,9 +65,7 @@ export class App {
     emailService.checkConnection();
 
     const app = express();
-    const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:4200')
-      .split(',')
-      .map(origin => origin.trim());
+    const corsOrigins = process.env.CORS_ORIGINS?.split(',') ?? [];
 
     app.use(express.json());
     app.disable('x-powered-by');
@@ -53,10 +75,12 @@ export class App {
     app.use('/api-alarma/houses', createHousesRouter(houseService));
     app.use('/api-alarma/sensors', createSensorsRouter(sensorService));
     app.use('/api-alarma/central', createCentralRouter(centralService));
-    app.use('/api-alarma/admin', createAdminRouter(userService, houseService, sensorService));
+    app.use('/api-alarma/admin', createAdminRouter(adminService, auditService));
+
+    app.use(errorHandler);
 
     app.use((_, res) => {
-      res.status(404).send({ ok: false, message: 'Ninguna ruta coincide con la solicitud.' });
+      res.status(404).send({ name: 'NotFound', message: 'Route Not Found', statusCode: 404 });
     });
 
     return { app, webSocketAccess, mosquittoAccess };

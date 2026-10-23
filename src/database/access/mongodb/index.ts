@@ -1,5 +1,6 @@
-export * from './model';
 export * from './user';
 export * from './house';
 export * from './sensor';
 export * from './central';
+export * from './event';
+export * from './mongo-db';
