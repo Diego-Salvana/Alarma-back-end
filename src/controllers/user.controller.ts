@@ -8,7 +8,7 @@ export class UserController {
   constructor (private userService: UserService) {}
 
   async create ({ body }: Request, res: Response) {
-    await this.userService.create(body);
+    await this.userService.register(body);
 
     sendSuccess(res, 201, 'User created successfully', null);
   }

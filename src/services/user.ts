@@ -14,7 +14,7 @@ export class UserService {
     private houseDataAccess: HouseDataAccess
   ) {}
 
-  async create (userInfo: Register): Promise<void> {
+  async register (userInfo: Register): Promise<void> {
     const passwordHash = await encrypt(userInfo.password);
     const userData = { ...userInfo, password: passwordHash };
 
