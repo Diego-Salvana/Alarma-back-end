@@ -76,13 +76,13 @@ export class App {
     app.use('/api-alarma/sensors', createSensorsRouter(sensorService));
     app.use('/api-alarma/central', createCentralRouter(centralService));
     app.use('/api-alarma/admin', createAdminRouter(adminService, auditService));
-
-    app.use(errorHandler);
-
+    
     app.use((_, res) => {
       res.status(404).send({ name: 'NotFound', message: 'Route Not Found', statusCode: 404 });
     });
-
+    
+    app.use(errorHandler);
+    
     return { app, webSocketAccess, mosquittoAccess };
   }
 }
