@@ -106,7 +106,23 @@ export class MosquittoAccess {
     
     this.dispatcher.onAlarmArming(username, houseName, state as State, excludedSensors);
   }
-  
+
+  private triggerHandler (topic: string, payload: string) {
+    const [,,, username, houseName] = topic.split('/');
+    const [ringing, sensor] = payload.split(':');
+    const sensorNumber = Number(sensor?.trim()) ? Number(sensor?.trim()) : null;
+    
+    if (ringing.trim() !== 'true' && ringing.trim() !== 'false') {
+      console.log(`Mensaje de disparo incorrecto: ${ringing}`);
+      this.dispatcher.onWarning(username, WarningType.TRIGGER_ALARM);
+      return;
+    }
+
+    const sirenRinging = ringing.trim() === 'true';
+
+    this.dispatcher.onTriggered(username, houseName, sirenRinging, sensorNumber);
+  }
+
   private lightsHandler (topic: string, payload: string) {
     const [,, username, houseName] = topic.split('/');
     const [sector, stateText] = payload.split(':');
@@ -119,21 +135,5 @@ export class MosquittoAccess {
     }
 
     this.dispatcher.onLightsChange(username, houseName, sector, state as State);
-  }
-
-  private triggerHandler (topic: string, payload: string) {
-    const [,,, username, houseName] = topic.split('/');
-    const [ringing, sensor] = payload.split(':');
-    const sensorNumber = Number(sensor?.trim()) ? Number(sensor?.trim()) : undefined;
-    
-    if (ringing.trim() !== 'true' && ringing.trim() !== 'false') {
-      console.log(`Mensaje de disparo incorrecto: ${ringing}`);
-      this.dispatcher.onWarning(username, WarningType.TRIGGER_ALARM);
-      return;
-    }
-
-    const sirenRinging = ringing.trim() === 'true';
-
-    this.dispatcher.onTriggered(username, houseName, sirenRinging, sensorNumber);
   }
 }

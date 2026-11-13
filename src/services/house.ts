@@ -195,7 +195,7 @@ export class HouseService {
         if (wasRinging) {
           this.webSocketAccess.emitSocketData<TriggeredAlarm>(
             triggeredEvent,
-            { house: info.house, ringing: false }
+            { house: info.house, ringing: false, sensorNumber: null }
           );
         }
       }
@@ -237,7 +237,7 @@ export class HouseService {
 
       const sensorNumber = info.sensorNumber;
 
-      if (sensorNumber !== undefined) {
+      if (sensorNumber !== null) {
         const date = new Date(Date.now());
         const house = await this.houseDataAccess.getByHouseName(username, info.house);
         await this.eventDataAccess.addSensorEvent(house._id, sensorNumber, date);

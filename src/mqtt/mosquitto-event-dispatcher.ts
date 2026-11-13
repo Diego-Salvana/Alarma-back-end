@@ -18,7 +18,7 @@ export class MosquittoEventDispatcher {
     void this.houseService.sendWarningByUsername(username, type);
   }
 
-  onTriggered (username: string, houseName: string, ringing: boolean, sensorNumber?: number) {
+  onTriggered (username: string, houseName: string, ringing: boolean, sensorNumber: number | null) {
     const info: TriggeredAlarm = { house: houseName, ringing, sensorNumber };
     void this.houseService.sendTriggeredInfo(username, info);
   }
